@@ -31,14 +31,11 @@ namespace Autodash.Core
 
     public class TestSuiteSchedule
     {
-        public bool OnDemand { get; set; }
         public TimeSpan Time { get; set; }
         public TimeSpan Interval { get; set; }
 
         public override string ToString()
         {
-            if (OnDemand)
-                return "On Demand";
             return string.Format("Runs at {0} every {1}", Time, Interval);
         }
     }
@@ -51,10 +48,26 @@ namespace Autodash.Core
 
     public class SuiteRun
     {
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
         public DateTime ScheduledFor { get; set; }
         public DateTime StartedOn { get; set; }
         public DateTime CompletedOn { get; set; }
         public SuiteRunStatus Status { get; set; }
+        public string TestSuiteId { get; set; }
+        public SuiteRunResult Result { get; set; }
+    }
+
+    public class SuiteRunResult
+    {
+        public SuiteRunResultStatus Status { get; set; }
+    }
+
+    public enum SuiteRunResultStatus
+    {
+        RanToCompletion,
+        Cancelled,
+        UnexpectedFailure
     }
 
     public class DefaultSuiteRunScheduler : ISuiteRunScheduler
@@ -74,6 +87,80 @@ namespace Autodash.Core
     {
         void Start();
         void Schedule(SuiteRun run);
+    }
+
+    public class DefaultSuiteRunScheduler : ISuiteRunScheduler
+    {
+        private readonly IMongoDatabase _db;
+        private readonly SortedList<DateTime, TestSuite> _runsQueue;
+
+        public DefaultSuiteRunScheduler(IMongoDatabase db)
+        {
+            _db = db;
+        }
+
+        public async Task Schedule(TestSuite suite)
+        {
+            if (suite == null)
+                throw new ArgumentNullException("suite");
+
+            _suitesQueue.Add(suite);
+
+            
+        }
+
+        public async void Start()
+        {
+            var coll = _db.GetCollection<TestSuite>("TestSuite");
+            var filter = new BsonDocument();//get all
+
+            List<TestSuite> suites = new List<TestSuite>();
+            using (var cursor = await coll.FindAsync(filter))
+            {
+                while (await cursor.MoveNextAsync())
+                {
+                    var batch = cursor.Current;
+                    foreach (var suite in batch)
+                    {
+                        suites.Add(suite);
+                    }
+                }
+            }
+
+            var runColl = _db.GetCollection<SuiteRun>("SuiteRun");
+
+            await FailRunningSuites(runColl);
+
+            _runsQueue.Clear();
+            foreach (var suite in suites)
+            {
+                var runs = await runColl.Find(n => n.Status == SuiteRunStatus.Scheduled && n.TestSuiteId == suite.Id)
+                    .SortBy(n => n.ScheduledFor)
+                    .ToListAsync();
+
+                foreach(var run in runs)
+                    _runsQueue.Add(run.ScheduledFor, run);
+            }
+            
+        }
+
+        private static async Task FailRunningSuites(IMongoCollection<SuiteRun> runColl)
+        {
+            var queryBuilder = Builders<SuiteRun>.Filter;
+            var runningFilter = queryBuilder.Eq(n => n.Status, SuiteRunStatus.Running);
+
+            var updateBuilder = Builders<SuiteRun>.Update;
+            var updateDef = updateBuilder.Set(n => n.Status, SuiteRunStatus.Complete)
+                                      .Set(n => n.CompletedOn, DateTime.UtcNow)
+                                      .Set(n => n.Result, new SuiteRunResult { Status = SuiteRunResultStatus.UnexpectedFailure });
+
+            await runColl.UpdateManyAsync(runningFilter, updateDef);
+        }
+
+        private static SuiteRun GetNextRun()
+        {
+
+        }
     }
 
     public class Project
@@ -174,13 +261,12 @@ namespace Autodash.Core
             RuleFor(p => p.Name).NotEmpty().Length(0, 100);
             RuleFor(p => p.ProjectId).NotEmpty();
             RuleFor(p => p.Configuration).NotNull();
-            RuleFor(p => p.Schedule).NotNull();
 
             RuleFor(p => p.Configuration.Browsers).NotEmpty();
             RuleFor(p => p.Configuration.TestCategoriesQuery).Length(0, 500);
 
-            RuleFor(p => p.Schedule.Time).InclusiveBetween(TimeSpan.Zero, new TimeSpan(23, 59, 59)).Unless(n => n.Schedule.OnDemand);
-            RuleFor(p => p.Schedule.Interval).GreaterThanOrEqualTo(TimeSpan.FromMinutes(5)).Unless(n => n.Schedule.OnDemand);
+            RuleFor(p => p.Schedule.Time).InclusiveBetween(TimeSpan.Zero, new TimeSpan(23, 59, 59));
+            RuleFor(p => p.Schedule.Interval).GreaterThanOrEqualTo(TimeSpan.FromMinutes(5));
         }
     }
 
