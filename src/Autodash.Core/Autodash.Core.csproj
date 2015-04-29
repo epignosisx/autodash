@@ -51,8 +51,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="MongoDatabaseProvider.cs" />
+    <Compile Include="CreateProjectCommand.cs" />
+    <Compile Include="CreateProjectValidator.cs" />
+    <Compile Include="CreateSuiteCommand.cs" />
+    <Compile Include="CreateTestSuiteValidator.cs" />
+    <Compile Include="DefaultSuiteRunScheduler.cs" />
+    <Compile Include="FileSystemTestAssembliesRepository.cs" />
+    <Compile Include="ISuiteRunner.cs" />
+    <Compile Include="ISuiteRunScheduler.cs" />
+    <Compile Include="ITestAssembliesRepository.cs" />
+    <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SuiteRun.cs" />
+    <Compile Include="SuiteRunResult.cs" />
+    <Compile Include="SuiteRunResultStatus.cs" />
+    <Compile Include="SuiteRunStatus.cs" />
+    <Compile Include="TestSuite.cs" />
+    <Compile Include="TestSuiteConfiguration.cs" />
+    <Compile Include="TestSuiteSchedule.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
