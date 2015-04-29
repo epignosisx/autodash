@@ -4,6 +4,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -70,33 +71,29 @@ namespace Autodash.Core
         UnexpectedFailure
     }
 
-    public class DefaultSuiteRunScheduler : ISuiteRunScheduler
-    {
-        public void Start()
-        {
- 	        throw new NotImplementedException();
-        }
-
-        public void Schedule(SuiteRun run)
-        {
- 	        throw new NotImplementedException();
-        }
-    }
-
     public interface ISuiteRunScheduler
     {
         void Start();
         void Schedule(SuiteRun run);
     }
 
+    public interface ISuiteRunner
+    {
+        void Run(SuiteRun run);
+    }
+
     public class DefaultSuiteRunScheduler : ISuiteRunScheduler
     {
         private readonly IMongoDatabase _db;
-        private readonly SortedList<DateTime, TestSuite> _runsQueue;
+        private readonly ISuiteRunner _suiteRunner;
+        private readonly ConcurrentQueue<SuiteRun> _onDemandQueue = new ConcurrentQueue<SuiteRun>();
+        private readonly List<TestSuite> _scheduledSuites = new List<TestSuite>();
+        private Task<SuiteRun> _runningSuite;
 
-        public DefaultSuiteRunScheduler(IMongoDatabase db)
+        public DefaultSuiteRunScheduler(IMongoDatabase db, ISuiteRunner suiteRunner)
         {
             _db = db;
+            _suiteRunner = suiteRunner;
         }
 
         public async Task Schedule(TestSuite suite)
@@ -114,7 +111,6 @@ namespace Autodash.Core
             var coll = _db.GetCollection<TestSuite>("TestSuite");
             var filter = new BsonDocument();//get all
 
-            List<TestSuite> suites = new List<TestSuite>();
             using (var cursor = await coll.FindAsync(filter))
             {
                 while (await cursor.MoveNextAsync())
@@ -122,7 +118,8 @@ namespace Autodash.Core
                     var batch = cursor.Current;
                     foreach (var suite in batch)
                     {
-                        suites.Add(suite);
+                        if(suite.Schedule != null)
+                            _scheduledSuites.Add(suite);
                     }
                 }
             }
@@ -131,17 +128,38 @@ namespace Autodash.Core
 
             await FailRunningSuites(runColl);
 
-            _runsQueue.Clear();
-            foreach (var suite in suites)
-            {
-                var runs = await runColl.Find(n => n.Status == SuiteRunStatus.Scheduled && n.TestSuiteId == suite.Id)
+            var runs = await runColl.Find(n => n.Status == SuiteRunStatus.Scheduled)
                     .SortBy(n => n.ScheduledFor)
                     .ToListAsync();
 
-                foreach(var run in runs)
-                    _runsQueue.Add(run.ScheduledFor, run);
-            }
+            foreach (var run in runs)
+                _onDemandQueue.Enqueue(run);
             
+            StartNextRun();
+        }
+
+        private void StartNextRun()
+        {
+            SuiteRun onDemandRun;
+            if (_onDemandQueue.TryDequeue(out onDemandRun))
+            {
+                _suiteRunner.Run(onDemandRun);
+                return;
+            }
+
+
+            DateTime previousStartTime = _runningSuite == null ? DateTime.UtcNow : _runningSuite.Result.StartedOn;
+            var suites = _scheduledSuites.ToList();
+            foreach (var suite in suites)
+            {
+                var time = suite.Schedule.Time;
+                while(time < previousStartTime)
+            }
+        }
+
+        private void ExecuteRun(SuiteRun run)
+        {
+
         }
 
         private static async Task FailRunningSuites(IMongoCollection<SuiteRun> runColl)
