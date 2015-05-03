@@ -1,7 +1,8 @@
+using System.Threading.Tasks;
 namespace Autodash.Core
 {
     public interface ISuiteRunner
     {
-        void Run(SuiteRun run);
+        Task<SuiteRun> Run(SuiteRun run);
     }
 }

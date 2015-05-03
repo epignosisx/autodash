@@ -12,11 +12,10 @@ namespace Autodash.Core
             var time = Time;
             var interval = Interval;
             var runDt = new DateTime(now.Year, now.Month, now.Day, time.Hours, time.Minutes, 0);
-            while (runDt < lastRunDate)
+            while (runDt < lastRunDate || runDt < now)
             {
                 runDt = runDt.Add(interval);
             }
-
             return runDt;
         }
 
