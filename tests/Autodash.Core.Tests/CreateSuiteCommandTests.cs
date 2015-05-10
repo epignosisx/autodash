@@ -28,7 +28,7 @@ namespace Autodash.Core.Tests
             suite.Configuration = new TestSuiteConfiguration {
                 Browsers = new[] { "Internet Explorer", "Firefox" },
                 TestAssembliesPath = "Foo\\Bar",
-                TestCategoriesQuery = "P1 & R3"
+                TestTagsQuery = "P1 & R3"
             };
 
             //act

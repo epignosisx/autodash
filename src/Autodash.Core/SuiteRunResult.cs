@@ -10,7 +10,7 @@ namespace Autodash.Core
         public string Details { get; set; }
     }
 
-    [BsonDiscriminator(typeof(FailedToStartSuiteRunResult).Name)]
+    [BsonDiscriminator("FailedToStartSuiteRunResult")]
     public class FailedToStartSuiteRunResult : SuiteRunResult
     {
         public FailedToStartSuiteRunResult(string details)

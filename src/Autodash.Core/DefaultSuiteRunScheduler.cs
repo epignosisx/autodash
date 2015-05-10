@@ -107,8 +107,8 @@ namespace Autodash.Core
             var updateBuilder = Builders<SuiteRun>.Update;
             var updateDef = updateBuilder.Set(n => n.Status, SuiteRunStatus.Complete)
                 .Set(n => n.CompletedOn, DateTime.UtcNow)
-                .Set(n => n.Result, new SuiteRunResult { Status = SuiteRunResultStatus.UnexpectedFailure });
-
+                .Set(n => n.Result, new FailedToStartSuiteRunResult("Application stopped working. Running suites are stopped."));
+            
             await runColl.UpdateManyAsync(runningFilter, updateDef);
         }
     }
