@@ -63,6 +63,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DefaultSuiteRunner.cs" />
+    <Compile Include="Dynamic.cs" />
+    <Compile Include="IUnitTestDiscoverer.cs" />
+    <Compile Include="IUnitTestRunner.cs" />
     <Compile Include="MongoDatabaseProvider.cs" />
     <Compile Include="CreateProjectCommand.cs" />
     <Compile Include="CreateProjectValidator.cs" />
@@ -73,6 +77,7 @@
     <Compile Include="ISuiteRunner.cs" />
     <Compile Include="ISuiteRunScheduler.cs" />
     <Compile Include="ITestAssembliesRepository.cs" />
+    <Compile Include="MsTestDiscoverer.cs" />
     <Compile Include="MSTestRunner.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -83,6 +88,10 @@
     <Compile Include="TestSuite.cs" />
     <Compile Include="TestSuiteConfiguration.cs" />
     <Compile Include="TestSuiteSchedule.cs" />
+    <Compile Include="UnitTestCollection.cs" />
+    <Compile Include="UnitTestDiscovererProvider.cs" />
+    <Compile Include="UnitTestInfo.cs" />
+    <Compile Include="UnitTestTagSelector.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

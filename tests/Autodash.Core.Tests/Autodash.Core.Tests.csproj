@@ -73,6 +73,7 @@
     <Compile Include="MSTestDiscovererTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestSuiteScheduleTests.cs" />
+    <Compile Include="UnitTestTagSelectorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
