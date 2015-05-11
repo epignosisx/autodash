@@ -71,6 +71,7 @@
     <Compile Include="CreateSuiteCommandTests.cs" />
     <Compile Include="MongoTestDbProvider.cs" />
     <Compile Include="MSTestDiscovererTests.cs" />
+    <Compile Include="MsTestRunnerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestSuiteScheduleTests.cs" />
     <Compile Include="UnitTestTagSelectorTests.cs" />

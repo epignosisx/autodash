@@ -1,3 +1,4 @@
+using System;
 namespace Autodash.Core
 {
     public class TestSuiteConfiguration
@@ -5,5 +6,6 @@ namespace Autodash.Core
         public string[] Browsers { get; set; }
         public string TestTagsQuery { get; set; }
         public string TestAssembliesPath { get; set; }
+        public TimeSpan TestTimeout { get; set; }
     }
 }

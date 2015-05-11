@@ -12,8 +12,8 @@ namespace Autodash.Core
     public class MsTestRunner : IUnitTestRunner
     {
         private static string CommandTemplate =
-            "call \"C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\Tools\\VsDevCmd.bat\"" +
-            "mstest.exe /testcontainer:{0} /test:{1} /resultsfile:{2}";
+            "call \"C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\Tools\\VsDevCmd.bat\"" + Environment.NewLine +
+            "mstest.exe /testcontainer:{0} /test:{1} /resultsfile:\"{2}\"";
 
         public UnitTestResult Run(UnitTestInfo unitTest, UnitTestCollection testCollection, TestSuiteConfiguration config)
         {
@@ -28,21 +28,36 @@ namespace Autodash.Core
             Parallel.ForEach(config.Browsers, browser =>
             {
                 string tempFilename = RemoveInvalidChars(unitTest.TestName + "_" + browser);
-                string commandFilename = tempFilename + ".bat";
-                string resultFilename = tempFilename + ".trx";
+                string commandFullpath = Path.Combine(config.TestAssembliesPath, tempFilename + ".bat");
+                string resultFullpath = Path.Combine(config.TestAssembliesPath, tempFilename + ".trx");
 
                 string commandContent = string.Format(CommandTemplate,
                     Path.GetFileName(testCollection.AssemblyPath),
                     unitTest.TestName,
-                    resultFilename
+                    resultFullpath
                 );
 
-                File.AppendAllText(Path.Combine(config.TestAssembliesPath, commandFilename), commandContent);
+                File.WriteAllText(commandFullpath, commandContent);
+                if (File.Exists(resultFullpath))
+                    File.Delete(resultFullpath);
 
                 ProcessStartInfo info = new ProcessStartInfo();
                 info.WorkingDirectory = config.TestAssembliesPath;
                 info.FileName = @"C:\Windows\System32\cmd.exe";
-                info.Arguments = "/c "
+                info.UseShellExecute = false;
+                info.WindowStyle = ProcessWindowStyle.Hidden;
+                info.ErrorDialog = false;
+                info.CreateNoWindow = false;
+                info.Arguments = "/c \"" + commandFullpath + "\"";
+                info.RedirectStandardError = true;
+                info.RedirectStandardOutput = true;
+
+                Process process = Process.Start(info);
+                string stderr = process.StandardError.ReadToEnd();
+                string stdout = process.StandardOutput.ReadToEnd();
+                
+                TimeSpan timeout = config.TestTimeout == TimeSpan.Zero ? TimeSpan.FromMinutes(30) : config.TestTimeout;
+                process.WaitForExit((int)timeout.TotalMilliseconds);
             });
 
             throw new NotImplementedException();
