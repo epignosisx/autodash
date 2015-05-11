@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
+using Autodash.Core.MsTest;
 using MongoDB.Driver;
 
 namespace Autodash.Core
@@ -58,6 +60,12 @@ namespace Autodash.Core
                 
                 TimeSpan timeout = config.TestTimeout == TimeSpan.Zero ? TimeSpan.FromMinutes(30) : config.TestTimeout;
                 process.WaitForExit((int)timeout.TotalMilliseconds);
+
+                XmlSerializer serializer = new XmlSerializer(typeof(TestRun));
+                using (var stream = File.Open(resultFullpath, FileMode.Open))
+                {
+                    TestRun t = (TestRun)serializer.Deserialize(stream);
+                }
             });
 
             throw new NotImplementedException();

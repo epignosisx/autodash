@@ -63,6 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MsTestExecutionReport.cs" />
     <Compile Include="DefaultSuiteRunner.cs" />
     <Compile Include="Dynamic.cs" />
     <Compile Include="IUnitTestDiscoverer.cs" />
