@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Autodash.Core
 {
     public class UnitTestCollectionResult
     {
-        public string MyProperty { get; set; }
+        public string AssemblyName { get; set; }
+        public List<UnitTestResult> UnitTestResults { get; set; }
+
+        public bool Passed 
+        {
+            get { return UnitTestResults.All(n => n.Passed); }
+        }
     }
 }

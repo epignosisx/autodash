@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -10,7 +8,7 @@ namespace Autodash.Core.Tests
     public class MsTestRunnerTests
     {
         [Fact]
-        public void TestAssemblyRunsSuccessfully()
+        public async Task PassingTestExecutesAndPassedResultIsReturned()
         {
             MsTestRunner subject = new MsTestRunner();
             UnitTestInfo unitTest = new UnitTestInfo("Autodash.MsTest.ValidTests.UnitTest1.SuccessTest", null);
@@ -20,9 +18,47 @@ namespace Autodash.Core.Tests
                 TestAssembliesPath = Environment.CurrentDirectory
             };
 
-            UnitTestResult result = subject.Run(unitTest, coll, config);
+            UnitTestResult result = await subject.Run(unitTest, coll, config);
 
-            Assert.NotNull(result);
+            Assert.True(result.Passed);
+            Assert.False(File.Exists(Path.Combine(Environment.CurrentDirectory, "Autodash.MsTest.ValidTests.UnitTest1.SuccessTest_Chrome.bat")));
+            Assert.False(File.Exists(Path.Combine(Environment.CurrentDirectory, "Autodash.MsTest.ValidTests.UnitTest1.SuccessTest_Chrome.trx")));
+        }
+
+        [Fact]
+        public async Task FailingTestExecutesAndFailedResultIsReturned()
+        {
+            MsTestRunner subject = new MsTestRunner();
+            UnitTestInfo unitTest = new UnitTestInfo("Autodash.MsTest.ValidTests.UnitTest1.FailTest", null);
+            UnitTestCollection coll = new UnitTestCollection("Autodash.MsTest.ValidTests", "Autodash.MsTest.ValidTests.dll", new[] { unitTest }, subject);
+            TestSuiteConfiguration config = new TestSuiteConfiguration
+            {
+                Browsers = new[] { "Chrome" },
+                TestAssembliesPath = Environment.CurrentDirectory
+            };
+
+            UnitTestResult result = await subject.Run(unitTest, coll, config);
+
+            Assert.False(result.Passed);
+            Assert.False(File.Exists(Path.Combine(Environment.CurrentDirectory, "Autodash.MsTest.ValidTests.UnitTest1.SuccessTest_Chrome.bat")));
+            Assert.False(File.Exists(Path.Combine(Environment.CurrentDirectory, "Autodash.MsTest.ValidTests.UnitTest1.SuccessTest_Chrome.trx")));
+        }
+
+        [Fact]
+        public async Task PassingTestExecutesAndPassedResultIsReturnedForThreeBrowsers()
+        {
+            MsTestRunner subject = new MsTestRunner();
+            UnitTestInfo unitTest = new UnitTestInfo("Autodash.MsTest.ValidTests.UnitTest1.SuccessTest", null);
+            UnitTestCollection coll = new UnitTestCollection("Autodash.MsTest.ValidTests", "Autodash.MsTest.ValidTests.dll", new[] { unitTest }, subject);
+            TestSuiteConfiguration config = new TestSuiteConfiguration
+            {
+                Browsers = new[] { "Chrome", "Firefox", "Internet Explorer" },
+                TestAssembliesPath = Environment.CurrentDirectory
+            };
+
+            UnitTestResult result = await subject.Run(unitTest, coll, config);
+
+            Assert.True(result.Passed);
         }
     }
 }

@@ -1,28 +1,48 @@
-using MongoDB.Bson.Serialization.Attributes;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Autodash.Core
 {
-    public abstract class SuiteRunResult
+    public class SuiteRunResult
     {
-        public bool Passed { get; set; }
+        public bool Passed 
+        {
+            get { return CollectionResults != null && CollectionResults.All(n => n.Passed); }
+        }
+
+        public int PassedTotal 
+        {
+            get
+            {
+                if (CollectionResults == null)
+                    return 0;
+                return CollectionResults.SelectMany(n => n.UnitTestResults).Count(n => n.Passed);
+            }
+        }
+
+        public int FailedTotal
+        {
+            get
+            {
+                if (CollectionResults == null)
+                    return 0;
+                return CollectionResults.SelectMany(n => n.UnitTestResults).Count(n => !n.Passed);
+            }
+        }
 
         public string Status { get; set; }
-
         public string Details { get; set; }
-    }
+        public UnitTestCollectionResult[] CollectionResults { get; set; }
 
-    [BsonDiscriminator("FailedToStartSuiteRunResult")]
-    public class FailedToStartSuiteRunResult : SuiteRunResult
-    {
-        public FailedToStartSuiteRunResult(string details)
+        public SuiteRunResult()
         {
-            Passed = false;
-            Status = "Failed to Start";
+            
+        }
+
+        public SuiteRunResult(string status, string details)
+        {
+            Status = status;
             Details = details;
         }
-    }
-
-    public class RanToCompletionSuiteRunResult : SuiteRunResult
-    {
-        public List<UnitTestCollectionResult> CollectionResults { get; set; }
     }
 }

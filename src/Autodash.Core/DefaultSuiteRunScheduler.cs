@@ -65,7 +65,8 @@ namespace Autodash.Core
             SuiteRun onDemandRun;
             if (_onDemandQueue.TryDequeue(out onDemandRun))
             {
-                _suiteRunner.Run(onDemandRun);
+                _runningSuite = _suiteRunner.Run(onDemandRun);
+                _runningSuite.ContinueWith(t => StartNextRun());
                 return;
             }
             
@@ -95,7 +96,8 @@ namespace Autodash.Core
                     TestSuiteSnapshot = nextSuite
                 };
 
-                //_runningSuite =  _suiteRunner.Run(run);
+                _runningSuite =  _suiteRunner.Run(run);
+                _runningSuite.ContinueWith(t => StartNextRun());
             }
         }
 
@@ -107,7 +109,7 @@ namespace Autodash.Core
             var updateBuilder = Builders<SuiteRun>.Update;
             var updateDef = updateBuilder.Set(n => n.Status, SuiteRunStatus.Complete)
                 .Set(n => n.CompletedOn, DateTime.UtcNow)
-                .Set(n => n.Result, new FailedToStartSuiteRunResult("Application stopped working. Running suites are stopped."));
+                .Set(n => n.Result, new SuiteRunResult("Did not complete", "Application stopped working. Running suites are stopped."));
             
             await runColl.UpdateManyAsync(runningFilter, updateDef);
         }

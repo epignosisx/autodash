@@ -27,20 +27,31 @@ namespace Autodash.Core
             TestSuiteConfiguration config = run.TestSuiteSnapshot.Configuration;
             string testTagsQuery = config.TestTagsQuery;
             
-            UnitTestCollectionResult[] results = new UnitTestCollectionResult[testColls.Length];
+            var results = new UnitTestCollectionResult[testColls.Length];
+            int index = 0;
             foreach (UnitTestCollection testColl in testColls)
             {
+                UnitTestCollectionResult collResult = new UnitTestCollectionResult();
+                collResult.AssemblyName = testColl.AssemblyName;
+                collResult.UnitTestResults = new List<UnitTestResult>();
                 foreach (UnitTestInfo test in testColl.Tests)
                 {
                     bool shouldRun = UnitTestTagSelector.Evaluate(testTagsQuery, test.TestTags);
                     if(shouldRun)
                     {
                         UnitTestResult result = await testColl.Runner.Run(test, testColl, config);
+                        collResult.UnitTestResults.Add(result);
                     }
                 }
+
+                results[index++] = collResult;
             }
 
-            return await Task.FromResult(run);
+            run.Result = new SuiteRunResult();
+            run.Result.CollectionResults = results;
+            run.Result.Status = "Ran to Completion";
+            run.Result.Details = string.Format("Passed: {0}. Failed: {1}", run.Result.PassedTotal, run.Result.FailedTotal);
+            return run;
         }
 
         private IEnumerable<UnitTestCollection> ValidateRun(SuiteRun run)
@@ -49,7 +60,9 @@ namespace Autodash.Core
             string testAssembliesPath = config.TestAssembliesPath;
             if(!Directory.Exists(testAssembliesPath))
             {
-                run.Result = new FailedToStartSuiteRunResult("Test assemblies not found at: " + testAssembliesPath);
+                run.Result = new SuiteRunResult();
+                run.Result.Status = "Failed to Start";
+                run.Result.Details = "Test assemblies not found at: " + testAssembliesPath;
                 yield break;
             }
 

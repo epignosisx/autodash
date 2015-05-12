@@ -2,12 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Autodash.Core.MsTest;
-using MongoDB.Driver;
 
 namespace Autodash.Core
 {
@@ -19,7 +16,6 @@ namespace Autodash.Core
 
         private static readonly XmlSerializer TestRunSerializer = new XmlSerializer(typeof(TestRun));
 
-
         public async Task<UnitTestResult> Run(UnitTestInfo unitTest, UnitTestCollection testCollection, TestSuiteConfiguration config)
         {
             if (unitTest == null)
@@ -29,13 +25,14 @@ namespace Autodash.Core
             if (config == null)
                 throw new ArgumentNullException("config");
 
-            List<Task<UnitTestBrowserResult>> ongoingTests = new List<Task<UnitTestBrowserResult>>(config.Browsers.Length);
-            List<UnitTestBrowserResult> browserResults = new List<UnitTestBrowserResult>(ongoingTests.Count);
+            var ongoingTests = new List<Task<UnitTestBrowserResult>>(config.Browsers.Length);
+            var browserResults = new List<UnitTestBrowserResult>(ongoingTests.Count);
             foreach(var browser in config.Browsers)
             {
-                ongoingTests.Add(Task.Run(() => RunTest(unitTest, testCollection, config, browser, 0)));
+                string browserRef = browser;
+                ongoingTests.Add(Task.Run(() => RunTest(unitTest, testCollection, config, browserRef, 0)));
             }
-            
+
             while (ongoingTests.Count > 0)
             {
                 Task<UnitTestBrowserResult> completed = await Task.WhenAny(ongoingTests.ToArray());
@@ -51,10 +48,10 @@ namespace Autodash.Core
                 }
             }
 
-            UnitTestResult unitTestResult = new UnitTestResult
+            var unitTestResult = new UnitTestResult
             {
                 TestName = unitTest.TestName,
-                Browsers = browserResults
+                BrowserResults = browserResults
             };
 
             return unitTestResult;
@@ -78,11 +75,11 @@ namespace Autodash.Core
 
             ProcessStartInfo info = new ProcessStartInfo();
             info.WorkingDirectory = config.TestAssembliesPath;
-            info.FileName = @"C:\Windows\System32\cmd.exe";
+            info.FileName = Path.Combine(Environment.ExpandEnvironmentVariables("%windir%"), @"System32\cmd.exe");
             info.UseShellExecute = false;
             info.WindowStyle = ProcessWindowStyle.Hidden;
             info.ErrorDialog = false;
-            info.CreateNoWindow = false;
+            info.CreateNoWindow = true;
             info.Arguments = "/c \"" + commandFullpath + "\"";
             info.RedirectStandardError = true;
             info.RedirectStandardOutput = true;
@@ -100,8 +97,13 @@ namespace Autodash.Core
                 report = (TestRun)TestRunSerializer.Deserialize(stream);
             }
 
-            bool passed = report.ResultSummary.Counters.completed == report.ResultSummary.Counters.passed;
-            UnitTestBrowserResult result = new UnitTestBrowserResult
+            //clean up
+            File.Delete(resultFullpath);
+            File.Delete(commandFullpath);
+
+            bool passed = report.ResultSummary.Counters.passed == "1";
+
+            var result = new UnitTestBrowserResult
             {
                 Attempt = attempt,
                 Browser = browser,
