@@ -7,5 +7,6 @@ namespace Autodash.Core
         public string TestTagsQuery { get; set; }
         public string TestAssembliesPath { get; set; }
         public TimeSpan TestTimeout { get; set; }
+        public int RetryAttempts { get; set; }
     }
 }

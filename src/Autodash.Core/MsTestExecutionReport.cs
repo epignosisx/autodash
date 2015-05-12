@@ -8,6 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System;
 using System.Xml.Serialization;
 
 // 
@@ -927,9 +928,9 @@ public partial class TestRunUnitTestResult {
     
     private string durationField;
     
-    private string startTimeField;
-    
-    private string endTimeField;
+    private DateTime startTimeField;
+
+    private DateTime endTimeField;
     
     private string testTypeField;
     
@@ -996,7 +997,7 @@ public partial class TestRunUnitTestResult {
     
     /// <remarks/>
     [System.Xml.Serialization.XmlAttributeAttribute()]
-    public string startTime {
+    public DateTime startTime {
         get {
             return this.startTimeField;
         }
@@ -1007,7 +1008,8 @@ public partial class TestRunUnitTestResult {
     
     /// <remarks/>
     [System.Xml.Serialization.XmlAttributeAttribute()]
-    public string endTime {
+    public DateTime endTime
+    {
         get {
             return this.endTimeField;
         }

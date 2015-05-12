@@ -15,30 +15,32 @@ namespace Autodash.Core
             _testDicovererProvider = testDicovererProvider;
         }
 
-        public Task<SuiteRun> Run(SuiteRun run)
+        public async Task<SuiteRun> Run(SuiteRun run)
         {
             if (run == null)
                 throw new ArgumentNullException("run");
 
             UnitTestCollection[] testColls = ValidateRun(run).ToArray();
             if (run.Result != null)
-                return Task.FromResult(run);
+                return await Task.FromResult(run);
 
             TestSuiteConfiguration config = run.TestSuiteSnapshot.Configuration;
             string testTagsQuery = config.TestTagsQuery;
-            foreach (var testColl in testColls)
+            
+            UnitTestCollectionResult[] results = new UnitTestCollectionResult[testColls.Length];
+            foreach (UnitTestCollection testColl in testColls)
             {
-                foreach (var test in testColl.Tests)
+                foreach (UnitTestInfo test in testColl.Tests)
                 {
                     bool shouldRun = UnitTestTagSelector.Evaluate(testTagsQuery, test.TestTags);
                     if(shouldRun)
                     {
-                        UnitTestResult result = testColl.Runner.Run(test, testColl, config);
+                        UnitTestResult result = await testColl.Runner.Run(test, testColl, config);
                     }
                 }
             }
 
-            return Task.FromResult(run);
+            return await Task.FromResult(run);
         }
 
         private IEnumerable<UnitTestCollection> ValidateRun(SuiteRun run)

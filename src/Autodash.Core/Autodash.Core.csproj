@@ -90,6 +90,7 @@
     <Compile Include="TestSuiteConfiguration.cs" />
     <Compile Include="TestSuiteSchedule.cs" />
     <Compile Include="UnitTestCollection.cs" />
+    <Compile Include="UnitTestCollectionResult.cs" />
     <Compile Include="UnitTestDiscovererProvider.cs" />
     <Compile Include="UnitTestInfo.cs" />
     <Compile Include="UnitTestTagSelector.cs" />
