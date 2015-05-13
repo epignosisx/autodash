@@ -28,6 +28,10 @@ namespace Autodash.Core
             string testTagsQuery = config.TestTagsQuery;
             
             var results = new UnitTestCollectionResult[testColls.Length];
+
+            run.Result = new SuiteRunResult();
+            run.Result.CollectionResults = results;
+
             int index = 0;
             foreach (UnitTestCollection testColl in testColls)
             {
@@ -46,9 +50,7 @@ namespace Autodash.Core
 
                 results[index++] = collResult;
             }
-
-            run.Result = new SuiteRunResult();
-            run.Result.CollectionResults = results;
+            
             run.Result.Status = "Ran to Completion";
             run.Result.Details = string.Format("Passed: {0}. Failed: {1}", run.Result.PassedTotal, run.Result.FailedTotal);
             return run;

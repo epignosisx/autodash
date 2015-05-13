@@ -1,8 +1,9 @@
+using System.Threading.Tasks;
 namespace Autodash.Core
 {
     public interface ISuiteRunScheduler
     {
-        void Start();
+        Task Start();
         void Schedule(TestSuite suite);
     }
 }

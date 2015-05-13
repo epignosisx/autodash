@@ -10,7 +10,7 @@ namespace Autodash.Core
             get { return CollectionResults != null && CollectionResults.All(n => n.Passed); }
         }
 
-        public int PassedTotal 
+        public int PassedTotal
         {
             get
             {
@@ -36,7 +36,6 @@ namespace Autodash.Core
 
         public SuiteRunResult()
         {
-            
         }
 
         public SuiteRunResult(string status, string details)
