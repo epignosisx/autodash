@@ -61,7 +61,7 @@ namespace Autodash.Core
             var suites = _scheduledSuites.ToList();
             foreach (var suite in suites)
             {
-                var date = suite.Schedule.GetNextRunDate(now, lastRunDate);
+                var date = suite.Schedule.GetNextRunDate(lastRunDate);
                 if (date < nextRunDate)
                 {
                     nextRunDate = date;
@@ -69,9 +69,9 @@ namespace Autodash.Core
                 }
             }
 
-            if (nextSuite != null && nextRunDate <= DateTime.UtcNow)//////what to do here?
+            if (nextSuite != null)
             {
-                SuiteRun run = new SuiteRun
+                var run = new SuiteRun
                 {
                     StartedOn = now,
                     ScheduledFor = nextRunDate,

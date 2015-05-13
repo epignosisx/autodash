@@ -20,15 +20,15 @@ namespace Autodash.Core.Tests
             repo.GetTestSuitesWithScheduleAsync().Returns(Task.FromResult(new List<TestSuite>()));
             repo.GetScheduledSuiteRunsAsync().Returns(Task.FromResult(new List<SuiteRun>()));
             
-            DefaultSuiteRunScheduler subject = new DefaultSuiteRunScheduler(repo, runner);
+            var subject = new DefaultSuiteRunScheduler(repo, runner);
 
             //act
             await subject.Start();
 
             //assert
-            repo.Received().GetTestSuitesWithScheduleAsync();
-            repo.Received().FailRunningSuitesAsync();
-            repo.Received().GetScheduledSuiteRunsAsync();
+            repo.Received().GetTestSuitesWithScheduleAsync().IgnoreAwaitForNSubstituteAssertion();
+            repo.Received().FailRunningSuitesAsync().IgnoreAwaitForNSubstituteAssertion();
+            repo.Received().GetScheduledSuiteRunsAsync().IgnoreAwaitForNSubstituteAssertion();
         }
 
         [Fact]
@@ -47,16 +47,16 @@ namespace Autodash.Core.Tests
             repo.GetTestSuitesWithScheduleAsync().Returns(Task.FromResult(new List<TestSuite> { testSuite }));
             repo.GetScheduledSuiteRunsAsync().Returns(Task.FromResult(new List<SuiteRun>()));
 
-            DefaultSuiteRunScheduler subject = new DefaultSuiteRunScheduler(repo, runner);
+            var subject = new DefaultSuiteRunScheduler(repo, runner);
 
             //act
             await subject.Start();
 
             //assert
-            repo.Received().GetTestSuitesWithScheduleAsync();
-            repo.Received().FailRunningSuitesAsync();
-            repo.Received().GetScheduledSuiteRunsAsync();
-            runner.DidNotReceive().Run(Arg.Any<SuiteRun>());
+            repo.Received().GetTestSuitesWithScheduleAsync().IgnoreAwaitForNSubstituteAssertion();
+            repo.Received().FailRunningSuitesAsync().IgnoreAwaitForNSubstituteAssertion();
+            repo.Received().GetScheduledSuiteRunsAsync().IgnoreAwaitForNSubstituteAssertion();
+            runner.DidNotReceive().Run(Arg.Any<SuiteRun>()).IgnoreAwaitForNSubstituteAssertion(); ;
         }
 
         [Fact]
@@ -76,16 +76,16 @@ namespace Autodash.Core.Tests
             repo.GetTestSuitesWithScheduleAsync().Returns(Task.FromResult(new List<TestSuite> { testSuite }));
             repo.GetScheduledSuiteRunsAsync().Returns(Task.FromResult(new List<SuiteRun>()));
 
-            DefaultSuiteRunScheduler subject = new DefaultSuiteRunScheduler(repo, runner);
+            var subject = new DefaultSuiteRunScheduler(repo, runner);
 
             //act
             await subject.Start();
 
             //assert
-            repo.Received().GetTestSuitesWithScheduleAsync();
-            repo.Received().FailRunningSuitesAsync();
-            repo.Received().GetScheduledSuiteRunsAsync();
-            runner.Received().Run(Arg.Any<SuiteRun>());
+            repo.Received().GetTestSuitesWithScheduleAsync().IgnoreAwaitForNSubstituteAssertion();
+            repo.Received().FailRunningSuitesAsync().IgnoreAwaitForNSubstituteAssertion();
+            repo.Received().GetScheduledSuiteRunsAsync().IgnoreAwaitForNSubstituteAssertion();
+            runner.Received().Run(Arg.Any<SuiteRun>()).IgnoreAwaitForNSubstituteAssertion();
         }
         
     }

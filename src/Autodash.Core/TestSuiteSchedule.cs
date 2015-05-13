@@ -7,12 +7,12 @@ namespace Autodash.Core
         public TimeSpan Time { get; set; }
         public TimeSpan Interval { get; set; }
 
-        public DateTime GetNextRunDate(DateTime now, DateTime lastRunDate)
+        public DateTime GetNextRunDate(DateTime lastRunDate)
         {
             var time = Time;
             var interval = Interval;
-            var runDt = new DateTime(now.Year, now.Month, now.Day, time.Hours, time.Minutes, 0);
-            while (runDt < lastRunDate || runDt < now)
+            var runDt = new DateTime(lastRunDate.Year, lastRunDate.Month, lastRunDate.Day, time.Hours, time.Minutes, 0);
+            while (runDt < lastRunDate)
             {
                 runDt = runDt.Add(interval);
             }
