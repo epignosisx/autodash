@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Threading;
 
 namespace Autodash.Core
 {
@@ -14,12 +15,14 @@ namespace Autodash.Core
         private readonly ISuiteRunner _suiteRunner;
         private readonly ConcurrentQueue<SuiteRun> _onDemandQueue = new ConcurrentQueue<SuiteRun>();
         private readonly List<TestSuite> _scheduledSuites = new List<TestSuite>();
+        private readonly Timer _nextRunTimer;
         private Task<SuiteRun> _runningSuite;
 
         public DefaultSuiteRunScheduler(ISuiteRunSchedulerRepository repository, ISuiteRunner suiteRunner)
         {
             _repository = repository;
             _suiteRunner = suiteRunner;
+            _nextRunTimer = new Timer(NextSuiteRunCheck);
         }
 
         public void Schedule(TestSuite suite)
@@ -27,6 +30,8 @@ namespace Autodash.Core
             if (suite == null)
                 throw new ArgumentNullException("suite");
 
+            var run = SuiteRun.CreateSuiteRun(suite, DateTime.UtcNow);
+            _onDemandQueue.Enqueue(run);
         }
 
         public async Task Start()
@@ -41,16 +46,22 @@ namespace Autodash.Core
             foreach (var run in runs)
                 _onDemandQueue.Enqueue(run);
             
-            StartNextRun();
+            await StartNextRun();
+
+            _nextRunTimer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(10));
         }
 
-        private void StartNextRun()
+        private async Task StartNextRun()
         {
+            if (_runningSuite != null && !_runningSuite.IsCompleted)
+                return;
+
             SuiteRun onDemandRun;
             if (_onDemandQueue.TryDequeue(out onDemandRun))
             {
+                onDemandRun.StartedOn = DateTime.UtcNow;
                 _runningSuite = _suiteRunner.Run(onDemandRun);
-                _runningSuite.ContinueWith(t => StartNextRun());
+                await _runningSuite.ContinueWith(t => SuiteRunCompleted(t.Result));
                 return;
             }
             
@@ -71,21 +82,34 @@ namespace Autodash.Core
 
             if (nextSuite != null)
             {
-                var run = new SuiteRun
-                {
-                    StartedOn = now,
-                    ScheduledFor = nextRunDate,
-                    Status = SuiteRunStatus.Running,
-                    TestSuiteId = nextSuite.Id,
-                    TestSuiteSnapshot = nextSuite
-                };
+                var run = SuiteRun.CreateSuiteRun(nextSuite, nextRunDate);
+                run.StartedOn = now;
+
+                await _repository.AddSuiteRunAsync(run);
 
                 _runningSuite = _suiteRunner.Run(run);
-                _runningSuite.ContinueWith(t => StartNextRun());
+                await _runningSuite.ContinueWith(t => SuiteRunCompleted(t.Result));
             }
         }
 
-        
+        private Task SuiteRunCompleted(SuiteRun run)
+        {
+            run.CompletedOn = DateTime.UtcNow;
+            run.Status = SuiteRunStatus.Complete;
+            return _repository.UpdateSuiteRunAsync(run);
+        }
+
+        private void NextSuiteRunCheck(object state)
+        {
+            try
+            {
+                StartNextRun();
+            }
+            catch (Exception ex)
+            {
+                //TODO: log it
+            }
+        }
     }
 
     public interface ISuiteRunSchedulerRepository
@@ -93,6 +117,8 @@ namespace Autodash.Core
         Task FailRunningSuitesAsync();
         Task<List<TestSuite>> GetTestSuitesWithScheduleAsync();
         Task<List<SuiteRun>> GetScheduledSuiteRunsAsync();
+        Task AddSuiteRunAsync(SuiteRun run);
+        Task UpdateSuiteRunAsync(SuiteRun run);
     }
 
     public class SuiteRunSchedulerRepository : ISuiteRunSchedulerRepository
@@ -141,7 +167,6 @@ namespace Autodash.Core
             return suites;
         }
 
-
         public Task<List<SuiteRun>> GetScheduledSuiteRunsAsync()
         {
             var runColl = _db.GetCollection<SuiteRun>("SuiteRun");
@@ -149,6 +174,22 @@ namespace Autodash.Core
             return runColl.Find(n => n.Status == SuiteRunStatus.Scheduled)
                 .SortBy(n => n.ScheduledFor)
                 .ToListAsync();
+        }
+
+        public Task AddSuiteRunAsync(SuiteRun run)
+        {
+            var runColl = _db.GetCollection<SuiteRun>("SuiteRun");
+            return runColl.InsertOneAsync(run);
+        }
+
+        public Task UpdateSuiteRunAsync(SuiteRun run)
+        {
+            var runColl = _db.GetCollection<SuiteRun>("SuiteRun");
+
+            var queryBuilder = Builders<SuiteRun>.Filter;
+            var filterById = queryBuilder.Eq(n => n.Id, run.Id);
+
+            return runColl.ReplaceOneAsync(filterById, run);
         }
     }
 }

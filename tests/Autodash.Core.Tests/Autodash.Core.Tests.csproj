@@ -75,6 +75,7 @@
     <Compile Include="MsTestRunnerTests.cs" />
     <Compile Include="NSubstituteHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScheduleOnDemandTestSuiteTests.cs" />
     <Compile Include="TestSuiteScheduleTests.cs" />
     <Compile Include="UnitTestTagSelectorTests.cs" />
   </ItemGroup>

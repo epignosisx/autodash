@@ -16,7 +16,7 @@ namespace Autodash.Core.Tests
             //arrange
             var repo = Substitute.For<ITestAssembliesRepository>();
             var db = await MongoTestDbProvider.GetDatabase();
-            var cmd = new CreateSuiteCommand();
+            var cmd = new CreateSuiteCommand(db, repo);
             var tempFolder = "a temp folder";
             TestSuite suite = new TestSuite();
             suite.Name = "Test Suite";
@@ -32,7 +32,7 @@ namespace Autodash.Core.Tests
             };
 
             //act
-            await cmd.ExecuteAsync(db, repo, suite, tempFolder);
+            await cmd.ExecuteAsync(suite, tempFolder);
 
             //assert
             Assert.NotNull(suite.Id);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -35,6 +36,12 @@ namespace Autodash.Core.Tests
         {
             bool result = UnitTestTagSelector.Evaluate("(Foo Or Bar) AND Zar", new[] { "Foo", "Bar" });
             Assert.False(result);
+        }
+
+        [Fact]
+        public void Foo()
+        {
+            var exp = DynamicExpression.Parse(typeof(bool), "true && false");
         }
     }
 }

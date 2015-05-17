@@ -15,5 +15,17 @@ namespace Autodash.Core
         public string TestSuiteId { get; set; }
         public SuiteRunResult Result { get; set; }
         public TestSuite TestSuiteSnapshot { get; set; }
+
+        public static SuiteRun CreateSuiteRun(TestSuite suite, DateTime scheduledOn)
+        {
+            var run = new SuiteRun
+            {
+                ScheduledFor = scheduledOn,
+                Status = SuiteRunStatus.Running,
+                TestSuiteId = suite.Id,
+                TestSuiteSnapshot = suite
+            };
+            return run;
+        }
     }
 }

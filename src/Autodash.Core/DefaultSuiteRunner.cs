@@ -40,7 +40,18 @@ namespace Autodash.Core
                 collResult.UnitTestResults = new List<UnitTestResult>();
                 foreach (UnitTestInfo test in testColl.Tests)
                 {
-                    bool shouldRun = UnitTestTagSelector.Evaluate(testTagsQuery, test.TestTags);
+                    bool shouldRun = false;
+                    try
+                    {
+                        shouldRun = UnitTestTagSelector.Evaluate(testTagsQuery, test.TestTags);
+                    }
+                    catch (Exception ex)
+                    {
+                        run.Result.Status = "Failed to evaluate test tag query";
+                        run.Result.Details = "Review test tag query for invalid query." + Environment.NewLine + ex.ToString();
+                        return run;
+                    }
+                    
                     if(shouldRun)
                     {
                         UnitTestResult result = await testColl.Runner.Run(test, testColl, config);
@@ -54,6 +65,19 @@ namespace Autodash.Core
             run.Result.Status = "Ran to Completion";
             run.Result.Details = string.Format("Passed: {0}. Failed: {1}", run.Result.PassedTotal, run.Result.FailedTotal);
             return run;
+        }
+
+        private void SafeOp(Action op, string status, string details)
+        {
+            try
+            {
+                op();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
 
         private IEnumerable<UnitTestCollection> ValidateRun(SuiteRun run)
