@@ -85,10 +85,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Autodash.MsTest.ValidTests\Autodash.MsTest.ValidTests.csproj">
-      <Project>{a914980e-d01d-44d3-9205-5c64351a8b4c}</Project>
-      <Name>Autodash.MsTest.ValidTests</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\Autodash.Core\Autodash.Core.csproj">
       <Project>{2382a2c9-64c3-43d8-b947-ad46b11b925b}</Project>
       <Name>Autodash.Core</Name>
