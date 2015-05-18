@@ -12,6 +12,7 @@ namespace Autodash.Core.UI
         public IEnumerable<string> GetAssemblyNames()
         {
             yield return "Autodash.Core";
+            yield return "FluentValidation";
         }
 
         public IEnumerable<string> GetDefaultNamespaces()
@@ -20,6 +21,9 @@ namespace Autodash.Core.UI
             yield return "Autodash.Core.UI";
             yield return "Autodash.Core.UI.Modules";
             yield return "Autodash.Core.UI.Models";
+
+            yield return "FluentValidation.Results";
+
         }
 
         public bool AutoIncludeModelNamespace

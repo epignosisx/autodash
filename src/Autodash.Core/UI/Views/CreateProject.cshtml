@@ -1,0 +1,26 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.CreateProjectVm>
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<h1>New Project</h1>
+
+<form method="post" enctype="application/x-www-form-urlencoded" action="/projects/create">
+
+    @foreach (var error in Model.Errors)
+    {
+
+    }
+
+    <div class="form-group">
+        <label for="ProjectName">Project Name</label>
+        <input type="text" class="form-control" name="ProjectName" required maxlength="100" />
+    </div>
+
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <input type="text" class="form-control" name="Description" required maxlength="500">
+    </div>
+
+    <button type="submit">Submit</button>
+</form>

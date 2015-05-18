@@ -1,4 +1,7 @@
-﻿body
-{
-    color:red;
+﻿.main-content{
+    padding-top:50px;
+}
+
+.mt10{
+    margin-top:10px;
 }

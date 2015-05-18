@@ -6,12 +6,19 @@ namespace Autodash.Core
 {
     public class CreateProjectCommand
     {
-        public Task ExecuteAsync(IMongoDatabase db, Project project)
+        private readonly IMongoDatabase _db;
+        
+        public CreateProjectCommand(IMongoDatabase db)
+        {
+            _db = db;
+        }
+
+        public Task ExecuteAsync(Project project)
         {
             var validator = new CreateProjectValidator();
             validator.ValidateAndThrow(project);
 
-            var coll = db.GetCollection<Project>("Project");
+            var coll = _db.GetCollection<Project>("Project");
             return coll.InsertOneAsync(project);
         }
     }
