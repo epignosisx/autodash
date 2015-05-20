@@ -3,23 +3,35 @@
     Layout = "_Layout.cshtml";
 }
 
-<h1>New Project</h1>
+<h1>New Test Suite</h1>
 
-<form method="post" enctype="application/x-www-form-urlencoded" action="/projects/create">
+<form method="post" enctype="application/x-www-form-urlencoded" action="/suites/create">
 
-    @foreach (var error in Model.Errors)
-    {
+    @Html.Partial("_ValidationSummary", Model.Errors)
 
-    }
+    <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
 
     <div class="form-group">
-        <label for="ProjectName">Project Name</label>
-        <input type="text" class="form-control" name="ProjectName" required maxlength="100" />
+        <label for="SuiteName">Suite Name</label>
+        <input type="text" class="form-control" name="SuiteName" value="@Model.SuiteName" required maxlength="100" />
     </div>
 
     <div class="form-group">
-        <label for="Description">Description</label>
-        <input type="text" class="form-control" name="Description" required maxlength="500">
+        <label for="Browsers">Browsers</label>
+        <div class="checkbox">
+            <label><input type="checkbox" name="Browsers" value="Chrome" />Chrome</label>&nbsp;
+            <label><input type="checkbox" name="Browsers" value="Firefox" />Firefox</label>&nbsp;
+            <label><input type="checkbox" name="Browsers" value="Internet Explorer" />IE</label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="TestAssemblies">Browsers</label>
+        <div class="checkbox">
+            <label><input type="checkbox" name="Browsers" value="Chrome" />Chrome</label>&nbsp;
+            <label><input type="checkbox" name="Browsers" value="Firefox" />Firefox</label>&nbsp;
+            <label><input type="checkbox" name="Browsers" value="Internet Explorer" />IE</label>
+        </div>
     </div>
 
     <button type="submit" class="btn btn-success">Submit</button>

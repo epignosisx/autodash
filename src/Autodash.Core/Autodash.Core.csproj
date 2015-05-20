@@ -124,6 +124,9 @@
     <Content Include="UI\Views\CreateProject.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="UI\Views\_ValidationSummary.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="UI\Views\CreateSuite.cshtml" />
   </ItemGroup>
   <ItemGroup>
