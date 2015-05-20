@@ -17,10 +17,16 @@ namespace Autodash.Core.UI
             // We don't call base because we don't want autoregister
             // we just register our one known dependency as an application level singleton
             existingContainer.Register<IMongoDatabase>((container, parameters) => MongoDatabaseProvider.GetDatabase());
+            existingContainer.Register<ITestAssembliesRepository, FileSystemTestAssembliesRepository>().AsSingleton();
+            
+            existingContainer.Register<CreateProjectCommand>();
+            existingContainer.Register<CreateSuiteCommand>();
         }
 
         protected override void ApplicationStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines)
         {
+            base.ApplicationStartup(container, pipelines);
+
             this.Conventions.ViewLocationConventions.Add((viewName, model, context) =>
             {
                 return string.Concat("UI/Views/", viewName);

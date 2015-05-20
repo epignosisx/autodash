@@ -7,8 +7,8 @@ namespace Autodash.Core
 {
     public class CreateSuiteCommand
     {
-        private IMongoDatabase _db;
-        private ITestAssembliesRepository _assembliesRepo;
+        private readonly IMongoDatabase _db;
+        private readonly ITestAssembliesRepository _assembliesRepo;
         
         public CreateSuiteCommand(IMongoDatabase db, ITestAssembliesRepository assembliesRepo)
         {

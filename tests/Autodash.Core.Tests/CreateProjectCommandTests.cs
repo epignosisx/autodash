@@ -1,10 +1,4 @@
 ﻿using FluentValidation;
-using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -17,12 +11,12 @@ namespace Autodash.Core.Tests
         {
             //arrange
             var db = await MongoTestDbProvider.GetDatabase();
-            var cmd = new CreateProjectCommand();
+            var cmd = new CreateProjectCommand(db);
             Project project = new Project();
             project.Name = "Test Project";
 
             //act
-            await cmd.ExecuteAsync(db, project);
+            await cmd.ExecuteAsync(project);
             
             //assert
             Assert.NotNull(project.Id);
@@ -34,12 +28,12 @@ namespace Autodash.Core.Tests
         {
             //arrange
             var db = await MongoTestDbProvider.GetDatabase();
-            var cmd = new CreateProjectCommand();
+            var cmd = new CreateProjectCommand(db);
             Project project = new Project();
             project.Name = null;
 
             //act/assert
-            await Assert.ThrowsAsync<ValidationException>(() => cmd.ExecuteAsync(db, project));
+            await Assert.ThrowsAsync<ValidationException>(() => cmd.ExecuteAsync(project));
         }
     }
 }

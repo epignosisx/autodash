@@ -124,6 +124,7 @@
     <Content Include="UI\Views\CreateProject.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="UI\Views\CreateSuite.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="UI\Content\main.css">

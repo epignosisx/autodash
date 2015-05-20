@@ -13,7 +13,7 @@ namespace Autodash.Core.UI.Modules
 {
     public class ProjectsModule : NancyModule
     {
-        public ProjectsModule() : base("/projects")
+        public ProjectsModule(TinyIoCContainer container) : base("/projects")
         {
             Get["/"] = _ => {
                 return View["Projects"];
@@ -32,7 +32,7 @@ namespace Autodash.Core.UI.Modules
                     Description = vm.Description
                 };
 
-                var cmd = TinyIoCContainer.Current.Resolve<CreateProjectCommand>();
+                var cmd = container.Resolve<CreateProjectCommand>();
 
                 try
                 {
@@ -44,7 +44,7 @@ namespace Autodash.Core.UI.Modules
                     return View["CreateProject", vm];
                 }
 
-                return Response.AsRedirect(string.Format("/projects/{0}/suites", project.Id));
+                return Response.AsRedirect(string.Format("/projects/{0}/suites/create", project.Id));
             };
         }
     }

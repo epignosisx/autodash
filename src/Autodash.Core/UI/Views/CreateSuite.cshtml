@@ -1,4 +1,4 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.CreateProjectVm>
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.CreateSuiteVm>
 @{
     Layout = "_Layout.cshtml";
 }
@@ -10,7 +10,7 @@
     @foreach (var error in Model.Errors)
     {
 
-    } 
+    }
 
     <div class="form-group">
         <label for="ProjectName">Project Name</label>
