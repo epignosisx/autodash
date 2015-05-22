@@ -11,16 +11,18 @@ namespace Autodash.Core.UI.Models
         public string[] Browsers { get; set; }
         public string TestTagsQuery { get; set; }
         public string TestAssembliesPath { get; set; }
-        public TimeSpan TestTimeout { get; set; }
+        public int TestTimeoutMinutes { get; set; }
         public int RetryAttempts { get; set; }
 
-        public TimeSpan Time { get; set; }
-        public TimeSpan Interval { get; set; }
+        public TimeSpan? Time { get; set; }
+        public int IntervalHours { get; set; }
 
         public ValidationFailure[] Errors { get; set; }
 
-        public CreateSuiteVm() 
+        public CreateSuiteVm()
         {
+            RetryAttempts = 3;
+            TestTimeoutMinutes = 10;
             Errors = new ValidationFailure[0];
         }
     }
