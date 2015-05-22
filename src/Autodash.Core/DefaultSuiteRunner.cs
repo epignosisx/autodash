@@ -8,11 +8,11 @@ namespace Autodash.Core
 {
     public class DefaultSuiteRunner : ISuiteRunner
     {
-        private readonly UnitTestDiscovererProvider _testDicovererProvider;
+        private readonly ITestSuiteUnitTestDiscoverer _unitTestDiscoverer;
 
-        public DefaultSuiteRunner(UnitTestDiscovererProvider testDicovererProvider)
+        public DefaultSuiteRunner(ITestSuiteUnitTestDiscoverer unitTestDiscoverer)
         {
-            _testDicovererProvider = testDicovererProvider;
+            _unitTestDiscoverer = unitTestDiscoverer;
         }
 
         public async Task<SuiteRun> Run(SuiteRun run)
@@ -35,7 +35,7 @@ namespace Autodash.Core
             int index = 0;
             foreach (UnitTestCollection testColl in testColls)
             {
-                UnitTestCollectionResult collResult = new UnitTestCollectionResult();
+                var collResult = new UnitTestCollectionResult();
                 collResult.AssemblyName = testColl.AssemblyName;
                 collResult.UnitTestResults = new List<UnitTestResult>();
                 foreach (UnitTestInfo test in testColl.Tests)
@@ -67,19 +67,6 @@ namespace Autodash.Core
             return run;
         }
 
-        private void SafeOp(Action op, string status, string details)
-        {
-            try
-            {
-                op();
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-        }
-
         private IEnumerable<UnitTestCollection> ValidateRun(SuiteRun run)
         {
             var config = run.TestSuiteSnapshot.Configuration;
@@ -89,21 +76,10 @@ namespace Autodash.Core
                 run.Result = new SuiteRunResult();
                 run.Result.Status = "Failed to Start";
                 run.Result.Details = "Test assemblies not found at: " + testAssembliesPath;
-                yield break;
+                return Enumerable.Empty<UnitTestCollection>();
             }
 
-            var testAssemblies = Directory.GetFiles(testAssembliesPath)
-                .Where(n => string.Equals(Path.GetExtension(n), ".dll", StringComparison.OrdinalIgnoreCase));
-
-            foreach (var testAssembly in testAssemblies)
-            {
-                foreach (var discoverer in _testDicovererProvider.Discoverers)
-                {
-                    string fullpath = Path.Combine(testAssembliesPath, testAssembly);
-                    UnitTestCollection testColl = discoverer.DiscoverTests(fullpath);
-                    yield return testColl;
-                }
-            }
+            return _unitTestDiscoverer.Discover(testAssembliesPath);
         }
     }
 }

@@ -14,17 +14,20 @@ namespace Autodash.Core
             _repositoryRoot = repositoryRoot;
         }
 
-        public void MoveToTestSuite(TestSuite suite, string zipLocation)
+        public string MoveToTestSuite(TestSuite suite, string zipLocation)
         {
             string suiteLocation = GetSuiteLocation(suite);
             Directory.CreateDirectory(suiteLocation);
             ZipFile.ExtractToDirectory(zipLocation, suiteLocation);
+            return suiteLocation;
         }
 
         private string GetSuiteLocation(TestSuite suite)
         {
             string safeName = SafeFileName(suite.Name);
-            string fullPath = Path.Combine(_repositoryRoot, suite.Id, safeName);
+            safeName = Truncate(safeName, 50);
+            safeName = suite.Id + "_" + safeName;
+            string fullPath = Path.Combine(_repositoryRoot, safeName);
             return fullPath;
         }
 
@@ -36,6 +39,12 @@ namespace Autodash.Core
                 name = name.Replace(illegalChar.ToString(CultureInfo.InvariantCulture), "");
             }
             return name;
+        }
+
+        private static string Truncate(string value, int maxLength)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
         }
     }
 }

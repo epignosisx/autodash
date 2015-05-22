@@ -4,8 +4,11 @@ namespace Autodash.Core
 {
     public class UnitTestDiscovererProvider
     {
-        private readonly List<IUnitTestDiscoverer> _discoverers = new List<IUnitTestDiscoverer>();
+        private static readonly List<IUnitTestDiscoverer> _discoverers = new List<IUnitTestDiscoverer>
+        {
+            new MsTestDiscoverer()
+        };
 
-        public IList<IUnitTestDiscoverer> Discoverers { get { return _discoverers; } }
+        public static IList<IUnitTestDiscoverer> Discoverers { get { return _discoverers; } }
     }
 }

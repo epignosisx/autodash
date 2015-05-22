@@ -29,8 +29,8 @@ namespace Autodash.Core
             var coll = _db.GetCollection<TestSuite>("TestSuite");
             await coll.InsertOneAsync(suite);
 
-            _assembliesRepo.MoveToTestSuite(suite, testAssembliesTempLocation);
-
+            suite.Configuration.TestAssembliesPath = _assembliesRepo.MoveToTestSuite(suite, testAssembliesTempLocation);
+            
             await coll.ReplaceOneAsync<TestSuite>(n => n.Id == suite.Id, suite);
         }
     }

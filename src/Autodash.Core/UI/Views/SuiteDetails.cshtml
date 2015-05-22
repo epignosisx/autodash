@@ -1,0 +1,121 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.SuiteDetailsVm>
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <h1>Suite Details</h1>
+    </div>
+    <div class="col-md-6">
+        <div id="last-ten-chart" style="width:250px;height:150px;border:aqua"></div>
+    </div>
+</div>
+
+<div role="tabpanel">
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#details" aria-controls="details" role="tab" data-toggle="tab">Details</a></li>
+        <li role="presentation"><a href="#suite-runs" aria-controls="suite runs" role="tab" data-toggle="tab">Suite Runs</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active mt10" id="details">
+            <form method="post" enctype="multipart/form-data" action="/suites/update">
+                <input type="hidden" name="Id" value="@Model.Suite.Id" />
+                <input type="hidden" name="ProjectId" value="@Model.Suite.ProjectId" />
+                
+                <div class="form-group">
+                    <label for="SuiteName">Suite Name</label>
+                    <input type="text" class="form-control" name="SuiteName" value="@Model.Suite.Name" required maxlength="100" />
+                </div>
+                
+                <fieldset class="mt30">
+                    <legend>Configuration</legend>
+                    <div class="form-group">
+                        <label for="Browsers">Browsers</label>
+                        <div class="checkbox">
+                            <label><input type="checkbox" name="Browsers" value="Chrome" @(Model.IsBrowserSelected("Chrome") ? "checked" : "") />Chrome</label>&nbsp;
+                            <label><input type="checkbox" name="Browsers" value="Firefox" @(Model.IsBrowserSelected("Firefox") ? "checked" : "") />Firefox</label>&nbsp;
+                            <label><input type="checkbox" name="Browsers" value="IE" @(Model.IsBrowserSelected("IE") ? "checked" : "") />IE</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="RetryAttempts">Retry attempts</label>
+                        <input type="number" class="form-control" name="RetryAttempts" value="@Model.Suite.Configuration.RetryAttempts" required maxlength="1" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="RetryAttempts">Test Timeout</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" name="TestTimeout" value="@Model.Suite.Configuration.TestTimeout.TotalMinutes" required />
+                            <div class="input-group-addon">minutes</div>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset class="mt30">
+                    <legend>Schedule (optional)</legend>
+
+                    <div class="form-group">
+                        <label for="Time">Run at</label>
+                        <input type="text" class="form-control" name="Time" value="@Model.ScheduleTime" pattern="^\d\d?:\d\d$" placeholder="Ex: 14:00" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Interval">Every</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="IntervalHours" value="@Model.ScheduleInterval" placeholder="Ex: 24" />
+                            <div class="input-group-addon">hours</div>
+                        </div>
+                    </div>
+                </fieldset>
+                
+                <button type="submit" class="btn btn-success">Update</button>
+
+            </form>
+        </div>
+        <div role="tabpanel" class="tab-pane mt10" id="suite-runs">
+
+        </div>
+    </div>
+
+</div>
+
+@section scripts{
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script>
+        $(function() {
+            $("#last-ten-chart").highcharts({
+                chart: {
+                    type: "column"
+                },
+                title: {
+                    text: ""
+                },
+                legend: {
+                    enabled: false
+                },
+                xAxis: {
+                    categories: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                },
+                yAxis: {
+                    min: 0,
+                    max: 240,
+                    title: {
+                        text: ''
+                    }
+                },
+                series: [
+                    {
+                        name: 'Tokyo',
+                        data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6]
+                    }
+                ]
+            });
+        });
+    </script>
+}

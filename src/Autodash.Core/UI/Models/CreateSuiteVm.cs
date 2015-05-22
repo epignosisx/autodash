@@ -9,7 +9,6 @@ namespace Autodash.Core.UI.Models
         public string SuiteName { get; set; }
 
         public string[] Browsers { get; set; }
-        public string TestTagsQuery { get; set; }
         public string TestAssembliesPath { get; set; }
         public int TestTimeoutMinutes { get; set; }
         public int RetryAttempts { get; set; }

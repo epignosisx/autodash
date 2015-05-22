@@ -16,6 +16,8 @@ namespace Autodash.Core
 
         private static readonly XmlSerializer TestRunSerializer = new XmlSerializer(typeof(TestRun));
 
+        public string TestRunnerName { get { return "MSTest Runner"; } }
+
         public async Task<UnitTestResult> Run(UnitTestInfo unitTest, UnitTestCollection testCollection, TestSuiteConfiguration config)
         {
             if (unitTest == null)
