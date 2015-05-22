@@ -1,32 +1,28 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.IO.Compression;
 
 namespace Autodash.Core
 {
     public class FileSystemTestAssembliesRepository : ITestAssembliesRepository
     {
         private readonly string _repositoryRoot;
-        public FileSystemTestAssembliesRepository(string repositoryRoot){
+
+        public FileSystemTestAssembliesRepository(string repositoryRoot)
+        {
             _repositoryRoot = repositoryRoot;
         }
 
-        public void MoveToTestSuite(TestSuite suite, string currentLocation)
+        public void MoveToTestSuite(TestSuite suite, string zipLocation)
         {
-            var dirInfo = new DirectoryInfo(currentLocation);
             string suiteLocation = GetSuiteLocation(suite);
-
             Directory.CreateDirectory(suiteLocation);
-
-            foreach(FileInfo file in dirInfo.GetFiles())
-            {
-                file.MoveTo(suiteLocation);
-            }
-
-            dirInfo.Delete(true);
+            ZipFile.ExtractToDirectory(zipLocation, suiteLocation);
         }
 
-        private string GetSuiteLocation(TestSuite suite){
+        private string GetSuiteLocation(TestSuite suite)
+        {
             string safeName = SafeFileName(suite.Name);
             string fullPath = Path.Combine(_repositoryRoot, suite.Id, safeName);
             return fullPath;

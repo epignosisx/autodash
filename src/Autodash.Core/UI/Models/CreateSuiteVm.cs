@@ -15,7 +15,7 @@ namespace Autodash.Core.UI.Models
         public int RetryAttempts { get; set; }
 
         public TimeSpan? Time { get; set; }
-        public int IntervalHours { get; set; }
+        public int? IntervalHours { get; set; }
 
         public ValidationFailure[] Errors { get; set; }
 

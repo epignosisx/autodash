@@ -5,7 +5,7 @@
 
 <h1>New Test Suite</h1>
 
-<form method="post" enctype="application/x-www-form-urlencoded" action="/suites/create">
+<form method="post" enctype="multipart/form-data" action="/suites/create">
 
     @Html.Partial("_ValidationSummary", Model.Errors)
 
@@ -15,54 +15,54 @@
         <label for="SuiteName">Suite Name</label>
         <input type="text" class="form-control" name="SuiteName" value="@Model.SuiteName" required maxlength="100" />
     </div>
+
+    <div class="form-group">
+        <label for="TestAssembliesZip">Suite Name</label>
+        <input type="file" class="form-control" name="TestAssembliesZip" required />
+    </div>
     
-    <fieldset>
+    <fieldset class="mt30">
         <legend>Configuration</legend>
         <div class="form-group">
             <label for="Browsers">Browsers</label>
             <div class="checkbox">
-                <label><input type="checkbox" name="Browsers" value="Chrome" />Chrome</label>&nbsp;
+                <label><input type="checkbox" name="Browsers" value="Chrome" checked />Chrome</label>&nbsp;
                 <label><input type="checkbox" name="Browsers" value="Firefox" />Firefox</label>&nbsp;
-                <label><input type="checkbox" name="Browsers" value="Internet Explorer" />IE</label>
+                <label><input type="checkbox" name="Browsers" value="InternetExplorer" />IE</label>
             </div>
         </div>
-        
+
         <div class="form-group">
             <label for="RetryAttempts">Retry attempts</label>
-            <input type="text" class="form-control" name="RetryAttempts" value="@Model.RetryAttempts" required number maxlength="1" />
+            <input type="number" class="form-control" name="RetryAttempts" value="@Model.RetryAttempts" required maxlength="1" />
         </div>
-        
+
         <div class="form-group">
             <label for="RetryAttempts">Test Timeout</label>
-            <input type="text" class="form-control" name="TestTimeout" value="@Model.TestTimeoutMinutes" required pattern="^\d\d?:\d\d$" />
+            <div class="input-group">
+                <input type="number" class="form-control" name="TestTimeout" value="@Model.TestTimeoutMinutes" required />
+                <div class="input-group-addon">minutes</div>
+            </div>
         </div>
     </fieldset>
 
-    <fieldset>
+    <fieldset class="mt30">
         <legend>Schedule (optional)</legend>
 
         <div class="form-group">
             <label for="Time">Run at</label>
-            <input type="text" class="form-control" name="Time" value="@Model.Time" required pattern="^\d\d?:\d\d$" placeholder="Ex: 14:00" />
+            <input type="text" class="form-control" name="Time" value="@Model.Time" pattern="^\d\d?:\d\d$" placeholder="Ex: 14:00" />
         </div>
 
         <div class="form-group">
             <label for="Interval">Every</label>
             <div class="input-group">
-                <input type="text" class="form-control" name="Interval" value="@Model.IntervalHours" placeholder="Ex: 24" />
+                <input type="text" class="form-control" name="IntervalHours" value="@Model.IntervalHours" placeholder="Ex: 24" />
                 <div class="input-group-addon">hours</div>
             </div>
         </div>
     </fieldset>
 
-    <div class="form-group">
-        <label for="TestAssemblies">Browsers</label>
-        <div class="checkbox">
-            <label><input type="checkbox" name="Browsers" value="Chrome" />Chrome</label>&nbsp;
-            <label><input type="checkbox" name="Browsers" value="Firefox" />Firefox</label>&nbsp;
-            <label><input type="checkbox" name="Browsers" value="Internet Explorer" />IE</label>
-        </div>
-    </div>
 
     <button type="submit" class="btn btn-success">Submit</button>
 </form>

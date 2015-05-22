@@ -2,6 +2,6 @@
 {
     public interface ITestAssembliesRepository
     {
-        void MoveToTestSuite(TestSuite suite, string currentLocation);
+        void MoveToTestSuite(TestSuite suite, string zipLocation);
     }
 }
