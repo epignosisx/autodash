@@ -4,6 +4,7 @@ using Nancy.Conventions;
 using Nancy.TinyIoc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,10 +15,10 @@ namespace Autodash.Core.UI
     {
         protected override void ConfigureApplicationContainer(TinyIoCContainer existingContainer)
         {
-            // We don't call base because we don't want autoregister
-            // we just register our one known dependency as an application level singleton
+            var repoPath = Path.Combine(Environment.CurrentDirectory, "Repository");
+
             existingContainer.Register<IMongoDatabase>((container, parameters) => MongoDatabaseProvider.GetDatabase());
-            existingContainer.Register<ITestAssembliesRepository, FileSystemTestAssembliesRepository>().AsSingleton();
+            existingContainer.Register<ITestAssembliesRepository>(new FileSystemTestAssembliesRepository(repoPath));
             
             existingContainer.Register<CreateProjectCommand>();
             existingContainer.Register<CreateSuiteCommand>();
