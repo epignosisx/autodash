@@ -80,13 +80,13 @@
         <div role="tabpanel" class="tab-pane mt10" id="test-explorer">
             <div class="clearfix">
                 <div class="pull-right form-inline">
-                    <label>Filter:</label> <input type="text" class="form-control" />
+                    <label>Filter:</label> <input type="text" class="form-control" id="test-explorer-input" />
                 </div>
             </div>
             @foreach (var unitTestColl in Model.UnitTestCollections)
             {
                 <h4>@unitTestColl.Runner.TestRunnerName</h4>
-                <table class="table table-condensed">
+                <table class="table table-condensed test-explorer-table">
                     <thead>
                         <tr>
                             <th>Test Name</th>
@@ -113,7 +113,9 @@
 </div>
 
 @section scripts{
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="/assets/js/test-explorer.js"></script>
+    <script src="/assets/js/suite-details.js"></script>
+    <script src="https://www.google.com/jsapi"></script>
     <script>
         // Load the Visualization API and the piechart package.
         google.load('visualization', '1.0', { 'packages': ['corechart'] });
