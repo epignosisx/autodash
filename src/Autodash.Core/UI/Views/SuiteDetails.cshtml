@@ -8,7 +8,7 @@
         <h1>Suite Details</h1>
     </div>
     <div class="col-md-6">
-        <div id="last-ten-chart" style="width:250px;height:150px;border:aqua"></div>
+        <div id="last-ten-chart" class="mt10" style="height:130px"></div>
     </div>
 </div>
 
@@ -17,6 +17,7 @@
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active"><a href="#details" aria-controls="details" role="tab" data-toggle="tab">Details</a></li>
+        <li role="presentation"><a href="#test-explorer" aria-controls="test explorer" role="tab" data-toggle="tab">Test Explorer</a></li>
         <li role="presentation"><a href="#suite-runs" aria-controls="suite runs" role="tab" data-toggle="tab">Suite Runs</a></li>
     </ul>
 
@@ -49,11 +50,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="RetryAttempts">Test Timeout</label>
-                        <div class="input-group">
-                            <input type="number" class="form-control" name="TestTimeout" value="@Model.Suite.Configuration.TestTimeout.TotalMinutes" required />
-                            <div class="input-group-addon">minutes</div>
-                        </div>
+                        <label for="RetryAttempts">Test Tags Query</label>
+                        <input type="text" class="form-control" name="TestTagsQuery" value="@Model.Suite.Configuration.TestTagsQuery" />
+                        <p class="help-block">Use <a href="#">test tag explorer</a> to help you compose a query.</p>
                     </div>
                 </fieldset>
 
@@ -78,44 +77,89 @@
 
             </form>
         </div>
+        <div role="tabpanel" class="tab-pane mt10" id="test-explorer">
+            <div class="clearfix">
+                <div class="pull-right form-inline">
+                    <label>Filter:</label> <input type="text" class="form-control" />
+                </div>
+            </div>
+            @foreach (var unitTestColl in Model.UnitTestCollections)
+            {
+                <h4>@unitTestColl.Runner.TestRunnerName</h4>
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Test Name</th>
+                            <th>Tags</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var test in unitTestColl.Tests)
+                        {
+                            <tr>
+                                <td>@test.TestName</td>
+                                <td>@string.Join(", ", test.TestTags)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
         <div role="tabpanel" class="tab-pane mt10" id="suite-runs">
-
+            
         </div>
     </div>
 
 </div>
 
 @section scripts{
-    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script>
-        $(function() {
-            $("#last-ten-chart").highcharts({
-                chart: {
-                    type: "column"
-                },
-                title: {
-                    text: ""
-                },
-                legend: {
-                    enabled: false
-                },
-                xAxis: {
-                    categories: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                },
-                yAxis: {
-                    min: 0,
-                    max: 240,
-                    title: {
-                        text: ''
+        // Load the Visualization API and the piechart package.
+        google.load('visualization', '1.0', { 'packages': ['corechart'] });
+
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+
+            var data = new google.visualization.DataTable();
+            data.addColumn('number', 'Run #');
+            data.addColumn('number', 'Took');
+            data.addColumn({ type: 'string', role: 'style' });
+
+            data.addRows([
+                [1, { v: 16, f: "16 mins" }, "color:green"],
+                [2, { v: 15, f: "15 mins" }, "color:red"],
+                [3, { v: 17, f: "17 mins" }, "color:red"],
+                [4, { v: 20, f: "20 mins" }, "color:green"],
+                [5, { v: 18, f: "18 mins" }, "color:green"],
+                [6, { v: 19, f: "19 mins" }, "color:red"],
+                [7, { v: 25, f: "25 mins" }, "color:green"],
+                [8, { v: 35, f: "35 mins" }, "color:green"],
+                [9, { v: 19, f: "19 mins" }, "color:red"],
+                [10, { v: 20, f: "20 mins" }, "color:green"]
+            ]);
+
+            var options = {
+                legend: { position: 'none' },
+                title: 'Last 10 suite runs',
+                hAxis: {
+                    textPosition: 'none',
+                    viewWindow: {
+                        min: 0.5,
+                        max: 10.5
                     }
                 },
-                series: [
-                    {
-                        name: 'Tokyo',
-                        data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6]
-                    }
-                ]
-            });
-        });
+                vAxis: {
+                    title: 'Time (mins)'
+                }
+            };
+
+            var chart = new google.visualization.ColumnChart(
+              document.getElementById('last-ten-chart'));
+
+            chart.draw(data, options);
+        }
     </script>
 }
