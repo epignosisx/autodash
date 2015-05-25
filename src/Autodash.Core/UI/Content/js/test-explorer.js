@@ -1,59 +1,31 @@
-﻿var TestExplorer = (function () {
-    function TestExplorer($filterBox, $tables) {
-        this.$filterBox = $filterBox;
-        this.$tables = $tables;
-        this.data = [];
-        this.init();
-    }
-    TestExplorer.prototype.init = function () {
-        this.processTables();
-        this.$filterBox.on("change", $.proxy(this.updateTable, this));
-    };
-    TestExplorer.prototype.processTables = function(){
-        var i = 0, l = this.$tables.length;
-        for(; i < l; i++){
-            this.processTable(this.$tables[i]);
-        }
-    };
-    TestExplorer.prototype.processTable = function (table) {
-        var i = 0, l = table.rows.length, $row;
+﻿function TestExplorer(suiteId) {
+    var self = this;
+    self.suiteId = suiteId;
+    self.unitTestCollections = ko.observableArray([]);
+    self.query = ko.observable();
+    self.error = ko.observable();
 
-        for (; i < l; i++) {
-            $row = $(table.rows[i]);
-            var cells = $row.children();
-            var text = $(cells[0]).text() + " " + $(cells[1]).text();
-            this.data.push({
-                text: text.toLowerCase(),
-                row: $row
-            });
-        }
+    self.submitQuery = function () {
+        self.fetch();
     };
-    TestExplorer.prototype.updateTable = function () {
-        var value = this.$filterBox.val(),
-            valueNormalized = value.toLowerCase(),
-            i = 0, l = this.data.length;
 
-        for (; i < l; i++) {
-            var row = this.data[i];
-            if (row.text.indexOf(valueNormalized) >= 0) {
-                row.row.removeClass("hidden");
-            }
-            else {
-                row.row.addClass("hidden");
-            }
-        }
+    self.fetch = function () {
+        $.getJSON("/suites/" + self.suiteId + "/test-explorer", { query: self.query() })
+            .success(self.handleResponse)
+            .fail(self.handleError);
     };
-    return TestExplorer;
-})();
 
-if (jQuery) {
-    var pluginName = "testExplorer";
-    $.fn[pluginName] = function (options) {
-        return this.each(function () {
-            if (!$.data(this, "plugin_" + pluginName)) {
-                $.data(this, "plugin_" + pluginName,
-                new TestExplorer($(this), options.tables));
-            }
-        });
+    self.handleResponse = function (data) {
+        self.unitTestCollections(data.unitTestCollections);
     };
+
+    self.handleError = function (xhr) {
+        self.error(xhr.responseJSON.error);
+    };
+
+    self.formatTestTags = function (testTags) {
+        return testTags.join(", ");
+    };
+
+    self.fetch();
 }

@@ -1,4 +1,5 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.SuiteDetailsVm>
+﻿@using Autodash.Core.UI.Models
+@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.SuiteDetailsVm>
 @{
     Layout = "_Layout.cshtml";
 }
@@ -15,7 +16,7 @@
 <div role="tabpanel">
 
     <!-- Nav tabs -->
-    <ul class="nav nav-tabs" role="tablist">
+    <ul class="nav nav-tabs" role="tablist" id="content-tabs">
         <li role="presentation" class="active"><a href="#details" aria-controls="details" role="tab" data-toggle="tab">Details</a></li>
         <li role="presentation"><a href="#test-explorer" aria-controls="test explorer" role="tab" data-toggle="tab">Test Explorer</a></li>
         <li role="presentation"><a href="#suite-runs" aria-controls="suite runs" role="tab" data-toggle="tab">Suite Runs</a></li>
@@ -25,7 +26,7 @@
     <div class="tab-content">
         <div role="tabpanel" class="tab-pane active mt10" id="details">
             <form method="post" enctype="multipart/form-data" action="/suites/update">
-                <input type="hidden" name="Id" value="@Model.Suite.Id" />
+                <input type="hidden" name="Id" id="Id" value="@Model.Suite.Id" />
                 <input type="hidden" name="ProjectId" value="@Model.Suite.ProjectId" />
                 
                 <div class="form-group">
@@ -52,7 +53,7 @@
                     <div class="form-group">
                         <label for="RetryAttempts">Test Tags Query</label>
                         <input type="text" class="form-control" name="TestTagsQuery" value="@Model.Suite.Configuration.TestTagsQuery" />
-                        <p class="help-block">Use <a href="#">test tag explorer</a> to help you compose a query.</p>
+                        <p class="help-block">Use <a href="#" id="js-test-tag-explorer">test tag explorer</a> to help you compose a query.</p>
                     </div>
                 </fieldset>
 
@@ -78,41 +79,40 @@
             </form>
         </div>
         <div role="tabpanel" class="tab-pane mt10" id="test-explorer">
-            <div class="clearfix">
-                <div class="pull-right form-inline">
-                    <label>Filter:</label> <input type="text" class="form-control" id="test-explorer-input" />
-                </div>
-            </div>
-            @foreach (var unitTestColl in Model.UnitTestCollections)
-            {
-                <h4>@unitTestColl.Runner.TestRunnerName</h4>
-                <table class="table table-condensed test-explorer-table">
-                    <thead>
-                        <tr>
-                            <th>Test Name</th>
-                            <th>Tags</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var test in unitTestColl.Tests)
-                        {
-                            <tr>
-                                <td>@test.TestName</td>
-                                <td>@string.Join(", ", test.TestTags)</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
+            @Html.Partial("_TestExplorer")
         </div>
         <div role="tabpanel" class="tab-pane mt10" id="suite-runs">
-            
+            <table class="table table-condensed suite-runs-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Passed / Failed</th>
+                        <th>Reports</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var run in Model.SuiteRuns)
+                    {
+                        <tr class="@(run.Result.Passed ? "bg-success" : "bg-danger")">
+                            <td>@run.ScheduledFor</td>
+                            <td>@run.DurationFriendly()</td>
+                            <td>@run.Status.ToString()</td>
+                            <td>@run.PassedFailed()</td>
+                            <td><a href="#">HTML</a> | <a href="#">Excel</a></td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
         </div>
     </div>
 
 </div>
 
 @section scripts{
+    <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
     <script src="/assets/js/test-explorer.js"></script>
     <script src="/assets/js/suite-details.js"></script>
     <script src="https://www.google.com/jsapi"></script>

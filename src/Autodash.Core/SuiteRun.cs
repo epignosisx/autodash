@@ -1,6 +1,7 @@
 using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Globalization;
 
 namespace Autodash.Core
 {
@@ -15,6 +16,14 @@ namespace Autodash.Core
         public string TestSuiteId { get; set; }
         public SuiteRunResult Result { get; set; }
         public TestSuite TestSuiteSnapshot { get; set; }
+
+        public TimeSpan Duration 
+        { 
+            get 
+            { 
+                return CompletedOn == DateTime.MinValue ? TimeSpan.MaxValue : (CompletedOn - StartedOn); 
+            }
+        }
 
         public static SuiteRun CreateSuiteRun(TestSuite suite, DateTime scheduledOn)
         {

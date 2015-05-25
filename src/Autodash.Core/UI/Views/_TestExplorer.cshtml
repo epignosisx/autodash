@@ -1,0 +1,29 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UnitTestCollection[]>
+@{
+    Layout = "";
+}
+
+<div id="test-explorer-container">
+    <div class="form-inline">
+        <label>Test Tags Query:</label> <input type="text" class="form-control" data-bind="value: query" />
+        <button class="btn btn-primary" data-bind="click: submitQuery">See Results</button>
+        <span class="text-danger" data-bind="text: error"></span>
+    </div>
+    <div data-bind="foreach: unitTestCollections">
+        <h4><span data-bind="text: assemblyName"></span> <small data-bind="text: testRunnerName"></small></h4>
+        <table class="table table-condensed">
+            <thead>
+                <tr>
+                    <th>Test Name</th>
+                    <th>Test Tags</th>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: tests">
+                <tr>
+                    <td data-bind="text: testName"></td>
+                    <td data-bind="text: $root.formatTestTags(testTags)"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

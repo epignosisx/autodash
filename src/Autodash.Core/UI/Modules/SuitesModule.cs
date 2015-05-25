@@ -124,16 +124,64 @@ namespace Autodash.Core.UI.Modules
                     return response;
                 }
 
-                var unitTestDiscoverer = container.Resolve<ITestSuiteUnitTestDiscoverer>();
-                UnitTestCollection[] unitTestCollections = unitTestDiscoverer.Discover(suite.Configuration.TestAssembliesPath).ToArray();
+                var suiteRuns = await GetSuiteRunsBySuiteId(database, parameters.id);
 
                 var vm = new SuiteDetailsVm
                 {
                     Suite = suite,
-                    UnitTestCollections = unitTestCollections
+                    SuiteRuns = suiteRuns
                 };
 
                 return View["SuiteDetails", vm];
+            };
+
+            Get["/suites/{id}/test-explorer", true] = async (parameters, ct) =>
+            {
+                var database = container.Resolve<IMongoDatabase>();
+                TestSuite suite = await GetSuiteById(database, parameters.id);
+                string query = Request.Query.query;
+                if (suite == null)
+                {
+                    return Response.AsJson(new { Error = "Suite not found" }, HttpStatusCode.NotFound);
+                }
+
+                var unitTestDiscoverer = container.Resolve<ITestSuiteUnitTestDiscoverer>();
+                UnitTestCollection[] unitTestCollections = unitTestDiscoverer.Discover(suite.Configuration.TestAssembliesPath).ToArray();
+
+                var vm = new TestExplorerVm
+                {
+                    UnitTestCollections = new List<UnitTestCollectionVm>(unitTestCollections.Length)
+                };
+
+                foreach (var coll in unitTestCollections)
+                {
+                    UnitTestCollectionVm collVm = new UnitTestCollectionVm
+                    {
+                        AssemblyName = coll.AssemblyName.Split(',')[0],
+                        TestRunnerName = coll.Runner.TestRunnerName,
+                        Tests = new List<UnitTestInfoVm>(coll.Tests.Length)
+                    };
+
+                    foreach (var test in coll.Tests)
+                    {
+                        try
+                        {
+                            if (string.IsNullOrEmpty(query) || UnitTestTagSelector.Evaluate(query, test.TestTags))
+                            {
+                                collVm.Tests.Add(new UnitTestInfoVm(test.TestName, test.TestTags));
+                            }
+                        }
+                        catch
+                        {
+                            return Response.AsJson(new { Error = "Unable to parse query" }, HttpStatusCode.BadRequest);
+                        }
+                    }
+
+                    if (collVm.Tests.Count > 0)
+                        vm.UnitTestCollections.Add(collVm);
+                }
+
+                return Response.AsJson(vm);
             };
         }
 
@@ -144,6 +192,21 @@ namespace Autodash.Core.UI.Modules
             await results.MoveNextAsync();
             TestSuite suite = results.Current.FirstOrDefault();
             return suite;
+        }
+
+        private static async Task<List<SuiteRun>> GetSuiteRunsBySuiteId(IMongoDatabase database, string suiteId)
+        {
+            var query = Builders<SuiteRun>.Filter.Eq(n => n.TestSuiteId, suiteId);
+            var results = await database.GetCollection<SuiteRun>("SuiteRun").FindAsync(query);
+
+            List<SuiteRun> runs = new List<SuiteRun>();
+            while(await results.MoveNextAsync())
+            {
+                runs.AddRange(results.Current.ToList());
+            }
+
+            runs = runs.OrderByDescending(n => n.ScheduledFor).ToList();
+            return runs;
         }
     }
 }

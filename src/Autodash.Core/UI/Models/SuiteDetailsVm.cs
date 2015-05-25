@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace Autodash.Core.UI.Models
@@ -6,7 +8,7 @@ namespace Autodash.Core.UI.Models
     public class SuiteDetailsVm
     {
         public TestSuite Suite { get; set; }
-        public UnitTestCollection[] UnitTestCollections { get; set; }
+        public List<SuiteRun> SuiteRuns { get; set; }
 
         public bool IsBrowserSelected(string browser)
         {
@@ -31,6 +33,22 @@ namespace Autodash.Core.UI.Models
                     return "";
                 return Suite.Schedule.Interval.TotalHours.ToString(CultureInfo.InvariantCulture);
             }
+        }
+    }
+
+    public static class SuiteRunExtensions
+    {
+        public static string DurationFriendly(this SuiteRun run)
+        {
+            var duration = run.Duration;
+            return duration == TimeSpan.MaxValue ? "" : duration.TotalMinutes.ToString(CultureInfo.InvariantCulture);
+        }
+
+        public static string PassedFailed(this SuiteRun run)
+        {
+            if (run.Result == null)
+                return "";
+            return string.Format("{0} / {1}", run.Result.PassedTotal, run.Result.FailedTotal);
         }
     }
 }
