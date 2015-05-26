@@ -25,12 +25,13 @@ namespace Autodash.Core
             _nextRunTimer = new Timer(NextSuiteRunCheck);
         }
 
-        public void Schedule(TestSuite suite)
+        public async Task Schedule(TestSuite suite)
         {
             if (suite == null)
                 throw new ArgumentNullException("suite");
 
             var run = SuiteRun.CreateSuiteRun(suite, DateTime.UtcNow);
+            await _repository.AddSuiteRunAsync(run);
             _onDemandQueue.Enqueue(run);
         }
 
@@ -121,11 +122,11 @@ namespace Autodash.Core
         Task UpdateSuiteRunAsync(SuiteRun run);
     }
 
-    public class SuiteRunSchedulerRepository : ISuiteRunSchedulerRepository
+    public class DefaultSuiteRunSchedulerRepository : ISuiteRunSchedulerRepository
     {
         private readonly IMongoDatabase _db;
 
-        public SuiteRunSchedulerRepository(IMongoDatabase database)
+        public DefaultSuiteRunSchedulerRepository(IMongoDatabase database)
         {
             _db = database;
         }

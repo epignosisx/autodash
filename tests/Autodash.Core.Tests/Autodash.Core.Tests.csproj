@@ -89,6 +89,10 @@
       <Project>{2382a2c9-64c3-43d8-b947-ad46b11b925b}</Project>
       <Name>Autodash.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Autodash.MsTest.ValidTests\Autodash.MsTest.ValidTests.csproj">
+      <Project>{a914980e-d01d-44d3-9205-5c64351a8b4c}</Project>
+      <Name>Autodash.MsTest.ValidTests</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

@@ -3,11 +3,7 @@ using Nancy;
 using Nancy.Conventions;
 using Nancy.TinyIoc;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Autodash.Core.UI
 {
@@ -21,8 +17,17 @@ namespace Autodash.Core.UI
             existingContainer.Register<ITestAssembliesRepository>(new FileSystemTestAssembliesRepository(repoPath));
             existingContainer.Register<ITestSuiteUnitTestDiscoverer, DefaultTestSuiteUnitTestDiscoverer>().AsSingleton();
 
+            existingContainer.Register<ISuiteRunSchedulerRepository, DefaultSuiteRunSchedulerRepository>().AsSingleton();
+            existingContainer.Register<ISuiteRunner, DefaultSuiteRunner>().AsSingleton();
+            existingContainer.Register<ISuiteRunScheduler, DefaultSuiteRunScheduler>().AsSingleton();
+            
+            existingContainer.Register<ISuiteRunScheduler, DefaultSuiteRunScheduler>().AsSingleton();
+
             existingContainer.Register<CreateProjectCommand>();
             existingContainer.Register<CreateSuiteCommand>();
+
+            var scheduler = existingContainer.Resolve<ISuiteRunScheduler>();
+            scheduler.Start();
         }
 
         protected override void ApplicationStartup(TinyIoCContainer container, Nancy.Bootstrapper.IPipelines pipelines)

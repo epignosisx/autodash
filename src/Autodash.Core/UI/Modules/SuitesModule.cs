@@ -183,6 +183,15 @@ namespace Autodash.Core.UI.Modules
 
                 return Response.AsJson(vm);
             };
+
+            Post["/suites/{id}/schedule", true] = async (parameters, ct) =>
+            {
+                var database = container.Resolve<IMongoDatabase>();
+                var scheduler = container.Resolve<ISuiteRunScheduler>();
+                TestSuite suite = await GetSuiteById(database, parameters.id);
+                await scheduler.Schedule(suite);
+                return Response.AsJson(new {Status = "Scheduled"});
+            };
         }
 
         private static async Task<TestSuite> GetSuiteById(IMongoDatabase database, string id)

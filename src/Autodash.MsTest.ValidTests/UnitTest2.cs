@@ -15,5 +15,11 @@ namespace Autodash.MsTest.ValidTests
         {
             Assert.IsTrue(true);
         }
+
+        [TestMethod, Ignore]
+        public void IgnoredTest()
+        {
+            Assert.IsTrue(true);
+        }
     }
 }

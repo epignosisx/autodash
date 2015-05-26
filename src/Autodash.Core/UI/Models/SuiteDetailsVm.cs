@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Web.Management;
 
 namespace Autodash.Core.UI.Models
 {
@@ -21,7 +22,8 @@ namespace Autodash.Core.UI.Models
             {
                 if (Suite.Schedule == null)
                     return "";
-                return Suite.Schedule.Time.Hours + ":" + Suite.Schedule.Time.Minutes;
+                return Suite.Schedule.Time.Hours.ToString("00", CultureInfo.InvariantCulture) + ":" + 
+                    Suite.Schedule.Time.Minutes.ToString("00", CultureInfo.InvariantCulture);
             }
         }
 
@@ -49,6 +51,28 @@ namespace Autodash.Core.UI.Models
             if (run.Result == null)
                 return "";
             return string.Format("{0} / {1}", run.Result.PassedTotal, run.Result.FailedTotal);
+        }
+
+        public static string StatusColored(this SuiteRun run)
+        {
+            if (run.Status == SuiteRunStatus.Complete)
+            {
+                if(run.Result.Passed)
+                    return "<span class='label label-success'>Complete</span>";
+                return "<span class='label label-danger'>Complete</span>";
+            }
+
+            if (run.Status == SuiteRunStatus.Scheduled)
+            {
+                return "<span class='label label-info'>Scheduled</span>";
+            }
+
+            if (run.Status == SuiteRunStatus.Running)
+            {
+                return "<span class='label label-primary'>Running</span>";
+            }
+
+            return "";
         }
     }
 }

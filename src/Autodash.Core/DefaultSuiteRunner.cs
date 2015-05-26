@@ -43,7 +43,7 @@ namespace Autodash.Core
                     bool shouldRun = false;
                     try
                     {
-                        shouldRun = UnitTestTagSelector.Evaluate(testTagsQuery, test.TestTags);
+                        shouldRun = string.IsNullOrEmpty(testTagsQuery) || UnitTestTagSelector.Evaluate(testTagsQuery, test.TestTags);
                     }
                     catch (Exception ex)
                     {

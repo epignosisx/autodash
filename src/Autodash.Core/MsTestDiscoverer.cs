@@ -9,6 +9,7 @@ namespace Autodash.Core
         private const string TestClassFullName = "Microsoft.VisualStudio.TestTools.UnitTesting.TestClassAttribute";
         private const string TestMethodFullName = "Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute";
         private const string TestCategoryFullName = "Microsoft.VisualStudio.TestTools.UnitTesting.TestCategoryAttribute";
+        private const string IgnoreFullName = "Microsoft.VisualStudio.TestTools.UnitTesting.IgnoreAttribute";
 
         private readonly MsTestRunner _runner = new MsTestRunner();
 
@@ -24,7 +25,7 @@ namespace Autodash.Core
                 { 
                     foreach(var method in type.Methods)
                     {
-                        if(method.IsPublic && HasCustomAttribute(method, TestMethodFullName))
+                        if(method.IsPublic && HasCustomAttribute(method, TestMethodFullName) && !HasCustomAttribute(method, IgnoreFullName))
                         {
                             string methodName = method.DeclaringType.FullName + "." + method.Name;
                             string[] testCats = GetTestCategories(method).ToArray();
