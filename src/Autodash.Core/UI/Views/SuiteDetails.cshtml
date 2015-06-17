@@ -83,30 +83,7 @@
             @Html.Partial("_TestExplorer")
         </div>
         <div role="tabpanel" class="tab-pane mt10" id="suite-runs">
-            <table class="table table-condensed suite-runs-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Duration (mins)</th>
-                        <th>Status</th>
-                        <th>Passed / Failed</th>
-                        <th>Reports</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var run in Model.SuiteRuns)
-                    {
-                        <tr>
-                            <td>@run.ScheduledFor</td>
-                            <td>@run.DurationFriendly()</td>
-                            <td>@Html.Raw(run.StatusColored())</td>
-                            <td>@run.PassedFailed()</td>
-                            <td><a href="#">HTML</a> | <a href="#">Excel</a></td>
-                        </tr>
-                    }
-                </tbody>
-
-            </table>
+            @Html.Partial("_SuiteRunHistory", Model.SuiteRuns)
         </div>
     </div>
 

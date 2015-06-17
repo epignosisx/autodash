@@ -4,6 +4,7 @@ namespace Autodash.Core
     public interface ISuiteRunScheduler
     {
         Task Start();
-        Task Schedule(TestSuite suite);
+        Task<SuiteRun> Schedule(TestSuite suite);
+        SuiteRun GetRunningSuite();
     }
 }

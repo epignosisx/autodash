@@ -21,8 +21,13 @@ namespace Autodash.Core
         { 
             get 
             { 
-                return CompletedOn == DateTime.MinValue ? TimeSpan.MaxValue : (CompletedOn - StartedOn); 
+                return CompletedOn == DateTime.MinValue ? TimeSpan.Zero : (CompletedOn - StartedOn); 
             }
+        }
+
+        public int DurationMinutes 
+        { 
+            get { return (int)Duration.TotalMinutes; } 
         }
 
         public static SuiteRun CreateSuiteRun(TestSuite suite, DateTime scheduledOn)
@@ -30,7 +35,7 @@ namespace Autodash.Core
             var run = new SuiteRun
             {
                 ScheduledFor = scheduledOn,
-                Status = SuiteRunStatus.Running,
+                Status = SuiteRunStatus.Scheduled,
                 TestSuiteId = suite.Id,
                 TestSuiteSnapshot = suite
             };

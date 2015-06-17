@@ -16,7 +16,8 @@ namespace Autodash.Core
         private readonly ConcurrentQueue<SuiteRun> _onDemandQueue = new ConcurrentQueue<SuiteRun>();
         private readonly List<TestSuite> _scheduledSuites = new List<TestSuite>();
         private readonly Timer _nextRunTimer;
-        private Task<SuiteRun> _runningSuite;
+        private Task<SuiteRun> _runningSuiteTask;
+        private SuiteRun _runningSuite;
 
         public DefaultSuiteRunScheduler(ISuiteRunSchedulerRepository repository, ISuiteRunner suiteRunner)
         {
@@ -25,7 +26,7 @@ namespace Autodash.Core
             _nextRunTimer = new Timer(NextSuiteRunCheck);
         }
 
-        public async Task Schedule(TestSuite suite)
+        public async Task<SuiteRun> Schedule(TestSuite suite)
         {
             if (suite == null)
                 throw new ArgumentNullException("suite");
@@ -33,6 +34,7 @@ namespace Autodash.Core
             var run = SuiteRun.CreateSuiteRun(suite, DateTime.UtcNow);
             await _repository.AddSuiteRunAsync(run);
             _onDemandQueue.Enqueue(run);
+            return run;
         }
 
         public async Task Start()
@@ -54,20 +56,19 @@ namespace Autodash.Core
 
         private async Task StartNextRun()
         {
-            if (_runningSuite != null && !_runningSuite.IsCompleted)
+            if (_runningSuiteTask != null && !_runningSuiteTask.IsCompleted)
                 return;
 
             SuiteRun onDemandRun;
             if (_onDemandQueue.TryDequeue(out onDemandRun))
             {
                 onDemandRun.StartedOn = DateTime.UtcNow;
-                _runningSuite = _suiteRunner.Run(onDemandRun);
-                await _runningSuite.ContinueWith(t => SuiteRunCompleted(t.Result));
+                RunSuite(onDemandRun);
                 return;
             }
             
             DateTime now = DateTime.UtcNow;
-            DateTime lastRunDate = _runningSuite == null ? DateTime.UtcNow : _runningSuite.Result.StartedOn;
+            DateTime lastRunDate = _runningSuiteTask == null ? DateTime.UtcNow : _runningSuiteTask.Result.StartedOn;
             TestSuite nextSuite = null;
             DateTime nextRunDate = DateTime.MaxValue;
             var suites = _scheduledSuites.ToList();
@@ -87,16 +88,23 @@ namespace Autodash.Core
                 run.StartedOn = now;
 
                 await _repository.AddSuiteRunAsync(run);
-
-                _runningSuite = _suiteRunner.Run(run);
-                await _runningSuite.ContinueWith(t => SuiteRunCompleted(t.Result));
+                RunSuite(run);
             }
+        }
+
+        private void RunSuite(SuiteRun suiteRun)
+        {
+            suiteRun.Status = SuiteRunStatus.Running;
+            _runningSuite = suiteRun;
+            _runningSuiteTask = _suiteRunner.Run(suiteRun);
+            _runningSuiteTask.ContinueWith(t => SuiteRunCompleted(t.Result));
         }
 
         private Task SuiteRunCompleted(SuiteRun run)
         {
             run.CompletedOn = DateTime.UtcNow;
             run.Status = SuiteRunStatus.Complete;
+            _runningSuite = null;
             return _repository.UpdateSuiteRunAsync(run);
         }
 
@@ -110,6 +118,11 @@ namespace Autodash.Core
             {
                 //TODO: log it
             }
+        }
+
+        public SuiteRun GetRunningSuite()
+        {
+            return _runningSuite;
         }
     }
 

@@ -1,0 +1,31 @@
+﻿@using System.Linq;
+@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<List<Autodash.Core.SuiteRun>>
+@{
+    Layout = "";
+}
+
+<input type="hidden" id="is-suite-incomplete" value="@Model.Any(n => n.Status != Autodash.Core.SuiteRunStatus.Complete)" />
+<table class="table table-condensed suite-runs-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Duration (mins)</th>
+            <th>Status</th>
+            <th>Passed / Failed</th>
+            <th>Reports</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var run in Model)
+        {
+            <tr>
+                <td>@run.ScheduledFor</td>
+                <td>@run.DurationFriendly()</td>
+                <td>@Html.Raw(run.StatusColored())</td>
+                <td>@run.PassedFailed()</td>
+                <td><a href="#">HTML</a> | <a href="#">Excel</a></td>
+            </tr>
+        }
+    </tbody>
+
+</table>

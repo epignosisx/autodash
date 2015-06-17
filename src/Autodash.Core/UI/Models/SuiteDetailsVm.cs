@@ -43,7 +43,7 @@ namespace Autodash.Core.UI.Models
         public static string DurationFriendly(this SuiteRun run)
         {
             var duration = run.Duration;
-            return duration == TimeSpan.MaxValue ? "" : duration.TotalMinutes.ToString(CultureInfo.InvariantCulture);
+            return duration == TimeSpan.MaxValue ? "" : duration.TotalMinutes.ToString("0.00", CultureInfo.InvariantCulture);
         }
 
         public static string PassedFailed(this SuiteRun run)
