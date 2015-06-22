@@ -47,20 +47,23 @@
 
     function updateCharts() {
         $.getJSON("/suites/" + suiteId + "/suite-run-history?format=json", function (data) {
-            var last10runs = data.SuiteRuns.slice(0, 10);
-            drawChart(mapRunsForLast10Runs(last10runs));
+            var last10runs = data.suiteRuns.slice(0, 10);
+            var runs = mapRunsForLast10Runs(last10runs);
+            drawChart(runs);
         });
     }
 
     function mapRunsForLast10Runs(suiteRuns){
-        var i = 0, l = suiteRuns, run = null, data = [];
+        var i = 0, l = suiteRuns.length, run = null, data = [];
 
         for (; i < l; i++) {
             run = suiteRuns[i];
             data.push([
-                i + 1, { v: run.DurationMinutes, f: run.DurationMinutes + " mins"}, "color:" + (run.Result.Passed ? "green" : "red")
+                i + 1, { v: run.durationMinutes, f: run.durationMinutes + " mins"}, "color:" + (run.result.passed ? "green" : "red")
             ]);
         }
+
+        return data;
     }
 
     function drawChart(runs) {
@@ -70,18 +73,7 @@
         data.addColumn('number', 'Took');
         data.addColumn({ type: 'string', role: 'style' });
 
-        data.addRows([
-            [1, { v: 16, f: "16 mins" }, "color:green"],
-            [2, { v: 15, f: "15 mins" }, "color:red"],
-            [3, { v: 17, f: "17 mins" }, "color:red"],
-            [4, { v: 20, f: "20 mins" }, "color:green"],
-            [5, { v: 18, f: "18 mins" }, "color:green"],
-            [6, { v: 19, f: "19 mins" }, "color:red"],
-            [7, { v: 25, f: "25 mins" }, "color:green"],
-            [8, { v: 35, f: "35 mins" }, "color:green"],
-            [9, { v: 19, f: "19 mins" }, "color:red"],
-            [10, { v: 20, f: "20 mins" }, "color:green"]
-        ]);
+        data.addRows(runs);
 
         var options = {
             legend: { position: 'none' },
@@ -94,7 +86,11 @@
                 }
             },
             vAxis: {
-                title: 'Time (mins)'
+                title: 'Time (mins)',
+                minValue: 0,
+                viewWindow: {
+                    min: 0
+                }
             }
         };
 
@@ -112,5 +108,5 @@
     google.load('visualization', '1.0', { 'packages': ['corechart'] });
 
     // Set a callback to run when the Google Visualization API is loaded.
-    google.setOnLoadCallback(drawChart);
+    google.setOnLoadCallback(updateCharts);
 });

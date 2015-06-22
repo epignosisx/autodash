@@ -188,7 +188,7 @@ namespace Autodash.Core.UI.Modules
             {
                 var database = container.Resolve<IMongoDatabase>();
                 var suiteRuns = await GetSuiteRunsBySuiteId(database, parameters.id);
-                if (parameters.format == "json")
+                if (Request.Query.format == "json")
                     return Response.AsJson(new { SuiteRuns = suiteRuns });
 
                 return View["_SuiteRunHistory", suiteRuns];
