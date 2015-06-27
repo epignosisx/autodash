@@ -1,4 +1,6 @@
 ﻿using Autodash.Core.UI.Models;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using Nancy;
 using System;
 using System.Collections.Generic;
@@ -15,8 +17,38 @@ namespace Autodash.Core.UI.Modules
     {
         public ProjectsModule(TinyIoCContainer container) : base("/projects")
         {
-            Get["/"] = _ => {
-                return View["Projects"];
+            Get["/", true] = async (x, ct) => {
+                var database = container.Resolve<IMongoDatabase>();
+                var filter = new BsonDocument();//get all
+                var results = await database.GetCollection<Project>("Project").FindAsync(filter);
+
+                List<Project> projects = new List<Project>();
+                while (await results.MoveNextAsync())
+                {
+                    projects.AddRange(results.Current.ToList());
+                }
+
+                var vm = new ProjectsVm();
+                vm.Projects = projects;
+
+                return View["Projects", vm];
+            };
+
+            Get["/{id}", true] = async (x, ct) =>
+            {
+                string projectId = x.id;
+                var database = container.Resolve<IMongoDatabase>();
+
+                var project = await database.GetProjectByIdAsync(projectId);
+                var suites = await database.GetSuitesByProjectIdAsync(projectId);
+                var suiteRuns = await database.GetSuiteRunsBySuiteIdsAsync(suites.Select(n => n.Id), take: 10);
+
+                ProjectDetailsVm vm = new ProjectDetailsVm();
+                vm.Project = project;
+                vm.Suites = suites;
+                vm.LastSuiteRuns = suiteRuns;
+
+                return View["ProjectDetails", vm];
             };
 
             Get["/create"] = _ => {

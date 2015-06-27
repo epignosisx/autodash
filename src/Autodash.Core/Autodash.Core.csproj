@@ -77,6 +77,7 @@
   <ItemGroup>
     <Compile Include="DefaultTestSuiteUnitTestDiscoverer.cs" />
     <Compile Include="ITestSuiteUnitTestDiscoverer.cs" />
+    <Compile Include="MongoDatabaseExtensions.cs" />
     <Compile Include="MsTestExecutionReport.cs" />
     <Compile Include="DefaultSuiteRunner.cs" />
     <Compile Include="Dynamic.cs" />
@@ -110,6 +111,7 @@
     <Compile Include="UI\Models\ProjectsVm.cs" />
     <Compile Include="UI\Models\SuiteDetailsVm.cs" />
     <Compile Include="UI\Models\TestExplorerVm.cs" />
+    <Compile Include="UI\Models\ProjectDetailsVm.cs" />
     <Compile Include="UI\Modules\ProjectsModule.cs" />
     <Compile Include="UI\Modules\SuitesModule.cs" />
     <Compile Include="UI\RazorConfig.cs" />
@@ -149,6 +151,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="UI\Views\_SuiteRunHistory.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\Views\ProjectDetails.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

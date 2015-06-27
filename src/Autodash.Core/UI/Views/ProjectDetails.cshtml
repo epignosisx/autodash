@@ -1,0 +1,10 @@
+﻿@using Autodash.Core.UI.Models
+@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.ProjectDetailsVm>
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<div class="row">
+    <h1>@Model.Project.Name</h1>
+    <p>@Model.Project.Description</p>
+</div>

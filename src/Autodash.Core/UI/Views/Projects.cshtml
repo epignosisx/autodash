@@ -1,4 +1,5 @@
-﻿@{
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.ProjectsVm>
+@{
     Layout = "_Layout.cshtml";
 }
 
@@ -9,39 +10,22 @@
 </div>
 
 <div class="row mt10">
-
-    <div class="col-sm-4">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title" id="panel-title">Panel title</h3>
-            </div>
-            <div class="panel-body">
-                Panel content
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-4">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title" id="panel-title">Panel title</h3>
-            </div>
-            <div class="panel-body">
-                Panel content
+    
+    @{ int idx = 0;}
+    @foreach (var proj in Model.Projects)
+    {
+        <div class="col-sm-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title" id="panel-title">
+                        <a href="/projects/@proj.Id">@proj.Name &raquo;</a>
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    @proj.Description
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="col-sm-4">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title" id="panel-title">Panel title</h3>
-            </div>
-            <div class="panel-body">
-                Panel content
-            </div>
-        </div>
-    </div>
-
-
+    }
 
 </div>

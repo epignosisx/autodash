@@ -84,7 +84,7 @@ namespace Autodash.Core.UI.Modules
             {
                 var vm = this.Bind<EditSuiteVm>();
                 var database = container.Resolve<IMongoDatabase>();
-                var existingSuite = await GetSuiteById(database, vm.Id);
+                var existingSuite = await database.GetSuiteByIdAsync(vm.Id);
 
                 var suite = new TestSuite
                 {
@@ -115,7 +115,8 @@ namespace Autodash.Core.UI.Modules
             Get["/suites/{id}", true] = async (parameters, ct) =>
             {
                 var database = container.Resolve<IMongoDatabase>();
-                TestSuite suite = await GetSuiteById(database, parameters.id);
+                string id = parameters.id;
+                TestSuite suite = await database.GetSuiteByIdAsync(id);
 
                 if (suite == null)
                 {
@@ -124,7 +125,7 @@ namespace Autodash.Core.UI.Modules
                     return response;
                 }
 
-                var suiteRuns = await GetSuiteRunsBySuiteId(database, parameters.id);
+                var suiteRuns = await database.GetSuiteRunsBySuiteIdAsync(id);
 
                 var vm = new SuiteDetailsVm
                 {
@@ -137,8 +138,9 @@ namespace Autodash.Core.UI.Modules
 
             Get["/suites/{id}/test-explorer", true] = async (parameters, ct) =>
             {
+                string id = parameters.id;
                 var database = container.Resolve<IMongoDatabase>();
-                TestSuite suite = await GetSuiteById(database, parameters.id);
+                TestSuite suite = await database.GetSuiteByIdAsync(id);
                 string query = Request.Query.query;
                 if (suite == null)
                 {
@@ -187,7 +189,8 @@ namespace Autodash.Core.UI.Modules
             Get["/suites/{id}/suite-run-history", true] = async (parameters, ct) =>
             {
                 var database = container.Resolve<IMongoDatabase>();
-                var suiteRuns = await GetSuiteRunsBySuiteId(database, parameters.id);
+                string id = parameters.id;
+                var suiteRuns = await database.GetSuiteRunsBySuiteIdAsync(id);
                 if (Request.Query.format == "json")
                     return Response.AsJson(new { SuiteRuns = suiteRuns });
 
@@ -198,34 +201,12 @@ namespace Autodash.Core.UI.Modules
             {
                 var database = container.Resolve<IMongoDatabase>();
                 var scheduler = container.Resolve<ISuiteRunScheduler>();
-                TestSuite suite = await GetSuiteById(database, parameters.id);
+                string id = parameters.id;
+                TestSuite suite = await database.GetSuiteByIdAsync(id);
                 SuiteRun run = await scheduler.Schedule(suite);
                 return Response.AsJson(new { SuiteRunId = run.Id });
             };
         }
 
-        private static async Task<TestSuite> GetSuiteById(IMongoDatabase database, string id)
-        {
-            var queryById = Builders<TestSuite>.Filter.Eq(n => n.Id, id);
-            var results = await database.GetCollection<TestSuite>("TestSuite").FindAsync(queryById);
-            await results.MoveNextAsync();
-            TestSuite suite = results.Current.FirstOrDefault();
-            return suite;
-        }
-
-        private static async Task<List<SuiteRun>> GetSuiteRunsBySuiteId(IMongoDatabase database, string suiteId)
-        {
-            var query = Builders<SuiteRun>.Filter.Eq(n => n.TestSuiteId, suiteId);
-            var results = await database.GetCollection<SuiteRun>("SuiteRun").FindAsync(query);
-
-            List<SuiteRun> runs = new List<SuiteRun>();
-            while(await results.MoveNextAsync())
-            {
-                runs.AddRange(results.Current.ToList());
-            }
-
-            runs = runs.OrderByDescending(n => n.ScheduledFor).ToList();
-            return runs;
-        }
     }
 }
