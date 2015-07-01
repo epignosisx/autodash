@@ -1,0 +1,161 @@
+﻿@using System
+@using System.Linq
+@using Autodash.Core.UI.Models
+@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.SuiteRunDetailsVm>
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<div class="row">
+    <h1>@Model.Project.Name</h1>
+    <p><strong>Suite Name:</strong> @Model.SuiteRun.TestSuiteSnapshot.Name <strong>Started On:</strong> @Model.SuiteRun.StartedOn <strong>Duration:</strong> @Model.SuiteRun.Duration.ToString(@"hh\:mm\:ss")</p>
+</div>
+
+<div class="row">
+    <div id="passed-failed-pie" style="float:left;width: 500px; height: 200px;"></div>
+    <div id="passed-failed-columns" style="float:left;width: 350px; height: 200px;"></div>
+</div>
+
+<div class="row">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Test Name</th>
+                @foreach (var browser in Model.SuiteRun.TestSuiteSnapshot.Configuration.Browsers.OrderBy(n => n))
+                {
+                    <th class="browser-result">@browser</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var test in Model.SuiteRun.Result.CollectionResults.SelectMany(n => n.UnitTestResults))
+            {
+                <tr>
+                    <td>@test.TestName</td>
+                    @foreach (var browser in test.BrowserResults.GroupBy(n => n.Browser).OrderBy(n => n.Key))
+                    {
+                        <td class="browser-result @(test[browser.Key].Passed ? "bg-success" : "bg-danger")">
+                            <span>@test[browser.Key].Duration.ToString("mm\\:ss")</span>
+                            <div class="hidden details">
+                                <table class="table table-condensed">
+                                    <tbody>
+                                        <tr>
+                                            <th>Duration</th>
+                                            <td>@test[browser.Key].Duration.ToString("mm\\:ss")</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Start Time</th>
+                                            <td>@test[browser.Key].StartTime.ToLongTimeString()</td>
+                                        </tr>
+                                        <tr>
+                                            <th>End Time</th>
+                                            <td>@test[browser.Key].EndTime.ToLongTimeString()</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <h4>Standard Output <small><a href="#output" class="glyphicon glyphicon-copy" title="Copy to clipboard"></a></small></h4>
+                                <pre id="output" style="max-height: 250px">@test[browser.Key].Stdout</pre>
+                                <h4>Standard Error <small><a href="#error" class="glyphicon glyphicon-copy" title="Copy to clipboard"></a></small></h4>
+                                <pre id="error" style="max-height: 250px">@test[browser.Key].Stderr</pre>
+                            </div>
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="test-details">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Test Log</h4>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                <textarea id="copy-text" class="hidden"></textarea>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+@section scripts{
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script>
+        google.load("visualization", "1", { packages: ["corechart"] });
+        google.setOnLoadCallback(drawCharts);
+        function drawCharts() {
+            drawPassedFailedPie();
+            drawPassedFailedCols();
+        }
+
+        function drawPassedFailedCols() {
+            var data = google.visualization.arrayToDataTable([
+              ['Passed/Failed', 'Total', { role: 'style' }, { role: 'annotation' }],
+              ['Passed', @Model.SuiteRun.Result.PassedTotal, "#90ED69", @Model.SuiteRun.Result.PassedTotal],
+              ['Failed', @Model.SuiteRun.Result.FailedTotal, "#F76666", @Model.SuiteRun.Result.FailedTotal]
+            ]);
+
+            var options = {
+                title: 'Passed/Failed Totals',
+                legend: 'none',
+                vAxis: {maxValue: @Math.Max(Model.SuiteRun.Result.PassedTotal, Model.SuiteRun.Result.FailedTotal), minValue: 0}
+            };
+
+            var chart = new google.visualization.ColumnChart(document.getElementById('passed-failed-columns'));
+
+            chart.draw(data, options);
+        }
+
+        function drawPassedFailedPie() {
+            var data = google.visualization.arrayToDataTable([
+              ['Passed/Failed', 'Total'],
+              ['Passed', @Model.SuiteRun.Result.PassedTotal],
+          ['Failed', @Model.SuiteRun.Result.FailedTotal]
+        ]);
+
+        var options = {
+            title: 'Passed/Failed %',
+            colors: ['#90ED69', '#F76666']
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('passed-failed-pie'));
+
+        chart.draw(data, options);
+    }
+    </script>
+    <script>
+        $(function() {
+            var $modal = $("#test-details");
+            $(".browser-result").on("click", function(e) {
+                $modal.find(".modal-body").html($(this).find(".details").html());
+                $modal.modal("show");
+            });
+
+            $(document).on("click", ".glyphicon-copy", function(e) {
+                e.preventDefault();
+                var $this = $(this),
+                    id = $this.attr("href"),
+                    content = $(id).text(),
+                    txtarea = document.getElementById("copy-text"),
+                    success = false;
+
+                txtarea.value = content;
+                txtarea.className = "";
+                txtarea.select();
+                try {
+                    success = document.execCommand("copy");
+                } catch (e) { } 
+                txtarea.className = "hidden";
+                if (!success) {
+                    alert("Your browser does not suppor copy to clipboard natively.");
+                }
+            });
+        });
+    </script>
+}

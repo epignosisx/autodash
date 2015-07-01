@@ -110,9 +110,11 @@
     <Compile Include="UI\Models\EditSuiteVm.cs" />
     <Compile Include="UI\Models\ProjectsVm.cs" />
     <Compile Include="UI\Models\SuiteDetailsVm.cs" />
+    <Compile Include="UI\Models\SuiteRunDetailsVm.cs" />
     <Compile Include="UI\Models\TestExplorerVm.cs" />
     <Compile Include="UI\Models\ProjectDetailsVm.cs" />
     <Compile Include="UI\Modules\ProjectsModule.cs" />
+    <Compile Include="UI\Modules\RunsModule.cs" />
     <Compile Include="UI\Modules\SuitesModule.cs" />
     <Compile Include="UI\RazorConfig.cs" />
     <Compile Include="UnitTestCollection.cs" />
@@ -154,6 +156,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="UI\Views\ProjectDetails.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\Views\SuiteRunDetails.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

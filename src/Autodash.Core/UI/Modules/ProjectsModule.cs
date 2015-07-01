@@ -15,7 +15,7 @@ namespace Autodash.Core.UI.Modules
 {
     public class ProjectsModule : NancyModule
     {
-        public ProjectsModule(TinyIoCContainer container) : base("/projects")
+        public ProjectsModule(TinyIoCContainer container)
         {
             Get["/", true] = async (x, ct) => {
                 var database = container.Resolve<IMongoDatabase>();
@@ -34,29 +34,40 @@ namespace Autodash.Core.UI.Modules
                 return View["Projects", vm];
             };
 
-            Get["/{id}", true] = async (x, ct) =>
+            Get["/projects/{id}", true] = async (x, ct) =>
             {
                 string projectId = x.id;
                 var database = container.Resolve<IMongoDatabase>();
 
                 var project = await database.GetProjectByIdAsync(projectId);
                 var suites = await database.GetSuitesByProjectIdAsync(projectId);
-                var suiteRuns = await database.GetSuiteRunsBySuiteIdsAsync(suites.Select(n => n.Id), take: 10);
+                List<ProjectTestSuiteVm> suiteVms = new List<ProjectTestSuiteVm>(suites.Count);
+                foreach (var suite in suites)
+                {
+                    var suiteRuns = await database.GetSuiteRunsBySuiteIdAsync(suite.Id, take: 10);
+                    var suiteVm = new ProjectTestSuiteVm
+                    {
+                        Suite = suite,
+                        LastSuiteRuns = suiteRuns
+                    };
+                    suiteVms.Add(suiteVm);
+                }
 
                 ProjectDetailsVm vm = new ProjectDetailsVm();
                 vm.Project = project;
-                vm.Suites = suites;
-                vm.LastSuiteRuns = suiteRuns;
+                vm.Suites = suiteVms;
 
                 return View["ProjectDetails", vm];
             };
 
-            Get["/create"] = _ => {
+            Get["/projects/create"] = _ =>
+            {
                 var vm = new CreateProjectVm();
                 return View["CreateProject", vm];
             };
 
-            Post["/create", true] = async (x, ct) => {
+            Post["/projects/create", true] = async (x, ct) =>
+            {
                 var vm = this.Bind<CreateProjectVm>();
                 
                 var project = new Project{

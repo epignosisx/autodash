@@ -9,3 +9,14 @@
 .mt30{
     margin-top:10px;
 }
+.browser-result {
+    max-width: 50px;
+    text-align: center;
+    cursor: pointer;
+}
+.browser-result.bg-success {
+    background-color: #90ED69;
+}
+.browser-result.bg-danger {
+    background-color:#F76666
+}

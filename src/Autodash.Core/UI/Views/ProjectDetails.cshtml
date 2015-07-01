@@ -8,3 +8,64 @@
     <h1>@Model.Project.Name</h1>
     <p>@Model.Project.Description</p>
 </div>
+
+<div class="row">
+    @{ int i = 0;}
+    @foreach (var suite in Model.Suites)
+    {
+        <div class="panel-group" role="tablist" id="suite-@i">
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="suite-heading-@i">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#suite-@i" href="#suite-collapse-@i" aria-expanded="true">
+                            @suite.Suite.Name
+                        </a>
+                        
+                        <a href="/suites/@suite.Suite.Id" style="float:right"><small>View Details &raquo;</small></a>
+                    </h4>
+                </div>
+                <div id="suite-collapse-@i" class="panel-collapse collapse in" role="tabpanel">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <h5>Configuration</h5>
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <th>Browsers</th>
+                                            <td>@string.Join(", ", suite.Suite.Configuration.Browsers)</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Test Tag Query</th>
+                                            <td>@suite.Suite.Configuration.TestTagsQuery</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Test Retry Attempts</th>
+                                            <td>@suite.Suite.Configuration.RetryAttempts</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Test Timeout</th>
+                                            <td>@suite.Suite.Configuration.TestTimeout</td>
+                                        </tr>
+                                        @if (suite.Suite.Schedule != null)
+                                        {
+                                            <tr>
+                                                <th>Schedule</th>
+                                                <td>@suite.Suite.Schedule.ToString()</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-8 col-md-offset-1">
+                                <h5>Last 10 Runs</h5>
+                                @Html.Partial("_SuiteRunHistory", suite.LastSuiteRuns)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @{i++;}
+    }
+</div>

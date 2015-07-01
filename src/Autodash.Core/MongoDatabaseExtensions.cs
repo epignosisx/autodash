@@ -19,11 +19,14 @@ namespace Autodash.Core
             return suite;
         }
 
-        public static async Task<List<SuiteRun>> GetSuiteRunsBySuiteIdAsync(this IMongoDatabase database, string suiteId)
+        public static async Task<List<SuiteRun>> GetSuiteRunsBySuiteIdAsync(this IMongoDatabase database, string suiteId, int take = -1)
         {
             var query = Builders<SuiteRun>.Filter.Eq(n => n.TestSuiteId, suiteId);
             var opts = new FindOptions<SuiteRun>();
             opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.ScheduledFor);
+
+            if (take > 0)
+                opts.Limit = take;
 
             var results = await database.GetCollection<SuiteRun>("SuiteRun").FindAsync(query, opts).ToListAsync();
             return results;
@@ -76,6 +79,15 @@ namespace Autodash.Core
 
             var results = await database.GetCollection<TestSuite>("TestSuite").FindAsync(filter).ToListAsync();
             return results;
+        }
+
+        public static async Task<SuiteRun> GetSuiteRunByIdAsync(this IMongoDatabase database, string suiteRunId)
+        {
+            var queryBuilder = Builders<SuiteRun>.Filter;
+            var filter = queryBuilder.Eq(n => n.Id, suiteRunId);
+
+            var results = await database.GetCollection<SuiteRun>("SuiteRun").FindAsync(filter).ToListAsync();
+            return results.FirstOrDefault();
         }
 
         private static async Task<List<T>> ToListAsync<T>(this Task<IAsyncCursor<T>> cursorTask)
