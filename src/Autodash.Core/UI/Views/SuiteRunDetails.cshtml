@@ -97,8 +97,8 @@
         function drawPassedFailedCols() {
             var data = google.visualization.arrayToDataTable([
               ['Passed/Failed', 'Total', { role: 'style' }, { role: 'annotation' }],
-              ['Passed', @Model.SuiteRun.Result.PassedTotal, "#90ED69", @Model.SuiteRun.Result.PassedTotal],
-              ['Failed', @Model.SuiteRun.Result.FailedTotal, "#F76666", @Model.SuiteRun.Result.FailedTotal]
+              ['Passed', @Model.SuiteRun.Result.PassedTotal, "#5cb85c", @Model.SuiteRun.Result.PassedTotal],
+              ['Failed', @Model.SuiteRun.Result.FailedTotal, "#d9534f", @Model.SuiteRun.Result.FailedTotal]
             ]);
 
             var options = {
@@ -121,7 +121,7 @@
 
         var options = {
             title: 'Passed/Failed %',
-            colors: ['#90ED69', '#F76666']
+            colors: ['#5cb85c', '#d9534f']
         };
 
         var chart = new google.visualization.PieChart(document.getElementById('passed-failed-pie'));
