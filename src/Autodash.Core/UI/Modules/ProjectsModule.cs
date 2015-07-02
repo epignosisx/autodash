@@ -89,6 +89,14 @@ namespace Autodash.Core.UI.Modules
 
                 return Response.AsRedirect(string.Format("/projects/{0}/suites/create", project.Id));
             };
+
+            Post["/projects/delete", true] = async (x, ct) =>
+            {
+                string id = Request.Form.id;
+                var database = container.Resolve<IMongoDatabase>();
+                await database.DeleteProjectAsync(id);
+                return Response.AsRedirect("/");
+            };
         }
     }
 }

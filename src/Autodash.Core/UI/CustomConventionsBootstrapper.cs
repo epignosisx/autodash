@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
 using Nancy;
 using Nancy.Conventions;
+using Nancy.Json;
 using Nancy.TinyIoc;
 using System;
 using System.IO;
@@ -26,6 +27,8 @@ namespace Autodash.Core.UI
             existingContainer.Register<CreateProjectCommand>();
             existingContainer.Register<CreateSuiteCommand>();
 
+            JsonSettings.MaxJsonLength = JsonSettings.MaxJsonLength*2;
+
             var scheduler = existingContainer.Resolve<ISuiteRunScheduler>();
             scheduler.Start();
         }
@@ -34,10 +37,7 @@ namespace Autodash.Core.UI
         {
             base.ApplicationStartup(container, pipelines);
 
-            this.Conventions.ViewLocationConventions.Add((viewName, model, context) =>
-            {
-                return string.Concat("UI/Views/", viewName);
-            });
+            this.Conventions.ViewLocationConventions.Add((viewName, model, context) => string.Concat("UI/Views/", viewName));
 
             this.Conventions.StaticContentsConventions.Add(
                 StaticContentConventionBuilder.AddDirectory("assets", @"UI/Content")

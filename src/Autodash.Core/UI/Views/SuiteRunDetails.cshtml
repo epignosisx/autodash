@@ -37,11 +37,11 @@
                         <td class="browser-result @(test[browser.Key].Passed ? "bg-success" : "bg-danger")">
                             <span>@test[browser.Key].Duration.ToString("mm\\:ss")</span>
                             <div class="hidden details">
-                                <table class="table table-condensed">
+                                <table class="table table-condensed browser-result-details">
                                     <tbody>
                                         <tr>
                                             <th>Duration</th>
-                                            <td>@test[browser.Key].Duration.ToString("mm\\:ss")</td>
+                                            <td>@test[browser.Key].Duration.ToString("mm\\:ss\\.ff")</td>
                                         </tr>
                                         <tr>
                                             <th>Start Time</th>

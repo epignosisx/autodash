@@ -112,6 +112,14 @@ namespace Autodash.Core.UI.Modules
                 return Response.AsRedirect("/suites/" + suite.Id);
             };
 
+            Post["/suites/delete", true] = async (x, ct) =>
+            {
+                var database = container.Resolve<IMongoDatabase>();
+                string id = Request.Form.id;
+                await database.DeleteTestSuiteAsync(id);
+                return Response.AsJson(new {Success = true});
+            };
+
             Get["/suites/{id}", true] = async (parameters, ct) =>
             {
                 var database = container.Resolve<IMongoDatabase>();

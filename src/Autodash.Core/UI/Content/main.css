@@ -219,3 +219,21 @@ a.thumbnail.active {
 .browser-result.bg-danger {
     background-color: #d9534f;
 }
+.browser-result-details th {
+    width: 200px;
+}
+.panel-title .panel-action {
+    float: right;
+    margin-right: 10px;
+}
+.panel-title .panel-action, 
+.panel-title .panel-action small{
+    color: white;
+}
+.test-explorer-table .test-name {
+    width: 70%;
+    -moz-word-break: break-all;
+    -o-word-break: break-all;
+    -ms-word-break: break-all;
+    word-break: break-all;
+}

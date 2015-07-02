@@ -90,6 +90,31 @@ namespace Autodash.Core
             return results.FirstOrDefault();
         }
 
+        public static async Task DeleteProjectAsync(this IMongoDatabase database, string projectId)
+        {
+            var suiteRunQueryBuilder = Builders<SuiteRun>.Filter;
+            var suiteRunFilter = suiteRunQueryBuilder.Eq(n => n.TestSuiteSnapshot.ProjectId, projectId);
+            var runResult = await database.GetCollection<SuiteRun>("SuiteRun").DeleteManyAsync(suiteRunFilter);
+
+            var testSuiteQueryBuilder = Builders<TestSuite>.Filter;
+            var testSuiteFilter = testSuiteQueryBuilder.Eq(n => n.ProjectId, projectId);
+            var suiteResult = await database.GetCollection<TestSuite>("TestSuite").DeleteManyAsync(testSuiteFilter);
+
+            var projectFilter = Builders<Project>.Filter.Eq(n => n.Id, projectId);
+            var projectResult = await database.GetCollection<Project>("Project").DeleteOneAsync(projectFilter);
+        }
+
+        public static async Task DeleteTestSuiteAsync(this IMongoDatabase database, string testSuiteId)
+        {
+            var suiteRunQueryBuilder = Builders<SuiteRun>.Filter;
+            var suiteRunFilter = suiteRunQueryBuilder.Eq(n => n.TestSuiteId, testSuiteId);
+            var runResult = await database.GetCollection<SuiteRun>("SuiteRun").DeleteManyAsync(suiteRunFilter);
+
+            var testSuiteQueryBuilder = Builders<TestSuite>.Filter;
+            var testSuiteFilter = testSuiteQueryBuilder.Eq(n => n.Id, testSuiteId);
+            var suiteResult = await database.GetCollection<TestSuite>("TestSuite").DeleteOneAsync(testSuiteFilter);
+        }
+
         private static async Task<List<T>> ToListAsync<T>(this Task<IAsyncCursor<T>> cursorTask)
         {
             var cursor = await cursorTask;

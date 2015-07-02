@@ -9,19 +9,32 @@
     <p>@Model.Project.Description</p>
 </div>
 
-<div class="row">
+<div class="row text-right">
+    <form enctype="application/x-www-form-urlencoded" action="/projects/delete" method="post" style="display:inline">
+        <input type="hidden" name="id" value="@Model.Project.Id"/>
+        <button type="submit" id="btn-delete-project" class="btn btn-danger" href="/projects/@Model.Project.Id/suites/create"><span class="glyphicon glyphicon-minus-sign"></span> Delete Project</button>
+    </form>
+    <a class="btn btn-primary" href="/projects/@Model.Project.Id/suites/create"><span class="glyphicon glyphicon-plus-sign"></span> Create Suite</a>
+</div>
+
+<div class="row mt10">
     @{ int i = 0;}
     @foreach (var suite in Model.Suites)
     {
         <div class="panel-group" role="tablist" id="suite-@i">
-            <div class="panel panel-default">
+            <div class="panel panel-primary">
                 <div class="panel-heading" role="tab" id="suite-heading-@i">
                     <h4 class="panel-title">
                         <a role="button" data-toggle="collapse" data-parent="#suite-@i" href="#suite-collapse-@i" aria-expanded="true">
                             @suite.Suite.Name
                         </a>
-                        
-                        <a href="/suites/@suite.Suite.Id" style="float:right"><small>View Details &raquo;</small></a>
+
+                        <a href="#@suite.Suite.Id" class="panel-action">
+                            <small><span class="glyphicon glyphicon-info-sign"></span>&nbsp;Details</small>
+                        </a>
+                        <a href="/suites/@suite.Suite.Id" class="panel-action action-delete">
+                            <small><span class="glyphicon glyphicon-remove-sign"></span>&nbsp;Delete</small>
+                        </a>
                     </h4>
                 </div>
                 <div id="suite-collapse-@i" class="panel-collapse collapse in" role="tabpanel">
@@ -49,10 +62,10 @@
                                         </tr>
                                         @if (suite.Suite.Schedule != null)
                                         {
-                                            <tr>
-                                                <th>Schedule</th>
-                                                <td>@suite.Suite.Schedule.ToString()</td>
-                                            </tr>
+                                        <tr>
+                                            <th>Schedule</th>
+                                            <td>@suite.Suite.Schedule.ToString()</td>
+                                        </tr>
                                         }
                                     </tbody>
                                 </table>
@@ -69,3 +82,25 @@
         @{i++;}
     }
 </div>
+
+@section scripts{
+    <script>
+        $(function() {
+            $(".action-delete").on("click", function(e) {
+                e.preventDefault();
+                if (confirm("Are you sure you want to delete this test suite?\nAll suite runs will be deleted as well.")) {
+                    var id = $(this).attr("href").split("#")[1];
+                    $.post("/suites/delete", { id: id }, function() {
+                        window.location.reload();
+                    });
+                }
+            });
+
+            $("#btn-delete-project").on("click", function(e) {
+                if (!confirm("Are you sure you want to delete this project?\nAll testsuites and suite runs will be deleted as well.")) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}
