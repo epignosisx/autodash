@@ -4,11 +4,18 @@
 @inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.SuiteRunDetailsVm>
 @{
     Layout = "_Layout.cshtml";
+    ViewBag.SilentMode = Model.DownloadMode;
+    ViewBag.EmbedResources = Model.EmbedResources;
 }
 
 <div class="row">
     <h1>@Model.Project.Name</h1>
-    <p><strong>Suite Name:</strong> @Model.SuiteRun.TestSuiteSnapshot.Name <strong>Started On:</strong> @Model.SuiteRun.StartedOn <strong>Duration:</strong> @Model.SuiteRun.Duration.ToString(@"hh\:mm\:ss")</p>
+    <p>
+        <strong>Suite Name:</strong> @Model.SuiteRun.TestSuiteSnapshot.Name
+        <strong>Started On:</strong> @Model.SuiteRun.StartedOn
+        <strong>Duration:</strong> @Model.SuiteRun.Duration.ToString(@"hh\:mm\:ss")
+    </p>
+    <p><strong>Test Tags Query:</strong> @(Model.SuiteRun.TestSuiteSnapshot.Configuration.TestTagsQuery ?? "None")</p>
 </div>
 
 <div class="row">
@@ -53,7 +60,7 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                                
+
                                 <h4>Standard Output <small><a href="#output" class="glyphicon glyphicon-copy" title="Copy to clipboard"></a></small></h4>
                                 <pre id="output" style="max-height: 250px">@test[browser.Key].Stdout</pre>
                                 <h4>Standard Error <small><a href="#error" class="glyphicon glyphicon-copy" title="Copy to clipboard"></a></small></h4>
@@ -83,7 +90,6 @@
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-
 @section scripts{
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script>
@@ -116,18 +122,18 @@
             var data = google.visualization.arrayToDataTable([
               ['Passed/Failed', 'Total'],
               ['Passed', @Model.SuiteRun.Result.PassedTotal],
-          ['Failed', @Model.SuiteRun.Result.FailedTotal]
-        ]);
+              ['Failed', @Model.SuiteRun.Result.FailedTotal]
+            ]);
 
-        var options = {
-            title: 'Passed/Failed %',
-            colors: ['#5cb85c', '#d9534f']
-        };
+            var options = {
+                title: 'Passed/Failed %',
+                colors: ['#5cb85c', '#d9534f']
+            };
 
-        var chart = new google.visualization.PieChart(document.getElementById('passed-failed-pie'));
+            var chart = new google.visualization.PieChart(document.getElementById('passed-failed-pie'));
 
-        chart.draw(data, options);
-    }
+            chart.draw(data, options);
+        }
     </script>
     <script>
         $(function() {
@@ -150,7 +156,7 @@
                 txtarea.select();
                 try {
                     success = document.execCommand("copy");
-                } catch (e) { } 
+                } catch (e) { }
                 txtarea.className = "hidden";
                 if (!success) {
                     alert("Your browser does not suppor copy to clipboard natively.");

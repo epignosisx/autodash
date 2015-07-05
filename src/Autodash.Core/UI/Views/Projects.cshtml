@@ -10,22 +10,85 @@
 </div>
 
 <div class="row mt10">
-    
-    @{ int idx = 0;}
+
     @foreach (var proj in Model.Projects)
     {
         <div class="col-sm-4">
             <div class="panel panel-primary">
                 <div class="panel-heading">
                     <h3 class="panel-title" id="panel-title">
-                        <a href="/projects/@proj.Id">@proj.Name &raquo;</a>
+                        <a href="/projects/@proj.Project.Id">@proj.Project.Name &raquo;</a>
                     </h3>
                 </div>
                 <div class="panel-body">
-                    @proj.Description
+                    <p><strong>@proj.Project.Description</strong></p>
+                    <div>
+                        Last runs:
+                        @foreach (var run in proj.SuiteRuns)
+                        {
+                            <span class="circle glyphicon @(run.Passed ? "bg-success-strong" : "bg-danger-strong")" title="@run.ToString()"></span>
+                        }
+                        @if (proj.SuiteRuns.Count == 0)
+                        {
+                            <text>(no runs)</text>
+                        }
+                    </div>
+                    @*<div class="row" id="chart-@proj.Project.Id" style="height:200px;"></div>*@
                 </div>
             </div>
         </div>
     }
 
 </div>
+
+<script src="https://www.google.com/jsapi"></script>
+<script>
+    // Load the Visualization API and the piechart package.
+    google.load('visualization', '1.1', { 'packages': ['corechart'] });
+
+    function createCharts() {
+        var projects = @Html.Raw(new Nancy.Json.JavaScriptSerializer().Serialize(Model.Projects));
+
+        for (var i = 0; i < projects.length; i++) {
+            var project = projects[i];
+            var runs = [];
+            for (var j = 0; j < project.suiteRuns.length; j++) {
+                var run = project.suiteRuns[j];
+                runs.push([j + 1, run.durationMinutes, run.passed ? "#5cb85c" : "#d9534f"]);
+            }
+            createChart(runs, document.getElementById("chart-" + project.project.id));
+        }
+    }
+
+    function createChart(runs, element) {
+        var data = new google.visualization.DataTable();
+        data.addColumn('number', 'Run #');
+        data.addColumn('number', 'Took');
+        data.addColumn({ type: 'string', role: 'style' });
+
+        data.addRows(runs);
+
+        var options = {
+            legend: { position: 'none' },
+            hAxis: {
+                textPosition: 'none',
+                viewWindow: {
+                    min: 0.5,
+                    max: 10.5
+                }
+            },
+            vAxis: {
+                title: 'Time (mins)',
+                minValue: 0,
+                viewWindow: {
+                    min: 0
+                }
+            }
+        };
+
+        var chart = new google.visualization.ColumnChart(element);
+        chart.draw(data, options);
+    }
+
+    //google.setOnLoadCallback(createCharts);
+</script>

@@ -213,10 +213,12 @@ a.thumbnail.active {
     text-align: center;
     cursor: pointer;
 }
-.browser-result.bg-success {
+.browser-result.bg-success,
+.bg-success-strong {
     background-color:#5cb85c;
 }
-.browser-result.bg-danger {
+.browser-result.bg-danger,
+.bg-danger-strong {
     background-color: #d9534f;
 }
 .browser-result-details th {
@@ -236,4 +238,12 @@ a.thumbnail.active {
     -o-word-break: break-all;
     -ms-word-break: break-all;
     word-break: break-all;
+}
+.circle {
+    width:16px;
+    height:16px;
+    -ms-border-radius: 8px;
+    border-radius: 8px;
+    position: relative;
+    top: 3px;
 }

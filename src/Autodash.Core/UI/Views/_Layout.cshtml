@@ -1,4 +1,6 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<dynamic>
+﻿@using System
+@using System.IO
+@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<dynamic>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,9 +11,20 @@
     <title>@ViewBag.Title</title>
     <!-- Bootstrap -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="/assets/main.css" rel="stylesheet" />
+    @if (ViewBag.EmbedResources != null)
+    {
+        <style type="text/css">
+            @Html.Raw(File.ReadAllText(Environment.CurrentDirectory + "\\UI\\Content\\main.css"))
+        </style>
+    }
+    else
+    {
+        <link href="/assets/main.css" rel="stylesheet" />
+    }
 </head>
 <body>
+    @if (ViewBag.SilentMode == null)
+    {   
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
@@ -30,6 +43,7 @@
             </div><!--/.nav-collapse -->
         </div>
     </nav>
+    }
 
     <div class="container main-content">
         @RenderBody()

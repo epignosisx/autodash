@@ -12,7 +12,7 @@
             <th>Duration (mins)</th>
             <th>Status</th>
             <th>Passed / Failed</th>
-            <th>Reports</th>
+            <th>Report</th>
         </tr>
     </thead>
     <tbody>
@@ -23,7 +23,7 @@
                 <td>@run.DurationFriendly()</td>
                 <td>@Html.Raw(run.StatusColored())</td>
                 <td>@run.PassedFailed()</td>
-                <td><a href="/runs/@run.Id/report.html">HTML</a> | <a href="#">Excel</a></td>
+                <td><a href="/runs/@run.Id/report.html">View</a> | <a href="/runs/@run.Id/report.html">Download</a></td>
             </tr>
         }
     </tbody>

@@ -27,7 +27,7 @@ namespace Autodash.Core.UI
             existingContainer.Register<CreateProjectCommand>();
             existingContainer.Register<CreateSuiteCommand>();
 
-            JsonSettings.MaxJsonLength = JsonSettings.MaxJsonLength*2;
+            JsonSettings.MaxJsonLength = int.MaxValue;
 
             var scheduler = existingContainer.Resolve<ISuiteRunScheduler>();
             scheduler.Start();

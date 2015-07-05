@@ -28,8 +28,21 @@ namespace Autodash.Core.UI.Modules
                     projects.AddRange(results.Current.ToList());
                 }
 
-                var vm = new ProjectsVm();
-                vm.Projects = projects;
+                List<ProjectSuiteRunVm> projectRuns = new List<ProjectSuiteRunVm>(projects.Count);
+                foreach (var project in projects)
+                {
+                    var runs = await database.GetSuiteRunsByProjectIdAsync(project.Id);
+                    projectRuns.Add(new ProjectSuiteRunVm
+                    {
+                        Project = project,
+                        SuiteRuns = runs.Select(n => new ProjectSuiteRunDetail{ DurationMinutes = n.DurationMinutes, Passed = n.Result.Passed}).ToList()
+                    });
+                }
+
+                var vm = new ProjectsVm
+                {
+                    Projects = projectRuns
+                };
 
                 return View["Projects", vm];
             };

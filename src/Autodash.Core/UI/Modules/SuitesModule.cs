@@ -144,6 +144,46 @@ namespace Autodash.Core.UI.Modules
                 return View["SuiteDetails", vm];
             };
 
+            Get["/suites/{id}/test-tree-map", true] = async (x, ct) =>
+            {
+                string id = x.id;
+                var database = container.Resolve<IMongoDatabase>();
+                TestSuite suite = await database.GetSuiteByIdAsync(id);
+                string query = Request.Query.query;
+                if (suite == null)
+                    return Response.AsJson(new { Error = "Suite not found" }, HttpStatusCode.NotFound);
+
+                var unitTestDiscoverer = container.Resolve<ITestSuiteUnitTestDiscoverer>();
+                UnitTestCollection[] unitTestCollections = unitTestDiscoverer.Discover(suite.Configuration.TestAssembliesPath).ToArray();
+
+                Dictionary<string, int> tagCount = new Dictionary<string, int>();
+                
+                foreach (var test in unitTestCollections.SelectMany(n => n.Tests))
+                {
+                    foreach (var tag in test.TestTags)
+                    {
+                        if (tagCount.ContainsKey(tag))
+                        {
+                            tagCount[tag]++;
+                        }
+                        else
+                        {
+                            tagCount.Add(tag, 1);
+                        }
+                    }
+                }
+
+                var mostUsedTag = (double)tagCount.OrderByDescending(n => n.Value).First().Value;
+                var data = tagCount.OrderBy(n => n.Key)
+                                   .Select(n => new
+                                   {
+                                       TagName = n.Key, 
+                                       Count = n.Value, 
+                                       Percentage = 100*(n.Value/mostUsedTag)
+                                   });
+                return Response.AsJson(new { Tags =  data});
+            };
+
             Get["/suites/{id}/test-explorer", true] = async (parameters, ct) =>
             {
                 string id = parameters.id;
@@ -151,9 +191,7 @@ namespace Autodash.Core.UI.Modules
                 TestSuite suite = await database.GetSuiteByIdAsync(id);
                 string query = Request.Query.query;
                 if (suite == null)
-                {
                     return Response.AsJson(new { Error = "Suite not found" }, HttpStatusCode.NotFound);
-                }
 
                 var unitTestDiscoverer = container.Resolve<ITestSuiteUnitTestDiscoverer>();
                 UnitTestCollection[] unitTestCollections = unitTestDiscoverer.Discover(suite.Configuration.TestAssembliesPath).ToArray();

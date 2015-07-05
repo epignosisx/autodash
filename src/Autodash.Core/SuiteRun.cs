@@ -25,9 +25,9 @@ namespace Autodash.Core
             }
         }
 
-        public int DurationMinutes 
+        public double DurationMinutes 
         { 
-            get { return (int)Duration.TotalMinutes; } 
+            get { return Duration.TotalMinutes; } 
         }
 
         public static SuiteRun CreateSuiteRun(TestSuite suite, DateTime scheduledOn)

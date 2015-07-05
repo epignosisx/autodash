@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Operations;
 
 namespace Autodash.Core
 {
@@ -23,7 +24,21 @@ namespace Autodash.Core
         {
             var query = Builders<SuiteRun>.Filter.Eq(n => n.TestSuiteId, suiteId);
             var opts = new FindOptions<SuiteRun>();
-            opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.ScheduledFor);
+            opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.StartedOn);
+
+            if (take > 0)
+                opts.Limit = take;
+
+            var results = await database.GetCollection<SuiteRun>("SuiteRun").FindAsync(query, opts).ToListAsync();
+            return results;
+        }
+
+        public static async Task<List<SuiteRun>> GetSuiteRunsByProjectIdAsync(this IMongoDatabase database,
+            string projectId, int take = -1)
+        {
+            var query = Builders<SuiteRun>.Filter.Eq(n => n.TestSuiteSnapshot.ProjectId, projectId);
+            var opts = new FindOptions<SuiteRun>();
+            opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.StartedOn);
 
             if (take > 0)
                 opts.Limit = take;
@@ -50,7 +65,7 @@ namespace Autodash.Core
             var query = Builders<SuiteRun>.Filter.Or(conditions);
 
             var opts = new FindOptions<SuiteRun>();
-            opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.ScheduledFor);
+            opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.StartedOn);
             opts.Limit = take;
 
             var results = await database.GetCollection<SuiteRun>("SuiteRun").FindAsync(query, opts).ToListAsync();
