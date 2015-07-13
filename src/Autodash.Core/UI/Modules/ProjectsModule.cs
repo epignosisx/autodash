@@ -31,7 +31,7 @@ namespace Autodash.Core.UI.Modules
                 List<ProjectSuiteRunVm> projectRuns = new List<ProjectSuiteRunVm>(projects.Count);
                 foreach (var project in projects)
                 {
-                    var runs = await database.GetSuiteRunsByProjectIdAsync(project.Id);
+                    var runs = await database.GetSuiteRunsByProjectIdAsync(project.Id, take: 10);
                     projectRuns.Add(new ProjectSuiteRunVm
                     {
                         Project = project,

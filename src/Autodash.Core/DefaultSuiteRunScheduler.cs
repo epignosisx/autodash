@@ -86,6 +86,7 @@ namespace Autodash.Core
             {
                 var run = SuiteRun.CreateSuiteRun(nextSuite, nextRunDate);
                 run.StartedOn = now;
+                run.Status = SuiteRunStatus.Running;
 
                 await _repository.AddSuiteRunAsync(run);
                 RunSuite(run);
@@ -97,15 +98,24 @@ namespace Autodash.Core
             suiteRun.Status = SuiteRunStatus.Running;
             _runningSuite = suiteRun;
             _runningSuiteTask = _suiteRunner.Run(suiteRun);
-            _runningSuiteTask.ContinueWith(t => SuiteRunCompleted(t.Result));
+            _runningSuiteTask.ContinueWith(SuiteRunCompleted);
         }
 
-        private Task SuiteRunCompleted(SuiteRun run)
+        private void SuiteRunCompleted(Task<SuiteRun> task)
         {
-            run.CompletedOn = DateTime.UtcNow;
-            run.Status = SuiteRunStatus.Complete;
-            _runningSuite = null;
-            return _repository.UpdateSuiteRunAsync(run);
+            try
+            {
+                var run = task.Result;
+                run.CompletedOn = DateTime.UtcNow;
+                run.Status = SuiteRunStatus.Complete;
+                _runningSuite = null;
+                _repository.UpdateSuiteRunAsync(run).Wait();
+            }
+            catch (Exception ex)
+            {
+                //TODO Log, in the meantime throw.
+                throw new Exception();
+            }
         }
 
         private void NextSuiteRunCheck(object state)

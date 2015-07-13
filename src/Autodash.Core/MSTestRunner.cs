@@ -12,6 +12,7 @@ namespace Autodash.Core
     {
         private static string CommandTemplate =
             "call \"C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\Tools\\VsDevCmd.bat\"" + Environment.NewLine +
+            "@set \"PATH=C:\\projects\\autodash\\tools\\;%PATH%\"" + Environment.NewLine +
             "mstest.exe /testcontainer:{0} /test:{1} /resultsfile:\"{2}\"";
 
         private static readonly XmlSerializer TestRunSerializer = new XmlSerializer(typeof(TestRun));
@@ -32,7 +33,7 @@ namespace Autodash.Core
             foreach(var browser in config.Browsers)
             {
                 string browserRef = browser;
-                ongoingTests.Add(Task.Run(() => RunTest(unitTest, testCollection, config, browserRef, 0)));
+                ongoingTests.Add(Task.Run(() => RunTest(unitTest, testCollection, config, browserRef, 1)));
             }
 
             while (ongoingTests.Count > 0)
@@ -61,7 +62,7 @@ namespace Autodash.Core
 
         private static UnitTestBrowserResult RunTest(UnitTestInfo unitTest, UnitTestCollection testCollection, TestSuiteConfiguration config, string browser, int attempt)
         {
-            string tempFilename = RemoveInvalidChars(unitTest.TestName + "_" + browser);
+            string tempFilename = RemoveInvalidChars(unitTest.ShortTestName + "_" + browser);
             string commandFullpath = Path.Combine(config.TestAssembliesPath, tempFilename + ".bat");
             string resultFullpath = Path.Combine(config.TestAssembliesPath, tempFilename + ".trx");
 
@@ -75,7 +76,7 @@ namespace Autodash.Core
             if (File.Exists(resultFullpath))
                 File.Delete(resultFullpath);
 
-            ProcessStartInfo info = new ProcessStartInfo();
+            var info = new ProcessStartInfo();
             info.WorkingDirectory = config.TestAssembliesPath;
             info.FileName = Path.Combine(Environment.ExpandEnvironmentVariables("%windir%"), @"System32\cmd.exe");
             info.UseShellExecute = false;
@@ -87,8 +88,8 @@ namespace Autodash.Core
             info.RedirectStandardOutput = true;
 
             Process process = Process.Start(info);
-            string stderr = process.StandardError.ReadToEnd();
             string stdout = process.StandardOutput.ReadToEnd();
+            string stderr = process.StandardError.ReadToEnd();
 
             TimeSpan timeout = config.TestTimeout == TimeSpan.Zero ? TimeSpan.FromMinutes(30) : config.TestTimeout;
             process.WaitForExit((int)timeout.TotalMilliseconds);
