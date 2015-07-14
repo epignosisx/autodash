@@ -24,7 +24,7 @@ namespace Autodash.Core
         {
             var query = Builders<SuiteRun>.Filter.Eq(n => n.TestSuiteId, suiteId);
             var opts = new FindOptions<SuiteRun>();
-            opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.StartedOn);
+            opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.ScheduledFor);
 
             if (take > 0)
                 opts.Limit = take;
@@ -38,7 +38,7 @@ namespace Autodash.Core
         {
             var query = Builders<SuiteRun>.Filter.Eq(n => n.TestSuiteSnapshot.ProjectId, projectId);
             var opts = new FindOptions<SuiteRun>();
-            opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.StartedOn);
+            opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.ScheduledFor);
 
             if (take > 0)
                 opts.Limit = take;
@@ -65,7 +65,7 @@ namespace Autodash.Core
             var query = Builders<SuiteRun>.Filter.Or(conditions);
 
             var opts = new FindOptions<SuiteRun>();
-            opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.StartedOn);
+            opts.Sort = Builders<SuiteRun>.Sort.Descending(n => n.ScheduledFor);
             opts.Limit = take;
 
             var results = await database.GetCollection<SuiteRun>("SuiteRun").FindAsync(query, opts).ToListAsync();

@@ -86,7 +86,6 @@ namespace Autodash.Core
             {
                 var run = SuiteRun.CreateSuiteRun(nextSuite, nextRunDate);
                 run.StartedOn = now;
-                run.Status = SuiteRunStatus.Running;
 
                 await _repository.AddSuiteRunAsync(run);
                 RunSuite(run);
@@ -96,6 +95,7 @@ namespace Autodash.Core
         private void RunSuite(SuiteRun suiteRun)
         {
             suiteRun.Status = SuiteRunStatus.Running;
+            _repository.UpdateSuiteRunAsync(suiteRun);
             _runningSuite = suiteRun;
             _runningSuiteTask = _suiteRunner.Run(suiteRun);
             _runningSuiteTask.ContinueWith(SuiteRunCompleted);

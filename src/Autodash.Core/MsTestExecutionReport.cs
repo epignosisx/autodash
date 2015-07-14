@@ -939,7 +939,9 @@ public partial class TestRunUnitTestResult {
     private string testListIdField;
     
     private string relativeResultsDirectoryField;
-    
+
+    private TestRunUnitTestResultOutput outputField;
+
     /// <remarks/>
     [System.Xml.Serialization.XmlAttributeAttribute()]
     public string executionId {
@@ -1061,6 +1063,27 @@ public partial class TestRunUnitTestResult {
             this.relativeResultsDirectoryField = value;
         }
     }
+    
+    /// <remarks/>
+    [System.Xml.Serialization.XmlElementAttribute("Output")]
+    public TestRunUnitTestResultOutput Output {
+        get {
+            return this.outputField;
+        }
+        set {
+            this.outputField = value;
+        }
+    }
+}
+
+[System.SerializableAttribute()]
+[System.Diagnostics.DebuggerStepThroughAttribute()]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true, Namespace="http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+[System.Xml.Serialization.XmlRootAttribute(Namespace="http://microsoft.com/schemas/VisualStudio/TeamTest/2010", IsNullable=false)]
+public partial class TestRunUnitTestResultOutput
+{
+    [System.Xml.Serialization.XmlElementAttribute("StdOut")]
+    public string StdOut { get; set; }
 }
 
 /// <remarks/>

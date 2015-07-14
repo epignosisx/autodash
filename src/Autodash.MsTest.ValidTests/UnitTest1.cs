@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Autodash.MsTest.ValidTests
@@ -11,12 +12,16 @@ namespace Autodash.MsTest.ValidTests
         [TestCategory("Tag2")]
         public void SuccessTest()
         {
+            Console.WriteLine("Running UnitTest1.SuccessTest");
+            Thread.Sleep(TimeSpan.FromSeconds(5));
             Assert.IsTrue(true);
         }
 
         [TestMethod]
         public void FailTest()
         {
+            Console.WriteLine("Running UnitTest1.FailTest");
+            Thread.Sleep(TimeSpan.FromSeconds(5));
             Assert.IsTrue(false);
         }
     }

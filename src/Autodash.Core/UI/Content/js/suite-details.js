@@ -58,9 +58,11 @@
 
         for (; i < l; i++) {
             run = suiteRuns[i];
-            data.push([
-                i + 1, { v: run.durationMinutes, f: run.durationMinutes + " mins" }, "color:" + (run.result.passed ? "#5cb85c" : "#d9534f")
-            ]);
+            if (run.result != null) {
+                data.push([
+                    i + 1, { v: run.durationMinutes, f: run.durationMinutes + " mins" }, "color:" + (run.result.passed ? "#5cb85c" : "#d9534f")
+                ]);
+            }
         }
 
         return data;

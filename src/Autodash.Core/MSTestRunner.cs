@@ -106,13 +106,17 @@ namespace Autodash.Core
 
             bool passed = report.ResultSummary.Counters.passed == "1";
 
+            string testOutput = "";
+            if(report.Results.Length > 0 && report.Results[0].Output != null)
+                testOutput = report.Results[0].Output.StdOut;
+
             var result = new UnitTestBrowserResult
             {
                 Attempt = attempt,
                 Browser = browser,
                 StartTime = report.Results[0].startTime,
                 EndTime = report.Results[0].endTime,
-                Stdout = stdout,
+                Stdout = stdout + Environment.NewLine +  "=================" + Environment.NewLine + testOutput,
                 Stderr = stderr,
                 Passed = passed
             };

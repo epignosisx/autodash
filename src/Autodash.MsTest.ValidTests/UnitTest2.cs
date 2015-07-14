@@ -13,6 +13,7 @@ namespace Autodash.MsTest.ValidTests
         [TestMethod]
         public void SuccessTest()
         {
+            Console.WriteLine("Running UnitTest2.SuccessTest");
             Assert.IsTrue(true);
         }
 
