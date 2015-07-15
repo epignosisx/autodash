@@ -28,9 +28,43 @@ namespace Autodash.Core
             if (config == null)
                 throw new ArgumentNullException("config");
 
+            UnitTestResult unitTestResult;
+            if (config.EnableBrowserExecutionInParallel)
+                unitTestResult = await RunInParallel(unitTest, testCollection, config);
+            else
+                unitTestResult = RunSerially(unitTest, testCollection, config);
+
+            return unitTestResult;
+        }
+
+        private static UnitTestResult RunSerially(UnitTestInfo unitTest, UnitTestCollection testCollection, TestSuiteConfiguration config)
+        {
+            var browserResults = new List<UnitTestBrowserResult>(config.Browsers.Length);
+            foreach (var browser in config.Browsers)
+            {
+                UnitTestBrowserResult browserResult = null;
+                do
+                {
+                    int nextAttempt = browserResult == null ? 1 : (browserResult.Attempt + 1);
+                    browserResult = RunTest(unitTest, testCollection, config, browser, nextAttempt);
+                    browserResults.Add(browserResult);
+                } while (!browserResult.Passed && browserResult.Attempt < config.RetryAttempts);
+            }
+
+            var unitTestResult = new UnitTestResult
+            {
+                TestName = unitTest.TestName,
+                BrowserResults = browserResults
+            };
+            return unitTestResult;
+        }
+
+        private static async Task<UnitTestResult> RunInParallel(UnitTestInfo unitTest, UnitTestCollection testCollection,
+            TestSuiteConfiguration config)
+        {
             var ongoingTests = new List<Task<UnitTestBrowserResult>>(config.Browsers.Length);
             var browserResults = new List<UnitTestBrowserResult>(ongoingTests.Count);
-            foreach(var browser in config.Browsers)
+            foreach (var browser in config.Browsers)
             {
                 string browserRef = browser;
                 ongoingTests.Add(Task.Run(() => RunTest(unitTest, testCollection, config, browserRef, 1)));
@@ -45,7 +79,7 @@ namespace Autodash.Core
                 if (!completed.Result.Passed && completed.Result.Attempt < config.RetryAttempts)
                 {
                     ongoingTests.Add(Task.Run(() => RunTest(
-                        unitTest, testCollection, config, 
+                        unitTest, testCollection, config,
                         completed.Result.Browser, completed.Result.Attempt + 1
                     )));
                 }
@@ -56,7 +90,6 @@ namespace Autodash.Core
                 TestName = unitTest.TestName,
                 BrowserResults = browserResults
             };
-
             return unitTestResult;
         }
 
