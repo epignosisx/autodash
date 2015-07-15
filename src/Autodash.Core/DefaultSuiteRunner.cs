@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Autodash.Core
@@ -15,7 +16,7 @@ namespace Autodash.Core
             _unitTestDiscoverer = unitTestDiscoverer;
         }
 
-        public async Task<SuiteRun> Run(SuiteRun run)
+        public async Task<SuiteRun> Run(SuiteRun run, CancellationToken cancellationToken)
         {
             if (run == null)
                 throw new ArgumentNullException("run");
@@ -40,6 +41,13 @@ namespace Autodash.Core
                 collResult.UnitTestResults = new List<UnitTestResult>();
                 foreach (UnitTestInfo test in testColl.Tests)
                 {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        run.Result.Status = "Suite Run was cancelled.";
+                        run.Result.Details = "Suite Run was cancelled during execution.";
+                        return run;
+                    }
+
                     bool shouldRun = false;
                     try
                     {
@@ -54,7 +62,7 @@ namespace Autodash.Core
                     
                     if(shouldRun)
                     {
-                        UnitTestResult result = await testColl.Runner.Run(test, testColl, config);
+                        UnitTestResult result = await testColl.Runner.Run(test, testColl, config, cancellationToken);
                         collResult.UnitTestResults.Add(result);
                     }
                 }

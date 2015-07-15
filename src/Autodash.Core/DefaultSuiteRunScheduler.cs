@@ -18,6 +18,8 @@ namespace Autodash.Core
         private readonly Timer _nextRunTimer;
         private Task<SuiteRun> _runningSuiteTask;
         private SuiteRun _runningSuite;
+        private CancellationTokenSource _runningSuiteCancelSource;
+        private object _cancelSourceLock = new object();
 
         public DefaultSuiteRunScheduler(ISuiteRunSchedulerRepository repository, ISuiteRunner suiteRunner)
         {
@@ -97,7 +99,11 @@ namespace Autodash.Core
             suiteRun.Status = SuiteRunStatus.Running;
             _repository.UpdateSuiteRunAsync(suiteRun);
             _runningSuite = suiteRun;
-            _runningSuiteTask = _suiteRunner.Run(suiteRun);
+            lock (_cancelSourceLock)
+            {
+                _runningSuiteCancelSource = new CancellationTokenSource();
+            }
+            _runningSuiteTask = _suiteRunner.Run(suiteRun, _runningSuiteCancelSource.Token);
             _runningSuiteTask.ContinueWith(SuiteRunCompleted);
         }
 
@@ -133,6 +139,15 @@ namespace Autodash.Core
         public SuiteRun GetRunningSuite()
         {
             return _runningSuite;
+        }
+
+        public void CancelRunningSuite()
+        {
+            lock (_cancelSourceLock)
+            {
+                if (_runningSuiteCancelSource != null)
+                    _runningSuiteCancelSource.Cancel();    
+            }
         }
     }
 

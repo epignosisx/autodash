@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Autodash.Core.MsTest;
@@ -19,7 +20,11 @@ namespace Autodash.Core
 
         public string TestRunnerName { get { return "MSTest Runner"; } }
 
-        public async Task<UnitTestResult> Run(UnitTestInfo unitTest, UnitTestCollection testCollection, TestSuiteConfiguration config)
+        public async Task<UnitTestResult> Run(
+            UnitTestInfo unitTest, 
+            UnitTestCollection testCollection, 
+            TestSuiteConfiguration config,
+            CancellationToken cancellationToken)
         {
             if (unitTest == null)
                 throw new ArgumentNullException("unitTest");
@@ -30,25 +35,32 @@ namespace Autodash.Core
 
             UnitTestResult unitTestResult;
             if (config.EnableBrowserExecutionInParallel)
-                unitTestResult = await RunInParallel(unitTest, testCollection, config);
+                unitTestResult = await RunInParallel(unitTest, testCollection, config, cancellationToken);
             else
-                unitTestResult = RunSerially(unitTest, testCollection, config);
+                unitTestResult = RunSerially(unitTest, testCollection, config, cancellationToken);
 
             return unitTestResult;
         }
 
-        private static UnitTestResult RunSerially(UnitTestInfo unitTest, UnitTestCollection testCollection, TestSuiteConfiguration config)
+        private static UnitTestResult RunSerially(
+            UnitTestInfo unitTest, 
+            UnitTestCollection testCollection, 
+            TestSuiteConfiguration config,
+            CancellationToken cancellationToken)
         {
             var browserResults = new List<UnitTestBrowserResult>(config.Browsers.Length);
             foreach (var browser in config.Browsers)
             {
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+
                 UnitTestBrowserResult browserResult = null;
                 do
                 {
                     int nextAttempt = browserResult == null ? 1 : (browserResult.Attempt + 1);
                     browserResult = RunTest(unitTest, testCollection, config, browser, nextAttempt);
                     browserResults.Add(browserResult);
-                } while (!browserResult.Passed && browserResult.Attempt < config.RetryAttempts);
+                } while (!browserResult.Passed && browserResult.Attempt < config.RetryAttempts && !cancellationToken.IsCancellationRequested);
             }
 
             var unitTestResult = new UnitTestResult
@@ -59,8 +71,11 @@ namespace Autodash.Core
             return unitTestResult;
         }
 
-        private static async Task<UnitTestResult> RunInParallel(UnitTestInfo unitTest, UnitTestCollection testCollection,
-            TestSuiteConfiguration config)
+        private static async Task<UnitTestResult> RunInParallel(
+            UnitTestInfo unitTest, 
+            UnitTestCollection testCollection,
+            TestSuiteConfiguration config,
+            CancellationToken cancellationToken)
         {
             var ongoingTests = new List<Task<UnitTestBrowserResult>>(config.Browsers.Length);
             var browserResults = new List<UnitTestBrowserResult>(ongoingTests.Count);
@@ -76,7 +91,7 @@ namespace Autodash.Core
                 browserResults.Add(completed.Result);
                 ongoingTests.Remove(completed);
 
-                if (!completed.Result.Passed && completed.Result.Attempt < config.RetryAttempts)
+                if (!completed.Result.Passed && completed.Result.Attempt < config.RetryAttempts && !cancellationToken.IsCancellationRequested)
                 {
                     ongoingTests.Add(Task.Run(() => RunTest(
                         unitTest, testCollection, config,

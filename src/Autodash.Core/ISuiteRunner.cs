@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -8,7 +9,7 @@ namespace Autodash.Core
 {
     public interface ISuiteRunner
     {
-        Task<SuiteRun> Run(SuiteRun run);
+        Task<SuiteRun> Run(SuiteRun run, CancellationToken cancellationToken);
     }
 
     public class UnitTestResult
