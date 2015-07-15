@@ -39,9 +39,37 @@ namespace Autodash.Core.Tests
         }
 
         [Fact]
-        public void Foo()
+        public void NotQueryIsValid()
         {
-            var exp = DynamicExpression.Parse(typeof(bool), "true && false");
+            bool result = UnitTestTagSelector.Evaluate("NOT Foo", new[] { "Bar" });
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void NotWithBangCharQueryIsValid()
+        {
+            bool result = UnitTestTagSelector.Evaluate("!Foo", new[] { "Bar" });
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void AndOperatorAndNotOperatorQueryIsValid()
+        {
+            bool result = UnitTestTagSelector.Evaluate("Bar AND NOT Foo", new[] { "Bar" });
+            Assert.True(result);
+        }
+
+        [Theory]
+        [InlineData("(Bar && Zar) || !Zar", new[] { "Bar", "Zar" })]
+        [InlineData("(Bar AND Zar) OR NOT Zar", new[] { "Bar", "Zar" })]
+        [InlineData("(Bar && Zar) || !Zar", new[] { "Foo" })]
+        [InlineData("(Bar AND Zar) OR NOT Zar", new[] { "Foo" })]
+        [InlineData("!Bar && !Zar", new[] { "Foo" })]
+        [InlineData("NOT Bar AND NOT Zar", new[] { "Foo" })]
+        public void ComplexQueryShouldBeValid(string query, string[] tags)
+        {
+            bool result = UnitTestTagSelector.Evaluate(query, tags);
+            Assert.True(result);
         }
     }
 }

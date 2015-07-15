@@ -3,6 +3,8 @@
     var vm = new TestExplorer(suiteId);
     ko.applyBindings(vm, document.getElementById("test-explorer-container"));
 
+    $('[data-toggle="popover"]').popover();
+
     $("#js-test-tag-explorer").on("click", function (e) {
         e.preventDefault();
         $('#content-tabs a[href="#test-explorer"]').tab("show");

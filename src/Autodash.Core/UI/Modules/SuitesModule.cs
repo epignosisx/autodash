@@ -53,7 +53,8 @@ namespace Autodash.Core.UI.Modules
                     {
                         Browsers = vm.Browsers,
                         RetryAttempts = vm.RetryAttempts,
-                        TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes)
+                        TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes),
+                        EnableBrowserExecutionInParallel = vm.EnableBrowserExecutionInParallel
                     },
                     Schedule = vm.Time.HasValue ? new TestSuiteSchedule {
                         Time = vm.Time.Value,
@@ -97,7 +98,8 @@ namespace Autodash.Core.UI.Modules
                         Browsers = vm.Browsers,
                         RetryAttempts = vm.RetryAttempts,
                         TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes),
-                        TestAssembliesPath = existingSuite.Configuration.TestAssembliesPath
+                        TestAssembliesPath = existingSuite.Configuration.TestAssembliesPath,
+                        EnableBrowserExecutionInParallel = vm.EnableBrowserExecutionInParallel
                     },
                     Schedule = vm.Time.HasValue ? new TestSuiteSchedule
                     {

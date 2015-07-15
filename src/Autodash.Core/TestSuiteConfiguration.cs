@@ -8,5 +8,6 @@ namespace Autodash.Core
         public string TestAssembliesPath { get; set; }
         public TimeSpan TestTimeout { get; set; }
         public int RetryAttempts { get; set; }
+        public bool EnableBrowserExecutionInParallel { get; set; }
     }
 }
