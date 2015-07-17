@@ -1,10 +1,29 @@
-﻿function TestExplorer(suiteId) {
+﻿function TestExplorer(suiteId, selectedTestsVm) {
     var self = this;
+    self.selectedTestsVm = selectedTestsVm;
     self.suiteId = suiteId;
     self.unitTestCollections = ko.observableArray([]);
     self.query = ko.observable();
     self.error = ko.observable();
     self.tags = ko.observableArray([]);
+
+    self.totalTests = ko.computed(function () {
+        var index = 0;
+        ko.utils.arrayForEach(self.unitTestCollections(), function(coll) {
+            ko.utils.arrayForEach(coll.tests, function () {
+                index++;
+            });
+        });
+        return index;
+    });
+
+    self.addTest = function(testName) {
+        self.selectedTestsVm.addTest(testName);
+    };
+
+    self.removeTest = function(testName) {
+        self.selectedTestsVm.removeTest(testName);
+    }
 
     self.submitQuery = function () {
         self.fetch();
@@ -42,6 +61,35 @@
     self.handleTagVisualization = function () {
         $("#test-tags-tree-map-modal").modal("show");
     }
+
+    self.fetch();
+}
+
+function SelectedTests(suiteId) {
+    self.suiteId = suiteId;
+    self.tests = ko.observableArray([]);
+
+    self.addTest = function(testName) {
+        self.tests.push(testName);
+    }
+
+    self.removeTest = function(testName) {
+        self.tests.remove(testName);
+    }
+
+    self.update = function() {
+        $.ajax({
+            url: "/suites/tests/update",
+            type: "POST",
+            data: JSON.stringify({ id: suiteId, tests: self.tests() })
+        }).done(self.fetch);
+    }
+
+    self.fetch = function() {
+        $.getJSON("/suites/" + self.suiteId + "/tests", function(response) {
+            self.tests(response.Data.Tests);
+        });
+    };
 
     self.fetch();
 }

@@ -115,6 +115,17 @@ namespace Autodash.Core.UI.Modules
                 return Response.AsRedirect("/suites/" + suite.Id);
             };
 
+            Post["/suites/tests/update", true] = async (parameters, ct) =>
+            {
+                var vm = this.Bind<UpdateSuiteTestsVm>();
+                var database = container.Resolve<IMongoDatabase>();
+                var existingSuite = await database.GetSuiteByIdAsync(vm.Id);
+                existingSuite.Configuration.SelectedTests = vm.Tests.ToArray();
+                var queryById = Builders<TestSuite>.Filter.Eq(n => n.Id, vm.Id);
+                await database.GetCollection<TestSuite>("TestSuite").FindOneAndReplaceAsync(queryById, existingSuite);
+                return Response.AsJson(new { Success = true });
+            };
+
             Post["/suites/delete", true] = async (x, ct) =>
             {
                 var database = container.Resolve<IMongoDatabase>();
@@ -206,7 +217,7 @@ namespace Autodash.Core.UI.Modules
 
                 foreach (var coll in unitTestCollections)
                 {
-                    UnitTestCollectionVm collVm = new UnitTestCollectionVm
+                    var collVm = new UnitTestCollectionVm
                     {
                         AssemblyName = coll.AssemblyName.Split(',')[0],
                         TestRunnerName = coll.Runner.TestRunnerName,

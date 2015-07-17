@@ -3,30 +3,44 @@
     Layout = "";
 }
 
-<div id="test-explorer-container">
-    <div class="form-inline">
-        <label>Test Tags Query:</label> <input type="text" class="form-control" placeholder="Ex: P1 && (US || UK)" style="width: 300px" data-bind="value: query" />
-        <button class="btn btn-primary" data-bind="click: submitQuery">Filter</button>
-        <span class="text-danger" data-bind="text: error"></span> <a href="#" data-bind="click: showTreeMap">See Test Tags tree map</a>
+<div id="test-explorer-container" data-bind="with: testExplorer">
+    <div class="row">
+        <div class="col-md-7">
+            <div class="form-inline">
+                <label>Test Tags Query:</label> <input type="text" class="form-control" placeholder="Ex: P1 AND (US OR UK)" style="width: 300px" data-bind="value: query" />
+                <button class="btn btn-primary" data-bind="click: submitQuery">Filter</button>
+                <span class="text-danger" data-bind="text: error"></span>
+                <a href="#" data-bind="click: showTreeMap">See Test Tags tree map</a>
+            </div>
+        </div>
+        <div class="col-md-5 text-right">
+            <span>Found:</span> <span data-bind="text: totalTests">XX</span>
+        </div>
     </div>
+
     <div data-bind="foreach: unitTestCollections">
         <h4><span data-bind="text: assemblyName"></span> <small data-bind="text: testRunnerName"></small></h4>
         <table class="table table-condensed test-explorer-table">
             <thead>
                 <tr>
+                    <th></th>
                     <th>Test Name</th>
                     <th>Test Tags</th>
                 </tr>
             </thead>
             <tbody data-bind="foreach: tests">
                 <tr>
+                    <td>
+                        <a href="#" class="glyphicon glyphicon-plus-sign" data-bind="click: $root.testExplorer.addTest(testName)"></a>
+                        <a href="#" class="glyphicon glyphicon-minus-sign text-danger" data-bind="click: $root.testExplorer.removeTest(testName)"></a>
+                    </td>
                     <td class="test-name" data-bind="text: testName"></td>
                     <td class="test-tags" data-bind="text: $root.formatTestTags(testTags)"></td>
                 </tr>
             </tbody>
         </table>
     </div>
-    
+
     <div class="modal fade" id="test-tags-tree-map-modal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">

@@ -20,6 +20,7 @@
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist" id="content-tabs">
         <li role="presentation" class="active"><a href="#details" aria-controls="details" role="tab" data-toggle="tab">Details</a></li>
+        <li role="presentation"><a href="#suite-tests" aria-controls="suite tests" role="tab" data-toggle="tab">Selected Tests</a></li>
         <li role="presentation"><a href="#test-explorer" aria-controls="test explorer" role="tab" data-toggle="tab">Test Explorer</a></li>
         <li role="presentation"><a href="#suite-runs" aria-controls="suite runs" role="tab" data-toggle="tab">Suite Runs</a></li>
     </ul>
@@ -91,6 +92,9 @@
 
             </form>
         </div>
+        <div role="tabpanel" class="tab-pane mt10" id="suite-tests">
+            @Html.Partial("_SuiteTests", Model.Suite)
+        </div>
         <div role="tabpanel" class="tab-pane mt10" id="test-explorer">
             @Html.Partial("_TestExplorer")
         </div>
@@ -102,7 +106,7 @@
 </div>
 
 @section scripts{
-    <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
+    <script src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.debug.js"></script>
     <script src="/assets/js/test-explorer.js"></script>
     <script src="/assets/js/suite-details.js"></script>
     <script src="/assets/js/suite-runs.js"></script>

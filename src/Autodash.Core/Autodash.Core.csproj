@@ -166,6 +166,9 @@
     <Content Include="UI\Views\SuiteRunDetails.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="UI\Views\_SuiteTests.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="UI\Content\main.css">

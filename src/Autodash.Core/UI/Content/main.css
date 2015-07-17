@@ -197,6 +197,22 @@ a.thumbnail.active {
 }
 /*End Bootstrap overrides*/
 
+.glyphicon {
+    text-decoration: none !important;
+}
+.bg-success{
+    background-color:#5cb85c;
+}
+.bg-danger{
+    background-color: #d9534f;
+}
+.text-success {
+    color:#5cb85c;
+}
+.text-danger {
+    color: #d9534f;
+}
+
 .main-content{
     padding-top:50px;
 }
@@ -212,14 +228,6 @@ a.thumbnail.active {
     max-width: 50px;
     text-align: center;
     cursor: pointer;
-}
-.browser-result.bg-success,
-.bg-success-strong {
-    background-color:#5cb85c;
-}
-.browser-result.bg-danger,
-.bg-danger-strong {
-    background-color: #d9534f;
 }
 .browser-result-details th {
     width: 200px;

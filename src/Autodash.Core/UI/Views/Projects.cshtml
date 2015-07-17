@@ -26,7 +26,7 @@
                         Last runs:
                         @foreach (var run in proj.SuiteRuns)
                         {
-                            <span class="circle glyphicon @(run.Passed ? "bg-success-strong" : "bg-danger-strong")" title="@run.ToString()"></span>
+                            <span class="circle glyphicon @(run.Passed ? "bg-success" : "bg-danger")" title="@run.ToString()"></span>
                         }
                         @if (proj.SuiteRuns.Count == 0)
                         {

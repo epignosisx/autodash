@@ -1,7 +1,14 @@
 ﻿$(function () {
     var suiteId = $("#Id").val();
-    var vm = new TestExplorer(suiteId);
-    ko.applyBindings(vm, document.getElementById("test-explorer-container"));
+    var testSelectionVm = new SelectedTests(suiteId);
+    var testExplorerVm = new TestExplorer(suiteId);
+
+    var vm = {
+        testSelection: testSelectionVm,
+        testExplorer: testExplorerVm
+    };
+
+    ko.applyBindings(vm, document.body);
 
     $('[data-toggle="popover"]').popover();
 

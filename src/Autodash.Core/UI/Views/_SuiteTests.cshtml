@@ -1,0 +1,22 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.TestSuite>
+@{
+    Layout = "";
+}
+
+<table class="table table-condensed" data-bind="with: testSelection">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Test Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var test in Model.Configuration.SelectedTests ?? new string[0])
+        {
+            <tr>
+                <td><a href="#" class="glyphicon glyphicon-minus-sign text-danger"></a></td>
+                <td>@test</td>
+            </tr>
+        }
+    </tbody>
+</table>
