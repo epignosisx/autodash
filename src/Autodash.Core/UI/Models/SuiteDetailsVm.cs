@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Web.Management;
+using Nancy.Helpers;
 
 namespace Autodash.Core.UI.Models
 {
@@ -55,23 +56,25 @@ namespace Autodash.Core.UI.Models
 
         public static string StatusColored(this SuiteRun run)
         {
+            string title = null;
             if (run.Status == SuiteRunStatus.Complete)
             {
                 if(run.Result.Passed)
-                    return "<span class='label label-success'>Complete</span>";
-                return "<span class='label label-danger'>Complete</span>";
+                    title = "<span class='label label-success' title='{0}'>Complete</span>";
+                else
+                    title = "<span class='label label-danger' title='{0}'>Complete</span>";
             }
-
-            if (run.Status == SuiteRunStatus.Scheduled)
+            else if (run.Status == SuiteRunStatus.Scheduled)
             {
-                return "<span class='label label-info'>Scheduled</span>";
+                title = "<span class='label label-info' title='{0}'>Scheduled</span>";
             }
-
-            if (run.Status == SuiteRunStatus.Running)
+            else if (run.Status == SuiteRunStatus.Running)
             {
-                return "<span class='label label-primary'>Running</span>";
+                title = "<span class='label label-primary' title='{0}'>Running</span>";
             }
 
+            if(!string.IsNullOrEmpty(title))
+                return string.Format(title, HttpUtility.HtmlAttributeEncode(run.Result.Details));
             return "";
         }
     }

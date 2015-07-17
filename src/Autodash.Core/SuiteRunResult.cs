@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Autodash.Core
@@ -30,17 +29,16 @@ namespace Autodash.Core
             }
         }
 
-        public string Status { get; set; }
         public string Details { get; set; }
+        public string Status { get; set; }
         public UnitTestCollectionResult[] CollectionResults { get; set; }
 
         public SuiteRunResult()
         {
         }
 
-        public SuiteRunResult(string status, string details)
+        public SuiteRunResult(string details)
         {
-            Status = status;
             Details = details;
         }
     }

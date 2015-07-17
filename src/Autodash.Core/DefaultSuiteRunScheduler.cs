@@ -141,13 +141,19 @@ namespace Autodash.Core
             return _runningSuite;
         }
 
-        public void CancelRunningSuite()
+        public bool TryCancelRunningSuite(string id)
         {
             lock (_cancelSourceLock)
             {
-                if (_runningSuiteCancelSource != null)
-                    _runningSuiteCancelSource.Cancel();    
+                if (_runningSuiteCancelSource != null && 
+                    _runningSuite != null &&
+                    _runningSuite.Id == id)
+                {
+                    _runningSuiteCancelSource.Cancel();
+                    return true;
+                }    
             }
+            return false;
         }
     }
 
@@ -178,7 +184,7 @@ namespace Autodash.Core
             var updateBuilder = Builders<SuiteRun>.Update;
             var updateDef = updateBuilder.Set(n => n.Status, SuiteRunStatus.Complete)
                 .Set(n => n.CompletedOn, DateTime.UtcNow)
-                .Set(n => n.Result, new SuiteRunResult("Did not complete", "Application stopped working. Running suites are stopped."));
+                .Set(n => n.Result, new SuiteRunResult("Did not complete. Application stopped working. Running suites were stopped."));
 
             await runColl.UpdateManyAsync(runningFilter, updateDef);
         }
@@ -188,7 +194,7 @@ namespace Autodash.Core
             var coll = _db.GetCollection<TestSuite>("TestSuite");
             var filter = new BsonDocument();//get all
 
-            List<TestSuite> suites = new List<TestSuite>();
+            var suites = new List<TestSuite>();
 
             using (var cursor = await coll.FindAsync(filter))
             {

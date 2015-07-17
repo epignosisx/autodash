@@ -25,25 +25,31 @@ namespace Autodash.Core
             if (run.Result != null)
                 return await Task.FromResult(run);
 
+            run.Result = new SuiteRunResult
+            {
+                CollectionResults = new UnitTestCollectionResult[testColls.Length]
+            };
+
+            for (int i = 0; i < testColls.Length;i++)
+            {
+                run.Result.CollectionResults[i] = new UnitTestCollectionResult
+                {
+                    AssemblyName = testColls[i].AssemblyName,
+                    UnitTestResults = new List<UnitTestResult>()
+                };
+            }
+
             TestSuiteConfiguration config = run.TestSuiteSnapshot.Configuration;
             string testTagsQuery = config.TestTagsQuery;
-            
-            var results = new UnitTestCollectionResult[testColls.Length];
-
-            run.Result = new SuiteRunResult();
-            run.Result.CollectionResults = results;
 
             int index = 0;
             foreach (UnitTestCollection testColl in testColls)
             {
-                var collResult = new UnitTestCollectionResult();
-                collResult.AssemblyName = testColl.AssemblyName;
-                collResult.UnitTestResults = new List<UnitTestResult>();
+                var collResult = run.Result.CollectionResults[index];
                 foreach (UnitTestInfo test in testColl.Tests)
                 {
                     if (cancellationToken.IsCancellationRequested)
                     {
-                        run.Result.Status = "Suite Run was cancelled.";
                         run.Result.Details = "Suite Run was cancelled during execution.";
                         return run;
                     }
@@ -55,8 +61,8 @@ namespace Autodash.Core
                     }
                     catch (Exception ex)
                     {
-                        run.Result.Status = "Failed to evaluate test tag query";
-                        run.Result.Details = "Review test tag query for invalid query." + Environment.NewLine + ex.ToString();
+                        //TODO: log
+                        run.Result.Details = "Failed to evaluate test tag query. Review test tag query for invalid query.";
                         return run;
                     }
                     
@@ -66,12 +72,9 @@ namespace Autodash.Core
                         collResult.UnitTestResults.Add(result);
                     }
                 }
-
-                results[index++] = collResult;
             }
-            
-            run.Result.Status = "Ran to Completion";
-            run.Result.Details = string.Format("Passed: {0}. Failed: {1}", run.Result.PassedTotal, run.Result.FailedTotal);
+
+            run.Result.Details = "Ran to Completion";
             return run;
         }
 
@@ -81,9 +84,10 @@ namespace Autodash.Core
             string testAssembliesPath = config.TestAssembliesPath;
             if(!Directory.Exists(testAssembliesPath))
             {
-                run.Result = new SuiteRunResult();
-                run.Result.Status = "Failed to Start";
-                run.Result.Details = "Test assemblies not found at: " + testAssembliesPath;
+                run.Result = new SuiteRunResult
+                {
+                    Details = "Failed to Start. Test assemblies not found at: " + testAssembliesPath
+                };
                 return Enumerable.Empty<UnitTestCollection>();
             }
 

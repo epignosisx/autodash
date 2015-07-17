@@ -117,15 +117,20 @@
     <Compile Include="UI\Modules\RunsModule.cs" />
     <Compile Include="UI\Modules\SuitesModule.cs" />
     <Compile Include="UI\RazorConfig.cs" />
+    <Compile Include="UnitTestBrowserResult.cs" />
     <Compile Include="UnitTestCollection.cs" />
     <Compile Include="UnitTestCollectionResult.cs" />
     <Compile Include="UnitTestDiscovererProvider.cs" />
     <Compile Include="UnitTestInfo.cs" />
+    <Compile Include="UnitTestResult.cs" />
     <Compile Include="UnitTestTagSelector.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <Content Include="UI\Content\js\suite-details.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\Content\js\suite-runs.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="UI\Content\js\test-explorer.js">

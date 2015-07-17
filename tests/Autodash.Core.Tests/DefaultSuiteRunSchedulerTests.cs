@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using Xunit;
@@ -56,7 +57,7 @@ namespace Autodash.Core.Tests
             repo.Received().GetTestSuitesWithScheduleAsync().IgnoreAwaitForNSubstituteAssertion();
             repo.Received().FailRunningSuitesAsync().IgnoreAwaitForNSubstituteAssertion();
             repo.Received().GetScheduledSuiteRunsAsync().IgnoreAwaitForNSubstituteAssertion();
-            runner.DidNotReceive().Run(Arg.Any<SuiteRun>()).IgnoreAwaitForNSubstituteAssertion(); ;
+            runner.DidNotReceive().Run(Arg.Any<SuiteRun>(), Arg.Any<CancellationToken>()).IgnoreAwaitForNSubstituteAssertion(); ;
         }
 
         [Fact]
@@ -85,7 +86,7 @@ namespace Autodash.Core.Tests
             repo.Received().GetTestSuitesWithScheduleAsync().IgnoreAwaitForNSubstituteAssertion();
             repo.Received().FailRunningSuitesAsync().IgnoreAwaitForNSubstituteAssertion();
             repo.Received().GetScheduledSuiteRunsAsync().IgnoreAwaitForNSubstituteAssertion();
-            runner.Received().Run(Arg.Any<SuiteRun>()).IgnoreAwaitForNSubstituteAssertion();
+            runner.Received().Run(Arg.Any<SuiteRun>(), Arg.Any<CancellationToken>()).IgnoreAwaitForNSubstituteAssertion();
         }
         
     }

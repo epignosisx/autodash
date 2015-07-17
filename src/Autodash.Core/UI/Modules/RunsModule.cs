@@ -36,6 +36,17 @@ namespace Autodash.Core.UI.Modules
 
                 return View["SuiteRunDetails", vm].WithHeader("Content-Disposition", disposition);
             };
+
+            Post["/runs/cancel"] = x =>
+            {
+                var scheduler = container.Resolve<ISuiteRunScheduler>();
+                string id = Request.Form.id;
+                if (string.IsNullOrEmpty(id))
+                    return Response.AsJson(new {Success = false}).WithStatusCode(HttpStatusCode.BadRequest);
+
+                bool success = scheduler.TryCancelRunningSuite(Request.Form.id);
+                return Response.AsJson(new {Success = success});
+            };
         }
 
         private static async Task<SuiteRunDetailsVm> GetSuiteRunVm(TinyIoCContainer container, string id)

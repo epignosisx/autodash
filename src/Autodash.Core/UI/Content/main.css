@@ -247,3 +247,7 @@ a.thumbnail.active {
     position: relative;
     top: 3px;
 }
+.cancel-suite-run {
+    text-decoration: none !important;
+    color: #333;
+}

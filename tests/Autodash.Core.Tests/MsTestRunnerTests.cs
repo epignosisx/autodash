@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -18,7 +19,7 @@ namespace Autodash.Core.Tests
                 TestAssembliesPath = Environment.CurrentDirectory
             };
 
-            UnitTestResult result = await subject.Run(unitTest, coll, config);
+            UnitTestResult result = await subject.Run(unitTest, coll, config, CancellationToken.None);
 
             Assert.True(result.Passed);
             Assert.False(File.Exists(Path.Combine(Environment.CurrentDirectory, "Autodash.MsTest.ValidTests.UnitTest1.SuccessTest_Chrome.bat")));
@@ -37,7 +38,7 @@ namespace Autodash.Core.Tests
                 TestAssembliesPath = Environment.CurrentDirectory
             };
 
-            UnitTestResult result = await subject.Run(unitTest, coll, config);
+            UnitTestResult result = await subject.Run(unitTest, coll, config, CancellationToken.None);
 
             Assert.False(result.Passed);
             Assert.False(File.Exists(Path.Combine(Environment.CurrentDirectory, "Autodash.MsTest.ValidTests.UnitTest1.SuccessTest_Chrome.bat")));
@@ -56,7 +57,7 @@ namespace Autodash.Core.Tests
                 TestAssembliesPath = Environment.CurrentDirectory
             };
 
-            UnitTestResult result = await subject.Run(unitTest, coll, config);
+            UnitTestResult result = await subject.Run(unitTest, coll, config, CancellationToken.None);
 
             Assert.True(result.Passed);
         }

@@ -6,6 +6,6 @@ namespace Autodash.Core
         Task Start();
         Task<SuiteRun> Schedule(TestSuite suite);
         SuiteRun GetRunningSuite();
-        void CancelRunningSuite();
+        bool TryCancelRunningSuite(string id);
     }
 }

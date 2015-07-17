@@ -21,7 +21,13 @@
             <tr>
                 <td>@run.ScheduledFor</td>
                 <td>@run.DurationFriendly()</td>
-                <td>@Html.Raw(run.StatusColored())</td>
+                <td>
+                    @Html.Raw(run.StatusColored())
+                    @if (run.Status == Autodash.Core.SuiteRunStatus.Running)
+                    {
+                        <a href="#" class="glyphicon glyphicon-stop cancel-suite-run" data-id="@run.Id" title="Cancel Suite Run"></a>
+                    }
+                </td>
                 <td>@run.PassedFailed()</td>
                 <td><a href="/runs/@run.Id/report">View</a> | <a href="/runs/@run.Id/report.html">Download</a></td>
             </tr>
