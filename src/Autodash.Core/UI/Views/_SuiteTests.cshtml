@@ -10,13 +10,10 @@
             <th>Test Name</th>
         </tr>
     </thead>
-    <tbody>
-        @foreach (var test in Model.Configuration.SelectedTests ?? new string[0])
-        {
-            <tr>
-                <td><a href="#" class="glyphicon glyphicon-minus-sign text-danger"></a></td>
-                <td>@test</td>
-            </tr>
-        }
+    <tbody data-bind="foreach: tests">
+        <tr>
+            <td><a href="#" class="glyphicon glyphicon-minus-sign text-danger" data-bind="click: $parent.removeTest.bind($data, $data)"></a></td>
+            <td data-bind="text: $data"></td>
+        </tr>
     </tbody>
 </table>

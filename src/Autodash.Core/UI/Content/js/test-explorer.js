@@ -25,6 +25,10 @@
         self.selectedTestsVm.removeTest(testName);
     }
 
+    self.containsTest = function(testName) {
+        return self.selectedTestsVm.containsTest(testName);
+    }
+
     self.submitQuery = function () {
         self.fetch();
     };
@@ -66,15 +70,32 @@
 }
 
 function SelectedTests(suiteId) {
+    var self = this;
     self.suiteId = suiteId;
     self.tests = ko.observableArray([]);
 
-    self.addTest = function(testName) {
-        self.tests.push(testName);
+    self.addTest = function (testName) {
+        if (!self.containsTest(testName)) {
+            self.tests.push(testName);
+            self.update();
+        }
+    }
+
+    self.containsTest = function(testName){
+        var arr = self.tests(), temp;
+        for (var i = 0; i < arr.length; i++) {
+            temp = arr[i];
+            if (temp === testName) {
+                return true;
+            }
+        }
+        return false;
     }
 
     self.removeTest = function(testName) {
-        self.tests.remove(testName);
+        if (self.containsTest(testName)) {
+            self.tests.remove(testName);
+        }
     }
 
     self.update = function() {
@@ -82,7 +103,7 @@ function SelectedTests(suiteId) {
             url: "/suites/tests/update",
             type: "POST",
             data: JSON.stringify({ id: suiteId, tests: self.tests() })
-        }).done(self.fetch);
+        });
     }
 
     self.fetch = function() {

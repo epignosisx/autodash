@@ -1,7 +1,7 @@
 ﻿$(function () {
     var suiteId = $("#Id").val();
     var testSelectionVm = new SelectedTests(suiteId);
-    var testExplorerVm = new TestExplorer(suiteId);
+    var testExplorerVm = new TestExplorer(suiteId, testSelectionVm);
 
     var vm = {
         testSelection: testSelectionVm,

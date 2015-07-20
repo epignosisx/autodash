@@ -31,11 +31,11 @@
             <tbody data-bind="foreach: tests">
                 <tr>
                     <td>
-                        <a href="#" class="glyphicon glyphicon-plus-sign" data-bind="click: $root.testExplorer.addTest(testName)"></a>
-                        <a href="#" class="glyphicon glyphicon-minus-sign text-danger" data-bind="click: $root.testExplorer.removeTest(testName)"></a>
+                        <a href="#" class="glyphicon glyphicon-plus-sign" data-bind="visible: $parents[1].containsTest(testName) == false, click: $parents[1].addTest.bind($data, testName)"></a>
+                        <a href="#" class="glyphicon glyphicon-minus-sign text-danger" data-bind="visible: $parents[1].containsTest(testName), click: $parents[1].removeTest.bind($data, testName)"></a>
                     </td>
                     <td class="test-name" data-bind="text: testName"></td>
-                    <td class="test-tags" data-bind="text: $root.formatTestTags(testTags)"></td>
+                    <td class="test-tags" data-bind="text: $parents[1].formatTestTags(testTags)"></td>
                 </tr>
             </tbody>
         </table>
