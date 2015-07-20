@@ -16,7 +16,6 @@
         <strong>Duration:</strong> @Model.SuiteRun.Duration.ToString(@"hh\:mm\:ss")
     </p>
     <p><strong>Status:</strong> @Model.SuiteRun.Result.Details</p>
-    <p><strong>Test Tags Query:</strong> @(Model.SuiteRun.TestSuiteSnapshot.Configuration.TestTagsQuery ?? "None")</p>
 </div>
 
 <div class="row">

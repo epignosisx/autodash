@@ -94,7 +94,6 @@ namespace Autodash.Core.UI.Modules
                     Name = vm.SuiteName,
                     Configuration = new TestSuiteConfiguration
                     {
-                        TestTagsQuery = vm.TestTagsQuery,
                         Browsers = vm.Browsers,
                         RetryAttempts = vm.RetryAttempts,
                         TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes),

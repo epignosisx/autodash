@@ -6,6 +6,7 @@
     self.query = ko.observable();
     self.error = ko.observable();
     self.tags = ko.observableArray([]);
+    self.queryInProgress = ko.observable(false);
 
     self.totalTests = ko.computed(function () {
         var index = 0;
@@ -28,7 +29,12 @@
     }
 
     self.submitQuery = function () {
-        self.fetch();
+        if (!self.queryInProgress()) {
+            self.queryInProgress(true);
+            self.fetch().always(function() {
+                self.queryInProgress(false);
+            });
+        }
     };
 
     self.fetch = function () {
@@ -139,7 +145,7 @@ ko.bindingHandlers.visualizeTag = {
     update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
         var obs = valueAccessor();
         $(element).html("");
-        $("<div class='bg-success-strong'>")
+        $("<div class='bg-success'>")
             .css({
                 "height": "18px",
                 "width": obs.percentage + "%"

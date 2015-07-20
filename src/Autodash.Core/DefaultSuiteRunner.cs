@@ -40,8 +40,7 @@ namespace Autodash.Core
             }
 
             TestSuiteConfiguration config = run.TestSuiteSnapshot.Configuration;
-            string testTagsQuery = config.TestTagsQuery;
-
+            
             int index = 0;
             foreach (UnitTestCollection testColl in testColls)
             {
@@ -54,18 +53,7 @@ namespace Autodash.Core
                         return run;
                     }
 
-                    bool shouldRun = false;
-                    try
-                    {
-                        shouldRun = string.IsNullOrEmpty(testTagsQuery) || UnitTestTagSelector.Evaluate(testTagsQuery, test.TestTags);
-                    }
-                    catch (Exception ex)
-                    {
-                        //TODO: log
-                        run.Result.Details = "Failed to evaluate test tag query. Review test tag query for invalid query.";
-                        return run;
-                    }
-                    
+                    bool shouldRun = config.SelectedTests == null || config.ContainsTest(test.TestName);
                     if(shouldRun)
                     {
                         UnitTestResult result = await testColl.Runner.Run(test, testColl, config, cancellationToken);

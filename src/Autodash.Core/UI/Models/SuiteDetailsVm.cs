@@ -74,7 +74,7 @@ namespace Autodash.Core.UI.Models
             }
 
             if(!string.IsNullOrEmpty(title))
-                return string.Format(title, HttpUtility.HtmlAttributeEncode(run.Result.Details));
+                return string.Format(title, HttpUtility.HtmlAttributeEncode(run.Result == null ? "" : run.Result.Details));
             return "";
         }
     }
