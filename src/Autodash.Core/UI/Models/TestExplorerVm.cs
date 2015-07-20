@@ -22,11 +22,13 @@ namespace Autodash.Core.UI.Models
     {
         public string TestName { get; set; }
         public string[] TestTags { get; set; }
+        public bool IsSelected { get; set; }
 
-        public UnitTestInfoVm(string testName, string[] testTags)
+        public UnitTestInfoVm(string testName, string[] testTags, bool isSelected)
         {
             TestName = testName;
             TestTags = testTags;
+            IsSelected = isSelected;
         }
         
     }

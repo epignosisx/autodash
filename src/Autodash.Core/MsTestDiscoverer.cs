@@ -28,7 +28,7 @@ namespace Autodash.Core
                         if(method.IsPublic && HasCustomAttribute(method, TestMethodFullName) && !HasCustomAttribute(method, IgnoreFullName))
                         {
                             string methodName = method.DeclaringType.FullName + "." + method.Name;
-                            string[] testCats = GetTestCategories(method).ToArray();
+                            string[] testCats = GetTestCategories(method).OrderBy(n => n).ToArray();
                             tests.Add(new UnitTestInfo(methodName, testCats));
                         }
                     }

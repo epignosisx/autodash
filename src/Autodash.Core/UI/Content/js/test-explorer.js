@@ -10,23 +10,21 @@
     self.totalTests = ko.computed(function () {
         var index = 0;
         ko.utils.arrayForEach(self.unitTestCollections(), function(coll) {
-            ko.utils.arrayForEach(coll.tests, function () {
+            ko.utils.arrayForEach(coll.tests(), function () {
                 index++;
             });
         });
         return index;
     });
 
-    self.addTest = function(testName) {
-        self.selectedTestsVm.addTest(testName);
+    self.addTest = function(test) {
+        self.selectedTestsVm.addTest(test.testName());
+        test.isSelected(true);
     };
 
-    self.removeTest = function(testName) {
-        self.selectedTestsVm.removeTest(testName);
-    }
-
-    self.containsTest = function(testName) {
-        return self.selectedTestsVm.containsTest(testName);
+    self.removeTest = function(test) {
+        self.selectedTestsVm.removeTest(test.testName());
+        test.isSelected(false);
     }
 
     self.submitQuery = function () {
@@ -40,7 +38,8 @@
     };
 
     self.handleResponse = function (data) {
-        self.unitTestCollections(data.unitTestCollections);
+        var obs = ko.mapping.fromJS(data.unitTestCollections)();
+        self.unitTestCollections(obs);
     };
 
     self.handleError = function (xhr) {
@@ -95,6 +94,7 @@ function SelectedTests(suiteId) {
     self.removeTest = function(testName) {
         if (self.containsTest(testName)) {
             self.tests.remove(testName);
+            self.update();
         }
     }
 
@@ -102,13 +102,14 @@ function SelectedTests(suiteId) {
         $.ajax({
             url: "/suites/tests/update",
             type: "POST",
+            contentType: "application/json",
             data: JSON.stringify({ id: suiteId, tests: self.tests() })
         });
     }
 
     self.fetch = function() {
         $.getJSON("/suites/" + self.suiteId + "/tests", function(response) {
-            self.tests(response.Data.Tests);
+            self.tests(response.tests);
         });
     };
 

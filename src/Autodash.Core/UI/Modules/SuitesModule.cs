@@ -115,6 +115,14 @@ namespace Autodash.Core.UI.Modules
                 return Response.AsRedirect("/suites/" + suite.Id);
             };
 
+            Get["/suites/{id}/tests", true] = async (parameters, ct) =>
+            {
+                var database = container.Resolve<IMongoDatabase>();
+                string id = parameters.id;
+                TestSuite suite = await database.GetSuiteByIdAsync(id);
+                return Response.AsJson(new { Tests = suite.Configuration.SelectedTests ?? new string[0] });
+            };
+
             Post["/suites/tests/update", true] = async (parameters, ct) =>
             {
                 var vm = this.Bind<UpdateSuiteTestsVm>();
@@ -163,14 +171,13 @@ namespace Autodash.Core.UI.Modules
                 string id = x.id;
                 var database = container.Resolve<IMongoDatabase>();
                 TestSuite suite = await database.GetSuiteByIdAsync(id);
-                string query = Request.Query.query;
                 if (suite == null)
                     return Response.AsJson(new { Error = "Suite not found" }, HttpStatusCode.NotFound);
 
                 var unitTestDiscoverer = container.Resolve<ITestSuiteUnitTestDiscoverer>();
                 UnitTestCollection[] unitTestCollections = unitTestDiscoverer.Discover(suite.Configuration.TestAssembliesPath).ToArray();
 
-                Dictionary<string, int> tagCount = new Dictionary<string, int>();
+                var tagCount = new Dictionary<string, int>();
                 
                 foreach (var test in unitTestCollections.SelectMany(n => n.Tests))
                 {
@@ -230,7 +237,11 @@ namespace Autodash.Core.UI.Modules
                         {
                             if (string.IsNullOrEmpty(query) || UnitTestTagSelector.Evaluate(query, test.TestTags))
                             {
-                                collVm.Tests.Add(new UnitTestInfoVm(test.TestName, test.TestTags));
+                                collVm.Tests.Add(new UnitTestInfoVm(
+                                    test.TestName, 
+                                    test.TestTags, 
+                                    suite.Configuration.ContainsTest(test.TestName)
+                                ));
                             }
                         }
                         catch
@@ -266,6 +277,7 @@ namespace Autodash.Core.UI.Modules
                 SuiteRun run = await scheduler.Schedule(suite);
                 return Response.AsJson(new { SuiteRunId = run.Id });
             };
+
         }
 
     }

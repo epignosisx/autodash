@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Autodash.Core
 {
     public class TestSuiteConfiguration
@@ -10,5 +13,12 @@ namespace Autodash.Core
         public int RetryAttempts { get; set; }
         public bool EnableBrowserExecutionInParallel { get; set; }
         public string[] SelectedTests { get; set; }
+
+        public bool ContainsTest(string methodName)
+        {
+            if (SelectedTests == null)
+                return false;
+            return SelectedTests.Contains(methodName);
+        }
     }
 }

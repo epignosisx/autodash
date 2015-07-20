@@ -5,7 +5,7 @@
 
 <div id="test-explorer-container" data-bind="with: testExplorer">
     <div class="row">
-        <div class="col-md-7">
+        <div class="col-md-9">
             <div class="form-inline">
                 <label>Test Tags Query:</label> <input type="text" class="form-control" placeholder="Ex: P1 AND (US OR UK)" style="width: 300px" data-bind="value: query" />
                 <button class="btn btn-primary" data-bind="click: submitQuery">Filter</button>
@@ -13,7 +13,7 @@
                 <a href="#" data-bind="click: showTreeMap">See Test Tags tree map</a>
             </div>
         </div>
-        <div class="col-md-5 text-right">
+        <div class="col-md-3 text-right">
             <span>Found:</span> <span data-bind="text: totalTests">XX</span>
         </div>
     </div>
@@ -31,11 +31,11 @@
             <tbody data-bind="foreach: tests">
                 <tr>
                     <td>
-                        <a href="#" class="glyphicon glyphicon-plus-sign" data-bind="visible: $parents[1].containsTest(testName) == false, click: $parents[1].addTest.bind($data, testName)"></a>
-                        <a href="#" class="glyphicon glyphicon-minus-sign text-danger" data-bind="visible: $parents[1].containsTest(testName), click: $parents[1].removeTest.bind($data, testName)"></a>
+                        <a href="#" class="glyphicon glyphicon-plus-sign" data-bind="visible: isSelected() == false, click: $parents[1].addTest.bind($data, $data)"></a>
+                        <a href="#" class="glyphicon glyphicon-minus-sign text-danger" data-bind="visible: isSelected, click: $parents[1].removeTest.bind($data, $data)"></a>
                     </td>
                     <td class="test-name" data-bind="text: testName"></td>
-                    <td class="test-tags" data-bind="text: $parents[1].formatTestTags(testTags)"></td>
+                    <td class="test-tags" data-bind="text: $parents[1].formatTestTags(testTags())"></td>
                 </tr>
             </tbody>
         </table>
