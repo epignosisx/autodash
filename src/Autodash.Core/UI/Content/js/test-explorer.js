@@ -65,6 +65,10 @@
         $("#test-tags-tree-map-modal").modal("show");
     }
 
+    self.selectedTestsVm.testsChanged.subscribe(function() {
+        self.fetch();
+    });
+
     self.fetch();
 }
 
@@ -72,15 +76,32 @@ function SelectedTests(suiteId) {
     var self = this;
     self.suiteId = suiteId;
     self.tests = ko.observableArray([]);
+    self.testsChanged = ko.observable();
 
-    self.addTest = function (testName) {
+    self.addTest = function(testName) {
         if (!self.containsTest(testName)) {
             self.tests.push(testName);
             self.update();
         }
     }
 
-    self.containsTest = function(testName){
+    self.removeTestHandler = function(testName) {
+        var promise = self.removeTest(testName);
+        if (promise != null) {
+            promise.done(function() {
+                self.testsChanged(+new Date);
+            });
+        }
+    };
+
+    self.removeTest = function(testName) {
+        if (self.containsTest(testName)) {
+            self.tests.remove(testName);
+            return self.update();
+        }
+    }
+
+    self.containsTest = function (testName) {
         var arr = self.tests(), temp;
         for (var i = 0; i < arr.length; i++) {
             temp = arr[i];
@@ -91,15 +112,8 @@ function SelectedTests(suiteId) {
         return false;
     }
 
-    self.removeTest = function(testName) {
-        if (self.containsTest(testName)) {
-            self.tests.remove(testName);
-            self.update();
-        }
-    }
-
     self.update = function() {
-        $.ajax({
+        return $.ajax({
             url: "/suites/tests/update",
             type: "POST",
             contentType: "application/json",
@@ -108,7 +122,7 @@ function SelectedTests(suiteId) {
     }
 
     self.fetch = function() {
-        $.getJSON("/suites/" + self.suiteId + "/tests", function(response) {
+        return $.getJSON("/suites/" + self.suiteId + "/tests", function(response) {
             self.tests(response.tests);
         });
     };

@@ -12,7 +12,7 @@
     </thead>
     <tbody data-bind="foreach: tests">
         <tr>
-            <td><a href="#" class="glyphicon glyphicon-minus-sign text-danger" data-bind="click: $parent.removeTest.bind($data, $data)"></a></td>
+            <td><a href="#" class="glyphicon glyphicon-minus-sign text-danger" data-bind="click: $parent.removeTestHandler.bind($data, $data)"></a></td>
             <td data-bind="text: $data"></td>
         </tr>
     </tbody>
