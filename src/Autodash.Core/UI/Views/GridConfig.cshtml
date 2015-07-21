@@ -1,0 +1,36 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.GridConfigVm>
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<h1>Selenium Grid</h1>
+
+<form method="post" enctype="application/x-www-form-urlencoded" action="/grid/config">
+
+    @Html.Partial("_ValidationSummary", Model.Errors)
+
+    <fieldset class="mt30">
+
+        <legend>Configuration</legend>
+        <div class="form-group">
+            <label for="HubUrl">Hub Url</label>
+            <input type="text" class="form-control" name="HubUrl" value="@Model.HubUrl" required maxlength="100" />
+            <p class="help-block">Enter the root url. Ex: http://www.the-selenium-grid:4444</p>
+        </div>
+
+    </fieldset>
+
+    <fieldset class="mt30">
+        <legend>Test Grid</legend>
+
+
+    </fieldset>
+
+    <button type="submit" class="btn btn-success">Submit</button>
+</form>
+
+@section scripts{
+    <script>
+
+    </script>
+}

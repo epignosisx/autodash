@@ -130,7 +130,7 @@ namespace Autodash.Core
             var suiteResult = await database.GetCollection<TestSuite>("TestSuite").DeleteOneAsync(testSuiteFilter);
         }
 
-        private static async Task<List<T>> ToListAsync<T>(this Task<IAsyncCursor<T>> cursorTask)
+        public static async Task<List<T>> ToListAsync<T>(this Task<IAsyncCursor<T>> cursorTask)
         {
             var cursor = await cursorTask;
             List<T> results = new List<T>();
@@ -140,6 +140,12 @@ namespace Autodash.Core
             }
 
             return results;
+        }
+
+        public static async Task<T> ToFirstOrDefaultAsync<T>(this Task<IAsyncCursor<T>> cursorTask)
+        {
+            var results = await cursorTask.ToListAsync();
+            return results.FirstOrDefault();
         }
     }
 }
