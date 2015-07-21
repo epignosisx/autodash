@@ -127,6 +127,8 @@
     <Compile Include="UnitTestInfo.cs" />
     <Compile Include="UnitTestResult.cs" />
     <Compile Include="UnitTestTagSelector.cs" />
+    <Compile Include="UpdateGridCommand.cs" />
+    <Compile Include="UpdateGridConfigValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

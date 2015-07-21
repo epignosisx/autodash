@@ -22,13 +22,13 @@ namespace Autodash.Core.UI.Modules
                 var filter = new BsonDocument();//get all
                 var results = await database.GetCollection<Project>("Project").FindAsync(filter);
 
-                List<Project> projects = new List<Project>();
+                var projects = new List<Project>();
                 while (await results.MoveNextAsync())
                 {
                     projects.AddRange(results.Current.ToList());
                 }
 
-                List<ProjectSuiteRunVm> projectRuns = new List<ProjectSuiteRunVm>(projects.Count);
+                var projectRuns = new List<ProjectSuiteRunVm>(projects.Count);
                 foreach (var project in projects)
                 {
                     var runs = await database.GetSuiteRunsByProjectIdAsync(project.Id, take: 10);
@@ -52,9 +52,9 @@ namespace Autodash.Core.UI.Modules
                 string projectId = x.id;
                 var database = container.Resolve<IMongoDatabase>();
 
-                var project = await database.GetProjectByIdAsync(projectId);
-                var suites = await database.GetSuitesByProjectIdAsync(projectId);
-                List<ProjectTestSuiteVm> suiteVms = new List<ProjectTestSuiteVm>(suites.Count);
+                Project project = await database.GetProjectByIdAsync(projectId);
+                List<TestSuite> suites = await database.GetSuitesByProjectIdAsync(projectId);
+                var suiteVms = new List<ProjectTestSuiteVm>(suites.Count);
                 foreach (var suite in suites)
                 {
                     var suiteRuns = await database.GetSuiteRunsBySuiteIdAsync(suite.Id, take: 10);
@@ -66,7 +66,7 @@ namespace Autodash.Core.UI.Modules
                     suiteVms.Add(suiteVm);
                 }
 
-                ProjectDetailsVm vm = new ProjectDetailsVm();
+                var vm = new ProjectDetailsVm();
                 vm.Project = project;
                 vm.Suites = suiteVms;
 

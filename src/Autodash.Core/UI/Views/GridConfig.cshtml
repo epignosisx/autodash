@@ -5,7 +5,7 @@
 
 <h1>Selenium Grid</h1>
 
-<form method="post" enctype="application/x-www-form-urlencoded" action="/grid/config">
+<form method="post" enctype="application/x-www-form-urlencoded" action="/grid">
 
     @Html.Partial("_ValidationSummary", Model.Errors)
 
@@ -14,23 +14,38 @@
         <legend>Configuration</legend>
         <div class="form-group">
             <label for="HubUrl">Hub Url</label>
-            <input type="text" class="form-control" name="HubUrl" value="@Model.HubUrl" required maxlength="100" />
+            <input type="text" class="form-control" name="HubUrl" value="@Model.HubUrl" required maxlength="150" />
             <p class="help-block">Enter the root url. Ex: http://www.the-selenium-grid:4444</p>
         </div>
 
     </fieldset>
-
-    <fieldset class="mt30">
-        <legend>Test Grid</legend>
-
-
-    </fieldset>
+    
+    @if (!string.IsNullOrEmpty(Model.HubUrl))
+    {
+        <fieldset class="mt30">
+            <legend>Grid Info</legend>
+            
+            <div class="row">
+                <div class="col-sm-5">
+                    <iframe src="@Model.GridVersion" style="margin-left:-8px;margin-top:-10px" height="100" width="300" seamless frameborder="0"></iframe>        
+                    <p><a href="@Model.GridConsole" target="_blank">Visit Grid Console</a></p>
+                </div>
+                <div class="col-sm-7">
+                    <pre id="grid-config"></pre>
+                </div>
+            </div>
+            
+        </fieldset>
+    }
 
     <button type="submit" class="btn btn-success">Submit</button>
 </form>
 
 @section scripts{
     <script>
-
+        @if(!string.IsNullOrEmpty(Model.JsonConfig))
+        {
+            <text>$("#grid-config").text(JSON.stringify(@Html.Raw(Model.JsonConfig), null, 2));</text>
+        }
     </script>
 }

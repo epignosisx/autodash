@@ -26,6 +26,7 @@ namespace Autodash.Core.UI
 
             existingContainer.Register<CreateProjectCommand>();
             existingContainer.Register<CreateSuiteCommand>();
+            existingContainer.Register<UpdateGridCommand>();
 
             JsonSettings.MaxJsonLength = int.MaxValue;
 
