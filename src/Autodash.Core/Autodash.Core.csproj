@@ -76,6 +76,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DefaultTestSuiteUnitTestDiscoverer.cs" />
+    <Compile Include="GridConsoleScraper.cs" />
+    <Compile Include="GridNodeInfo.cs" />
+    <Compile Include="IGridConsoleScraper.cs" />
     <Compile Include="ITestSuiteUnitTestDiscoverer.cs" />
     <Compile Include="MongoDatabaseExtensions.cs" />
     <Compile Include="MsTestExecutionReport.cs" />

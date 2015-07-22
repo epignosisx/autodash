@@ -8,6 +8,7 @@ using OpenQA.Selenium.Remote;
 
 namespace Autodash.MsTest.SeleniumTests
 {
+    //http://localhost:4444/grid/api/proxy?id=http://10.240.240.74:5555
     [TestClass]
     public class UnitTest1
     {
