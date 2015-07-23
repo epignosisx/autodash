@@ -63,7 +63,7 @@ namespace Autodash.MsTest.SeleniumTests
             var txt = driver.FindElement(By.Id("search-query"));
             txt.SendKeys("jewelry");
             txt.SendKeys(OpenQA.Selenium.Keys.Enter);
-            Thread.Sleep(10000);
+            Thread.Sleep(TimeSpan.FromSeconds(10));
             bool b = driver.Url.Contains("jewelry");
             Assert.IsTrue(b);
             driver.Quit();
