@@ -23,6 +23,15 @@ namespace Autodash.Core.Tests
                 Assert.NotNull(info.Protocol);
                 Assert.True(info.MaxInstances > 0);
             }
+
+
+            [Fact]
+            public static void InvalidNodeStringIsNotParsed()
+            {
+                GridNodeInfo info;
+                bool parsed = GridNodeInfo.TryParse("asdf", out info);
+                Assert.False(parsed);
+            }
         }
     }
 }
