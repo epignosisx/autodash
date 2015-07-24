@@ -9,6 +9,7 @@ namespace Autodash.Core
         public UpdateGridConfigValidator()
         {
             RuleFor(p => p.HubUrl).NotEmpty().SetValidator(new StringMustBeRootUrlValidator());
+            RuleFor(p => p.MaxParallelTestSuitesRunning).InclusiveBetween(0, 5);
         }
 
         class StringMustBeRootUrlValidator : PropertyValidator
@@ -19,7 +20,7 @@ namespace Autodash.Core
 
             protected override bool IsValid(PropertyValidatorContext context)
             {
-                string url = context.PropertyValue as string;
+                var url = context.PropertyValue as string;
                 if (string.IsNullOrEmpty(url))
                     return true;
 

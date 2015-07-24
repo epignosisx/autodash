@@ -9,5 +9,6 @@ namespace Autodash.Core
         public string Id { get; set; }
 
         public string HubUrl { get; set; }
+        public int MaxParallelTestSuitesRunning { get; set; }
     }
 }

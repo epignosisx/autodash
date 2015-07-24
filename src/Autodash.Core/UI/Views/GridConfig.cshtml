@@ -17,7 +17,11 @@
             <input type="text" class="form-control" name="HubUrl" value="@Model.HubUrl" required maxlength="150" />
             <p class="help-block">Enter the root url. Ex: http://www.the-selenium-grid:4444</p>
         </div>
-
+        <div class="form-group">
+            <label for="MaxParallelTestSuitesRunning">Maximum number of test suites running in parallel</label>
+            <input type="number" class="form-control" name="MaxParallelTestSuitesRunning" value="@Model.MaxParallelTestSuitesRunning" required maxlength="2" />
+            <p class="help-block">A high number of test suites running in parallel allows more test suites to run at the same time, but it will slow down each of the participating test suites.</p>
+        </div>
     </fieldset>
     
     @if (!string.IsNullOrEmpty(Model.HubUrl))

@@ -136,11 +136,6 @@ namespace Autodash.Core
             }
         }
 
-        public SuiteRun GetRunningSuite()
-        {
-            return _runningSuite;
-        }
-
         public bool TryCancelRunningSuite(string id)
         {
             lock (_cancelSourceLock)

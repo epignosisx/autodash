@@ -5,8 +5,8 @@ namespace Autodash.Core.UI.Models
     public class GridConfigVm
     {
         public string HubUrl { get; set; }
+        public int MaxParallelTestSuitesRunning { get; set; }
         public string JsonConfig { get; set; }
-
         public ValidationFailure[] Errors { get; set; }
 
         public string GridVersion {
@@ -25,6 +25,7 @@ namespace Autodash.Core.UI.Models
 
         public GridConfigVm()
         {
+            MaxParallelTestSuitesRunning = 1;
             Errors = new ValidationFailure[0];
         }
     }

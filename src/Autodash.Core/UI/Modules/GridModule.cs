@@ -28,8 +28,9 @@ namespace Autodash.Core.UI.Modules
                 if (config != null)
                 {
                     vm.HubUrl = config.HubUrl;
+                    vm.MaxParallelTestSuitesRunning = config.MaxParallelTestSuitesRunning;
                     
-                    using (WebClient webClient = new WebClient())
+                    using (var webClient = new WebClient())
                     {
                         try
                         {
@@ -48,7 +49,8 @@ namespace Autodash.Core.UI.Modules
                 
                 var config = new SeleniumGridConfiguration
                 {
-                    HubUrl = vm.HubUrl
+                    HubUrl = vm.HubUrl,
+                    MaxParallelTestSuitesRunning = vm.MaxParallelTestSuitesRunning
                 };
 
                 var cmd = container.Resolve<UpdateGridCommand>();
