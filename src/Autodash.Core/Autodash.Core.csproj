@@ -75,6 +75,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BoundedUpdatableCollection.cs" />
     <Compile Include="DefaultTestSuiteUnitTestDiscoverer.cs" />
     <Compile Include="DefaultGridConsoleScraper.cs" />
     <Compile Include="GridNodeBrowserInfo.cs" />

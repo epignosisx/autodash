@@ -14,62 +14,11 @@ namespace Autodash.Core
         bool TryCancelRunningSuite(string id);
     }
 
-    public class BoundedSuiteRunCollection
-    {
-        private readonly List<SuiteRun> _running = new List<SuiteRun>(5);
-        private int _currentCapacity;
-
-        public bool IsFull
-        {
-            get
-            {
-                lock (_running)
-                {
-                    return _running.Count >= _currentCapacity;
-                }
-            }
-        }
-
-        public void UpdateCapacity(int newCapacity)
-        {
-            Interlocked.Exchange(ref _currentCapacity, newCapacity);
-        }
-
-        public bool TryAdd(SuiteRun run)
-        {
-            lock(_running)
-            {
-                if (_running.Count < _currentCapacity)
-                {
-                    _running.Add(run);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public void Remove(SuiteRun run)
-        {
-            lock(_running)
-            {
-                _running.Remove(run);
-            }
-        }
-
-        public SuiteRun[] ToArray()
-        {
-            lock(_running)
-            {
-                return _running.ToArray();
-            }
-        }
-    }
-
     public class ParallelSuiteRunScheduler : ISuiteRunScheduler
     {
         private readonly ISuiteRunSchedulerRepository _repository;
         private readonly ConcurrentQueue<SuiteRun> _onDemandQueue = new ConcurrentQueue<SuiteRun>();
-        private readonly BoundedSuiteRunCollection _runningSuiteRuns = new BoundedSuiteRunCollection();
+        private readonly BoundedUpdatableCollection<RunnerSuiteRunContext> _runningSuiteRuns = new BoundedUpdatableCollection<RunnerSuiteRunContext>();
 
         private readonly List<TestSuite> _scheduledSuites = new List<TestSuite>();
         private readonly Timer _nextRunTimer;
@@ -187,5 +136,18 @@ namespace Autodash.Core
         }
     }
 
-    public class SuiteRun
+    public class RunnerSuiteRunContext
+    {
+        private readonly SuiteRun _run;
+        private readonly CancellationToken _cancellationToken;
+
+        public RunnerSuiteRunContext(SuiteRun run, CancellationToken cancellationToken)
+        {
+            if (run == null) 
+                throw new ArgumentNullException("run");
+            
+            _run = run;
+            _cancellationToken = cancellationToken;
+        }
+    }
 }
