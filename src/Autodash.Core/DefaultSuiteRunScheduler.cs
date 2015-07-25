@@ -159,6 +159,7 @@ namespace Autodash.Core
         Task<List<SuiteRun>> GetScheduledSuiteRunsAsync();
         Task AddSuiteRunAsync(SuiteRun run);
         Task UpdateSuiteRunAsync(SuiteRun run);
+        Task<SeleniumGridConfiguration> GetGridConfigurationAsync();
     }
 
     public class DefaultSuiteRunSchedulerRepository : ISuiteRunSchedulerRepository
@@ -230,6 +231,16 @@ namespace Autodash.Core
             var filterById = queryBuilder.Eq(n => n.Id, run.Id);
 
             return runColl.ReplaceOneAsync(filterById, run);
+        }
+
+
+        public Task<SeleniumGridConfiguration> GetGridConfigurationAsync()
+        {
+            var config = _db.GetCollection<SeleniumGridConfiguration>("SeleniumGridConfiguration")
+                   .FindAsync(new BsonDocument())
+                   .ToFirstOrDefaultAsync();
+
+            return config;
         }
     }
 }
