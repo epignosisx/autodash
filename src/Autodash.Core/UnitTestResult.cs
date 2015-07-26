@@ -14,6 +14,11 @@ namespace Autodash.Core
             BrowserResults = new List<UnitTestBrowserResult>();
         }
 
+        public UnitTestResult(string testName) : this()
+        {
+            TestName = testName;
+        }
+
         [BsonIgnore]
         public bool Passed
         {

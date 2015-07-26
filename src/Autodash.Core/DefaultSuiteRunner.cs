@@ -44,7 +44,7 @@ namespace Autodash.Core
             int index = 0;
             foreach (UnitTestCollection testColl in testColls)
             {
-                var collResult = run.Result.CollectionResults[index];
+                var collResult = run.Result.CollectionResults[index++];
                 foreach (UnitTestInfo test in testColl.Tests)
                 {
                     if (cancellationToken.IsCancellationRequested)

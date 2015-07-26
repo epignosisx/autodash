@@ -17,5 +17,6 @@ namespace Autodash.Core
         {
             get { return UnitTestResults.All(n => n.Passed); }
         }
+
     }
 }

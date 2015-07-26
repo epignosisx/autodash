@@ -10,4 +10,5 @@ namespace Autodash.Core
             RuleFor(p => p.Description).Length(0, 500);
         }
     }
+
 }

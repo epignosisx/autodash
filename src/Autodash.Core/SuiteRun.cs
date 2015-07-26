@@ -30,6 +30,18 @@ namespace Autodash.Core
             get { return Duration.TotalMinutes; } 
         }
 
+        public void MarkAsRunning()
+        {
+            StartedOn = DateTime.UtcNow;
+            Status = SuiteRunStatus.Running;
+        }
+
+        public void MarkAsCompleted()
+        {
+            CompletedOn = DateTime.UtcNow;
+            Status = SuiteRunStatus.Complete;
+        }
+
         public static SuiteRun CreateSuiteRun(TestSuite suite, DateTime scheduledOn)
         {
             var run = new SuiteRun
