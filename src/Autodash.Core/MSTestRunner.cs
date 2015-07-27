@@ -11,9 +11,11 @@ namespace Autodash.Core
 {
     public class MsTestRunner : IUnitTestRunner
     {
-        private static string CommandTemplate =
+        private static readonly string CommandTemplate =
             "call \"C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\Tools\\VsDevCmd.bat\"" + Environment.NewLine +
             "@set \"PATH=C:\\projects\\autodash\\tools\\;%PATH%\"" + Environment.NewLine +
+            "@set browser={3}" + Environment.NewLine +
+            "@set environment={4}" + Environment.NewLine +
             "mstest.exe /testcontainer:{0} /test:{1} /resultsfile:\"{2}\"";
 
         private static readonly XmlSerializer TestRunSerializer = new XmlSerializer(typeof(TestRun));
@@ -117,7 +119,9 @@ namespace Autodash.Core
             string commandContent = string.Format(CommandTemplate,
                 Path.GetFileName(testCollection.AssemblyPath),
                 unitTest.TestName,
-                resultFullpath
+                resultFullpath,
+                browser,
+                config.EnvironmentUrl
             );
 
             File.WriteAllText(commandFullpath, commandContent);

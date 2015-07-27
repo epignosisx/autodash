@@ -49,16 +49,22 @@ namespace Autodash.Core.Tests
             //arrange
             var suiteRun = GetSuiteRun();
             var testColls = GetUnitTestCollections();
-            var gridNodes = new List<GridNodeBrowserInfo> { new GridNodeBrowserInfo { BrowserName = "Firefox" } };
+            var gridNodes = new GridNodeInfo[]{
+                new GridNodeInfo {
+                    MaxSessions = 5,
+                    Browsers = new List<GridNodeBrowserInfo> { new GridNodeBrowserInfo { BrowserName = "Firefox", Protocol = "WebDriver"} }
+                }
+            };
+            var gridNodeManager = new GridNodeManager(gridNodes);
             var subject = new ParallelSuiteRunContext(
-                suiteRun, 
+                suiteRun,
                 CancellationToken.None, 
                 testColls, 
                 new TaskCompletionSource<SuiteRun>()
             );
 
             //act
-            var result = subject.FindNextTestToRun(gridNodes);
+            var result = subject.FindNextTestToRun(gridNodeManager);
 
             //assert
             Assert.NotNull(result);
@@ -72,7 +78,13 @@ namespace Autodash.Core.Tests
             //arrange
             var suiteRun = GetSuiteRun();
             var testColls = GetUnitTestCollections();
-            var gridNodes = new List<GridNodeBrowserInfo> { new GridNodeBrowserInfo { BrowserName = "Crazy Browser" } };
+            var gridNodes = new GridNodeInfo[]{
+                new GridNodeInfo {
+                    MaxSessions = 5,
+                    Browsers = new List<GridNodeBrowserInfo> { new GridNodeBrowserInfo { BrowserName = "Crazy Browser", Protocol = "WebDriver"} }
+                }
+            };
+            var gridNodeManager = new GridNodeManager(gridNodes);
             var subject = new ParallelSuiteRunContext(
                 suiteRun,
                 CancellationToken.None,
@@ -81,7 +93,7 @@ namespace Autodash.Core.Tests
             );
 
             //act
-            var result = subject.FindNextTestToRun(gridNodes);
+            var result = subject.FindNextTestToRun(gridNodeManager);
 
             //assert
             Assert.Null(result);

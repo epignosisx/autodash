@@ -51,6 +51,7 @@ namespace Autodash.Core.UI.Modules
                     Name = vm.SuiteName,
                     Configuration = new TestSuiteConfiguration
                     {
+                        EnvironmentUrl = vm.EnvironmentUrl,
                         Browsers = vm.Browsers,
                         RetryAttempts = vm.RetryAttempts,
                         TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes),
@@ -94,6 +95,7 @@ namespace Autodash.Core.UI.Modules
                     Name = vm.SuiteName,
                     Configuration = new TestSuiteConfiguration
                     {
+                        EnvironmentUrl = vm.EnvironmentUrl,
                         Browsers = vm.Browsers,
                         RetryAttempts = vm.RetryAttempts,
                         TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes),

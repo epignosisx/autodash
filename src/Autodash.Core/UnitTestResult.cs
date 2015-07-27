@@ -48,9 +48,15 @@ namespace Autodash.Core
 
         public IEnumerable<string> GetPendingBrowserResults(string[] browsers, int retryAttempts)
         {
+            List<UnitTestBrowserResult> snapshot;
+            lock (BrowserResults)
+            {
+                snapshot = BrowserResults.ToList();
+            }
+
             foreach(var browser in browsers)
             {
-                var results = BrowserResults.Where(n => n.Browser == browser).ToList();
+                var results = snapshot.Where(n => n.Browser == browser).ToList();
                 if (results.Count == 0)
                 {
                     yield return browser;

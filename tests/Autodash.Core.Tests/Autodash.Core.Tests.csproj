@@ -83,6 +83,7 @@
     <Compile Include="CreateSuiteCommandTests.cs" />
     <Compile Include="DefaultSuiteRunSchedulerTests.cs" />
     <Compile Include="GridNodeInfoTests.cs" />
+    <Compile Include="GridNodeManagerTests.cs" />
     <Compile Include="MongoTestDbProvider.cs" />
     <Compile Include="MSTestDiscovererTests.cs" />
     <Compile Include="MsTestRunnerTests.cs" />

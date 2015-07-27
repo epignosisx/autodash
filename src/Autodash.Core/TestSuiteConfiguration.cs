@@ -13,6 +13,7 @@ namespace Autodash.Core
         public int RetryAttempts { get; set; }
         public bool EnableBrowserExecutionInParallel { get; set; }
         public string[] SelectedTests { get; set; }
+        public string EnvironmentUrl { get; set; }
 
         public bool ContainsTest(string methodName)
         {
