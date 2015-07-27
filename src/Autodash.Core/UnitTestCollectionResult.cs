@@ -18,5 +18,29 @@ namespace Autodash.Core
             get { return UnitTestResults.All(n => n.Passed); }
         }
 
+        public IEnumerable<PendingTestRunInfo> GetPendingTestsToRun(string[] browsers, int retryAttempts)
+        {
+            foreach (var test in UnitTestResults)
+            {
+                var pendingBrowsers = test.GetPendingBrowserResults(browsers, retryAttempts)
+                                          .ToArray();
+                if(pendingBrowsers.Length > 0)
+                {
+                    yield return new PendingTestRunInfo(test, pendingBrowsers);
+                }
+            }
+        }
+    }
+
+    public class PendingTestRunInfo
+    {
+        public UnitTestResult UnitTestResult { get; private set; }
+        public string[] Browsers { get; private set; }
+
+        public PendingTestRunInfo(UnitTestResult unitTestResult, string[] browsers)
+        {
+            UnitTestResult = unitTestResult;
+            Browsers = browsers;
+        }
     }
 }

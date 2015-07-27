@@ -64,11 +64,12 @@ namespace Autodash.Core.Tests
         private readonly ITestSuiteUnitTestDiscoverer _unitTestDiscoverer;
         private readonly IGridConsoleScraper _gridConsoleScraper;
         private readonly ISuiteRunSchedulerRepository _repository;
-        private readonly ConcurrentQueue<SuiteRunContext> _suiteRuns = new ConcurrentQueue<SuiteRunContext>();
+        private readonly ConcurrentQueue<ParallelSuiteRunContext> _suiteRuns = new ConcurrentQueue<ParallelSuiteRunContext>();
         private Uri _hubUrl;
 
         private IDisposable _subscription;
         private int _isInitialized = 0;
+        private int _processingNextTestsRound = 0;
 
         public ParallelSuiteRunner(
             ITestSuiteUnitTestDiscoverer unitTestDiscoverer, 
@@ -131,7 +132,7 @@ namespace Autodash.Core.Tests
             _hubUrl = new Uri(gridConfig.HubUrl + "grid/console");
 
             var taskCompletionSource = new TaskCompletionSource<SuiteRun>();
-            _suiteRuns.Enqueue(new SuiteRunContext(run, cancellationToken, testColls, taskCompletionSource));
+            _suiteRuns.Enqueue(new ParallelSuiteRunContext(run, cancellationToken, testColls, taskCompletionSource));
             EnsureInitialized();
             return await taskCompletionSource.Task;
         }
@@ -141,124 +142,141 @@ namespace Autodash.Core.Tests
             if (Interlocked.CompareExchange(ref _isInitialized, 1, 0) == 0)
             {
                 _subscription = Observable.Interval(TimeSpan.FromSeconds(5))
-                    .Where(n => _suiteRuns.Count > 0)
+                    .Where(n => _suiteRuns.Count > 0 && _processingNextTestsRound == 0)
                     .SelectMany(_ => _gridConsoleScraper.GetAvailableNodesInfoAsync(_hubUrl))
-                    .SelectMany(browserNodes => browserNodes)
-                    .Select(FindNextRun)
-                    .Where(nextTest => nextTest != null)
+                    .Select(FindNextRuns)
+                    .SelectMany(nextTests => nextTests)
+                    .SelectMany(RunTestAsync)
                     .Subscribe();
             }
         }
 
-        private TestRunContext FindNextRun(GridNodeBrowserInfo browserNode)
+        private async Task<UnitTestBrowserResult> RunTestAsync(Tuple<ParallelSuiteRunContext, TestRunContext> context)
         {
-            SuiteRunContext suiteRunContext;
+            var suiteRunContext = context.Item1;
+            var testRunContext = context.Item2;
+            var result = await testRunContext.UnitTestCollection.Runner.Run(testRunContext);
+
+            var test = (from collResult in suiteRunContext.SuiteRun.Result.CollectionResults
+                        from testResult in collResult.UnitTestResults
+                        where collResult.AssemblyName == testRunContext.UnitTestCollection.AssemblyName
+                            && testResult.TestName == testRunContext.UnitTestInfo.TestName
+                        select testResult).First();
+            
+            lock (test.BrowserResults)
+            {
+                test.BrowserResults.Add(result);
+            }
+            return result;
+        }
+
+        private IEnumerable<Tuple<ParallelSuiteRunContext, TestRunContext>> FindNextRuns(List<GridNodeBrowserInfo> browserNodes)
+        {
+            ParallelSuiteRunContext firstSuiteDequeued = null;
+            ParallelSuiteRunContext suiteRunContext;
+            int prevBrowserNodesCount = browserNodes.Count;
             while (_suiteRuns.TryDequeue(out suiteRunContext))
             {
+                if (firstSuiteDequeued == null)
+                {
+                    firstSuiteDequeued = suiteRunContext;
+                }
+                else if (firstSuiteDequeued == suiteRunContext && prevBrowserNodesCount > browserNodes.Count) 
+                {
+                    //we break when we have completed a full scan of the suites and no more
+                    //tests can be run given the grid node browsers available.
+                    yield break; 
+                }
+
                 if (suiteRunContext.CancellationToken.IsCancellationRequested)
                 {
                     suiteRunContext.SuiteRun.Result.Details = "Suite Run was cancelled during execution.";
-                    suiteRunContext.TaskCompletionSource.SetResult(suiteRunContext.SuiteRun);
+                    suiteRunContext.TaskCompletionSource.TrySetResult(suiteRunContext.SuiteRun);
+                    
+                    //reset if first suite
+                    if (firstSuiteDequeued == suiteRunContext)
+                        firstSuiteDequeued = null;
                 }
-
-                Tuple<UnitTestCollection, UnitTestInfo> nextTest = suiteRunContext.FindNextTestToRun(browserNode);
-                if (nextTest != null)
+                else
                 {
-                    return new TestRunContext(
-                        nextTest.Item2, 
-                        nextTest.Item1,
-                        suiteRunContext.SuiteRun.TestSuiteSnapshot.Configuration, 
-                        browserNode,
-                        suiteRunContext.CancellationToken
-                    );
-                }
-            }
-            return null;
-        }
+                    _suiteRuns.Enqueue(suiteRunContext);// back to the end of the queue
 
-        private class SuiteRunContext
-        {
-            public SuiteRun SuiteRun { get; private set; }
-            public CancellationToken CancellationToken { get; private set; }
-            public UnitTestCollection[] UnitTestCollections { get; private set; }
-            public TaskCompletionSource<SuiteRun> TaskCompletionSource { get; private set; }
+                    Tuple<UnitTestCollection, UnitTestInfo, GridNodeBrowserInfo> nextTest =
+                        suiteRunContext.FindNextTestToRun(browserNodes);
 
-            public SuiteRunContext(SuiteRun suiteRun, 
-                CancellationToken cancellationToken,
-                UnitTestCollection[] unitTestCollections,
-                TaskCompletionSource<SuiteRun> taskCompletionSource)
-            {
-                SuiteRun = suiteRun;
-                CancellationToken = cancellationToken;
-                UnitTestCollections = unitTestCollections;
-                TaskCompletionSource = taskCompletionSource;
-            }
+                    browserNodes.Remove(nextTest.Item3); //remove browser node so we do not double book a node.
 
-            public Tuple<UnitTestCollection, UnitTestInfo> FindNextTestToRun(GridNodeBrowserInfo browserNode)
-            {
-                var suiteRun = SuiteRun;
-                var config = suiteRun.TestSuiteSnapshot.Configuration;
-
-                if (!config.Browsers.Contains(browserNode.BrowserName))
-                    return null;
-
-                for (int i = 0; i < suiteRun.Result.CollectionResults.Length; i++)
-                {
-                    UnitTestCollectionResult collResult = suiteRun.Result.CollectionResults[i];
-                    foreach (UnitTestResult testResult in collResult.UnitTestResults)
+                    if (nextTest != null)
                     {
-                        var browserResults = testResult.BrowserResults.Where(n => n.Browser == browserNode.BrowserName).ToList();
+                        var test = new TestRunContext(
+                            nextTest.Item2,
+                            nextTest.Item1,
+                            suiteRunContext.SuiteRun.TestSuiteSnapshot.Configuration,
+                            nextTest.Item3,
+                            suiteRunContext.CancellationToken
+                        );
 
-                        if (browserResults.Count == 0)
-                        {
-                            return FindUnitTestCollection(testResult.TestName);
-                        }
-
-                        var passed = browserResults.Any(n => n.Passed);
-                        var lastAttempt = browserResults.OrderByDescending(n => n.Attempt).Select(n => n.Attempt).First();
-
-                        if (!passed && lastAttempt < config.RetryAttempts)
-                        {
-                            return FindUnitTestCollection(testResult.TestName);
-                        }
+                        yield return Tuple.Create(suiteRunContext, test);
                     }
                 }
-
-                return null;
-            }
-
-            private Tuple<UnitTestCollection, UnitTestInfo> FindUnitTestCollection(string testName)
-            {
-                var q = from testColl in UnitTestCollections
-                        from test in testColl.Tests
-                        where test.TestName == testName
-                        select Tuple.Create(testColl, test);
-
-                return q.First();
             }
         }
     }
 
-    public class TestRunContext
+    public class ParallelSuiteRunContext
     {
-        public UnitTestInfo UnitTestInfo { get; private set; }
-        public UnitTestCollection UnitTestCollection { get; private set; }
-        public TestSuiteConfiguration TestSuiteConfiguration { get; private set; }
-        public GridNodeBrowserInfo GridNodeBrowserInfo { get; private set; }
+        public SuiteRun SuiteRun { get; private set; }
         public CancellationToken CancellationToken { get; private set; }
+        public UnitTestCollection[] UnitTestCollections { get; private set; }
+        public TaskCompletionSource<SuiteRun> TaskCompletionSource { get; private set; }
 
-        public TestRunContext(
-            UnitTestInfo unitTestInfo, 
-            UnitTestCollection unitTestCollection, 
-            TestSuiteConfiguration testSuiteConfiguration, 
-            GridNodeBrowserInfo gridNodeBrowserInfo, 
-            CancellationToken cancellationToken)
+        public ParallelSuiteRunContext(SuiteRun suiteRun,
+            CancellationToken cancellationToken,
+            UnitTestCollection[] unitTestCollections,
+            TaskCompletionSource<SuiteRun> taskCompletionSource)
         {
-            UnitTestInfo = unitTestInfo;
-            UnitTestCollection = unitTestCollection;
-            TestSuiteConfiguration = testSuiteConfiguration;
-            GridNodeBrowserInfo = gridNodeBrowserInfo;
+            SuiteRun = suiteRun;
             CancellationToken = cancellationToken;
+            UnitTestCollections = unitTestCollections;
+            TaskCompletionSource = taskCompletionSource;
+        }
+
+        public Tuple<UnitTestCollection, UnitTestInfo, GridNodeBrowserInfo> FindNextTestToRun(List<GridNodeBrowserInfo> browserNodes)
+        {
+            var suiteRun = SuiteRun;
+            var config = suiteRun.TestSuiteSnapshot.Configuration;
+
+            if (config.Browsers.All(b => browserNodes.All(bn => bn.BrowserName != b)))
+                return null;
+
+            for (int i = 0; i < suiteRun.Result.CollectionResults.Length; i++)
+            {
+                UnitTestCollectionResult collResult = suiteRun.Result.CollectionResults[i];
+                var tests = collResult.GetPendingTestsToRun(config.Browsers, config.RetryAttempts);
+                foreach (var test in tests)
+                {
+                    for (int j = 0; j < browserNodes.Count; j++)
+                    {
+                        var browserNode = browserNodes[j];
+                        if (test.Browsers.Contains(browserNode.BrowserName))
+                        {
+                            return FindUnitTestCollection(test.UnitTestResult.TestName, browserNode);
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private Tuple<UnitTestCollection, UnitTestInfo, GridNodeBrowserInfo> FindUnitTestCollection(string testName, GridNodeBrowserInfo browserNode)
+        {
+            var q = from testColl in UnitTestCollections
+                    from test in testColl.Tests
+                    where test.TestName == testName
+                    select Tuple.Create(testColl, test, browserNode);
+
+            return q.First();
         }
     }
 

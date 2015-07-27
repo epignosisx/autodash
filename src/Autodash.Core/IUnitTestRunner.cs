@@ -6,5 +6,6 @@ namespace Autodash.Core
     {
         string TestRunnerName { get; }
         Task<UnitTestResult> Run(UnitTestInfo unitTest, UnitTestCollection testCollection, TestSuiteConfiguration config, CancellationToken cancellationToken);
+        Task<UnitTestBrowserResult> Run(TestRunContext context);
     }
 }

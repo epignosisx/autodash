@@ -46,6 +46,26 @@ namespace Autodash.Core
             }
         }
 
+        public IEnumerable<string> GetPendingBrowserResults(string[] browsers, int retryAttempts)
+        {
+            foreach(var browser in browsers)
+            {
+                var results = BrowserResults.Where(n => n.Browser == browser).ToList();
+                if (results.Count == 0)
+                {
+                    yield return browser;
+                    continue;
+                }
+
+                bool passed = results.Any(n => n.Passed);
+                if (passed)
+                    continue;
+
+                if (results.Count < retryAttempts)
+                    yield return browser;
+            }
+        }
+
         public override string ToString()
         {
             return TestName + " - Passed: " + Passed;

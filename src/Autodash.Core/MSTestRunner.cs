@@ -180,5 +180,11 @@ namespace Autodash.Core
             }
             return name;
         }
+
+        public Task<UnitTestBrowserResult> Run(TestRunContext context)
+        {
+            //make it truly async by listening to the Process.Exited event
+            return Task.Run(() => RunTest(context.UnitTestInfo, context.UnitTestCollection, context.TestSuiteConfiguration, context.GridNodeBrowserInfo.BrowserName, 1));
+        }
     }
 }

@@ -106,6 +106,7 @@
     <Compile Include="SuiteRunResult.cs" />
     <Compile Include="SuiteRunResultStatus.cs" />
     <Compile Include="SuiteRunStatus.cs" />
+    <Compile Include="TestRunContext.cs" />
     <Compile Include="TestSuite.cs" />
     <Compile Include="TestSuiteConfiguration.cs" />
     <Compile Include="TestSuiteSchedule.cs" />
