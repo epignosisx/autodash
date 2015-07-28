@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -93,48 +94,52 @@ namespace Autodash.Core
         {
             if (Interlocked.CompareExchange(ref _isInitialized, 1, 0) == 0)
             {
-                _subscription = Observable.Interval(TimeSpan.FromSeconds(5))
-                    .DebugWriteLine("Runner Loop")
-                    .Subscribe(Console.WriteLine);
-                //.Where(n => _suiteRuns.Count > 0 && _processingNextTestsRound == 0)
-                //.Do(_ => Interlocked.Exchange(ref _processingNextTestsRound, 1))
-                //.SelectMany(_ => _gridConsoleScraper.GetAvailableNodesInfoAsync(_hubUrl))
-                //.Select(nodes => new GridNodeManager(nodes))
-                //.Select(FindNextRuns)
-                //.Do(_ => Interlocked.Exchange(ref _processingNextTestsRound, 0))
-                //.SelectMany(nextTests => nextTests)
-                //.Select(RunTestAsync)
-                //.SelectMany(t => t)
-                //.Subscribe(
-                //    result => Debug.WriteLine("Runner Loop - Completed: " + result.TestName), 
-                //    ex => Debug.WriteLine("Runner Loop - Error: " + ex.ToString())
-                //);
+                _subscription = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(5))
+                    .Do(_ => ObsEx.DebugWriteLine("New Tick"))
+                    .Where(n => _suiteRuns.Count > 0 && _processingNextTestsRound == 0)
+                    .Do(_ => Interlocked.Exchange(ref _processingNextTestsRound, 1))
+                    .SelectMany(_ => _gridConsoleScraper.GetAvailableNodesInfoAsync(_hubUrl))
+                    .Select(nodes => new GridNodeManager(nodes))
+                    .Select(FindNextRuns)
+                    .Do(_ => Interlocked.Exchange(ref _processingNextTestsRound, 0))
+                    .SelectMany(nextTests => nextTests)
+                    .Select(RunTestAsync)
+                    .SelectMany(t => t)
+                    .Subscribe(
+                        result => Debug.WriteLine("Runner Loop - Completed: " + result.TestName),
+                        ex => Debug.WriteLine("Runner Loop - Error: " + ex.ToString())
+                    );
             }
         }
 
-        private Task<UnitTestResult> RunTestAsync(Tuple<ParallelSuiteRunContext, TestRunContext> context)
+        private async Task<UnitTestResult> RunTestAsync(Tuple<ParallelSuiteRunContext, TestRunContext> context)
         {
             Debug.WriteLine("RunTestAsync - start: {0}", Thread.CurrentThread.ManagedThreadId);
-            var suiteRunContext = context.Item1;
-            var testRunContext = context.Item2;
-            var task = testRunContext.UnitTestCollection.Runner.Run(testRunContext).ContinueWith(t =>
-            {
-                var result = t.Result;
-                Debug.WriteLine("RunTestAsync - result: {0}", Thread.CurrentThread.ManagedThreadId);
+            await Task.Delay(TimeSpan.FromSeconds(8));
+            Debug.WriteLine("RunTestAsync - finished: {0}", Thread.CurrentThread.ManagedThreadId);
+            return new UnitTestResult(context.Item2.UnitTestInfo.TestName);
 
-                var test = (from collResult in suiteRunContext.SuiteRun.Result.CollectionResults
-                            from testResult in collResult.UnitTestResults
-                            where collResult.AssemblyName == testRunContext.UnitTestCollection.AssemblyName
-                                  && testResult.TestName == testRunContext.UnitTestInfo.TestName
-                            select testResult).First();
+            //Debug.WriteLine("RunTestAsync - start: {0}", Thread.CurrentThread.ManagedThreadId);
+            //var suiteRunContext = context.Item1;
+            //var testRunContext = context.Item2;
+            //var task = testRunContext.UnitTestCollection.Runner.Run(testRunContext).ContinueWith(t =>
+            //{
+            //    var result = t.Result;
+            //    Debug.WriteLine("RunTestAsync - result: {0}", Thread.CurrentThread.ManagedThreadId);
 
-                lock (test.BrowserResults)
-                {
-                    test.BrowserResults.Add(result);
-                }
-                return test;
-            });
-            return task;
+            //    var test = (from collResult in suiteRunContext.SuiteRun.Result.CollectionResults
+            //                from testResult in collResult.UnitTestResults
+            //                where collResult.AssemblyName == testRunContext.UnitTestCollection.AssemblyName
+            //                      && testResult.TestName == testRunContext.UnitTestInfo.TestName
+            //                select testResult).First();
+
+            //    lock (test.BrowserResults)
+            //    {
+            //        test.BrowserResults.Add(result);
+            //    }
+            //    return test;
+            //});
+            //return task;
         }
 
         private IEnumerable<Tuple<ParallelSuiteRunContext, TestRunContext>> FindNextRuns(GridNodeManager gridNodeManager)

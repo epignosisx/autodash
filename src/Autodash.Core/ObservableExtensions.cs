@@ -4,12 +4,11 @@ using System.Threading;
 
 namespace Autodash.Core
 {
-    public static class ObservableExtensions
+    public static class ObsEx
     {
-        public static IObservable<TSource> DebugWriteLine<TSource>(this IObservable<TSource> source, string line)
+        public static void DebugWriteLine(object line)
         {
             Debug.WriteLine(Thread.CurrentThread.ManagedThreadId + ": " + line);
-            return source;
         }
     }
 }

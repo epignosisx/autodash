@@ -1,15 +1,108 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
 using System.Reactive.Disposables;
 using System.Reactive.Threading.Tasks;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using FluentValidation;
+using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Autodash.Core.Tests
 {
+    public class ParallelSuiteRunRunnerTests
+    {
+        private static UnitTestCollection[] GetUnitTestCollections()
+        {
+            var test1 = new UnitTestInfo("Test1", null);
+            var test2 = new UnitTestInfo("Test2", null);
+            var unitTestCollection = new UnitTestCollection(null, null, new[] { test1, test2 }, null);
+            return new UnitTestCollection[] { unitTestCollection };
+        }
+
+        private static SuiteRun GetSuiteRun()
+        {
+            return new SuiteRun
+            {
+                TestSuiteSnapshot = new TestSuite
+                {
+                    Configuration = new TestSuiteConfiguration
+                    {
+                        TestAssembliesPath = "c:\\",
+                        EnvironmentUrl = "http://localhost",
+                        Browsers = new[] { "firefox", "chrome" },
+                        RetryAttempts = 2,
+                        SelectedTests = new[] { "Test1", "Test2" }
+                    }
+                },
+                Result = new SuiteRunResult
+                {
+                    CollectionResults = new UnitTestCollectionResult[]{
+                        new UnitTestCollectionResult{
+                            UnitTestResults = new List<UnitTestResult>{
+                                new UnitTestResult { TestName = "Test1" },
+                                new UnitTestResult { TestName = "Test2" }
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        private static SeleniumGridConfiguration GetGridConfig()
+        {
+            return new SeleniumGridConfiguration {HubUrl = "http://localhost", MaxParallelTestSuitesRunning = 1};
+        }
+
+        private static List<GridNodeInfo> GetGridNodes()
+        {
+            var gridNodes = new List<GridNodeInfo>{
+                new GridNodeInfo {
+                    MaxSessions = 5,
+                    Browsers = new List<GridNodeBrowserInfo>
+                    {
+                        new GridNodeBrowserInfo { BrowserName = "firefox", Protocol = "WebDriver", MaxInstances = 5},
+                        new GridNodeBrowserInfo { BrowserName = "chrome", Protocol = "WebDriver", MaxInstances = 5}
+                    },
+                }
+            };
+
+            return gridNodes;
+        }
+
+
+        [Fact]
+        public async Task Foo()
+        {
+            var discoverer = Substitute.For<ITestSuiteUnitTestDiscoverer>();
+            discoverer.Discover(Arg.Any<string>()).Returns(GetUnitTestCollections());
+
+            var scraper = Substitute.For<IGridConsoleScraper>();
+            scraper.GetAvailableNodesInfoAsync(Arg.Any<Uri>()).Returns(Task.FromResult(GetGridNodes()));
+
+            var repository = Substitute.For<ISuiteRunSchedulerRepository>();
+            repository.GetScheduledSuiteRunsAsync().Returns(Task.FromResult(new List<SuiteRun>(0)));
+            repository.GetTestSuitesWithScheduleAsync().Returns(Task.FromResult(new List<TestSuite>(0)));
+            repository.GetGridConfigurationAsync().Returns(Task.FromResult(GetGridConfig()));
+
+            var suiteRun = GetSuiteRun();
+
+            var subject = new ParallelSuiteRunner(discoverer, scraper, repository);
+
+            var result = await subject.Run(suiteRun, CancellationToken.None);
+
+            Assert.NotNull(result);
+        }
+
+
+    }
+
     public class ParallelSuiteRunSchedulerTests
     {
+
         [Fact]
         public void Foo()
         {

@@ -81,6 +81,7 @@
     <Compile Include="AsyncLock.cs" />
     <Compile Include="CreateProjectCommandTests.cs" />
     <Compile Include="CreateSuiteCommandTests.cs" />
+    <Compile Include="DefaultGridConsoleScraperTests.cs" />
     <Compile Include="DefaultSuiteRunSchedulerTests.cs" />
     <Compile Include="GridNodeInfoTests.cs" />
     <Compile Include="GridNodeManagerTests.cs" />
