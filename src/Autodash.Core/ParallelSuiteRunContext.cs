@@ -24,7 +24,7 @@ namespace Autodash.Core
             TaskCompletionSource = taskCompletionSource;
         }
 
-        public Tuple<UnitTestCollection, UnitTestInfo, GridNodeBrowserInfo> FindNextTestToRun(GridNodeManager gridNodeManager)
+        public Tuple<UnitTestCollection, UnitTestInfo, UnitTestResult, GridNodeBrowserInfo> FindNextTestToRun(GridNodeManager gridNodeManager)
         {
             var suiteRun = SuiteRun;
             var config = suiteRun.TestSuiteSnapshot.Configuration;
@@ -45,7 +45,7 @@ namespace Autodash.Core
                         var browserNode = browserNodes[j];
                         if (test.Browsers.Contains(browserNode.BrowserName))
                         {
-                            return FindUnitTestCollection(test.UnitTestResult.TestName, browserNode);
+                            return FindUnitTestCollection(test.UnitTestResult, browserNode);
                         }
                     }
                 }
@@ -54,12 +54,12 @@ namespace Autodash.Core
             return null;
         }
 
-        private Tuple<UnitTestCollection, UnitTestInfo, GridNodeBrowserInfo> FindUnitTestCollection(string testName, GridNodeBrowserInfo browserNode)
+        private Tuple<UnitTestCollection, UnitTestInfo, UnitTestResult, GridNodeBrowserInfo> FindUnitTestCollection(UnitTestResult unitTestResult, GridNodeBrowserInfo browserNode)
         {
             var q = from testColl in UnitTestCollections
                     from test in testColl.Tests
-                    where test.TestName == testName
-                    select Tuple.Create(testColl, test, browserNode);
+                    where test.TestName == unitTestResult.TestName
+                    select Tuple.Create(testColl, test, unitTestResult, browserNode);
 
             return q.First();
         }

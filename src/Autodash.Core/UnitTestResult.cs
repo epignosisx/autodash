@@ -9,16 +9,6 @@ namespace Autodash.Core
         public string TestName { get; set; }
         public List<UnitTestBrowserResult> BrowserResults { get; set; }
 
-        public UnitTestResult()
-        {
-            BrowserResults = new List<UnitTestBrowserResult>();
-        }
-
-        public UnitTestResult(string testName) : this()
-        {
-            TestName = testName;
-        }
-
         [BsonIgnore]
         public bool Passed
         {
@@ -26,6 +16,20 @@ namespace Autodash.Core
             {
                 return BrowserResults.GroupBy(b => b.Browser).All(n => n.Any(p => p.Passed));
             }
+        }
+
+        [BsonIgnore]
+        private readonly List<string> _ongoingBrowserTests;
+
+        public UnitTestResult()
+        {
+            BrowserResults = new List<UnitTestBrowserResult>();
+            _ongoingBrowserTests = new List<string>(4);
+        }
+
+        public UnitTestResult(string testName) : this()
+        {
+            TestName = testName;
         }
 
         public UnitTestBrowserResult this[string browser]
@@ -54,8 +58,17 @@ namespace Autodash.Core
                 snapshot = BrowserResults.ToList();
             }
 
+            List<string> ongoingSnapshot;
+            lock (_ongoingBrowserTests)
+            {
+                ongoingSnapshot = _ongoingBrowserTests.ToList();
+            }
+
             foreach(var browser in browsers)
             {
+                if (ongoingSnapshot.Contains(browser))
+                    continue;
+
                 var results = snapshot.Where(n => n.Browser == browser).ToList();
                 if (results.Count == 0)
                 {
@@ -70,6 +83,18 @@ namespace Autodash.Core
                 if (results.Count < retryAttempts)
                     yield return browser;
             }
+        }
+
+        public void AddOngoingBrowserTest(string browser)
+        {
+            lock(_ongoingBrowserTests)
+                _ongoingBrowserTests.Add(browser);
+        }
+
+        public void RemoveOngoingBrowserTest(string browser)
+        {
+            lock (_ongoingBrowserTests)
+                _ongoingBrowserTests.Remove(browser);
         }
 
         public override string ToString()

@@ -95,7 +95,7 @@ namespace Autodash.Core
             if (Interlocked.CompareExchange(ref _isInitialized, 1, 0) == 0)
             {
                 _subscription = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(5))
-                    .Do(_ => ObsEx.DebugWriteLine("New Tick"))
+                    .Do(_ => ObsEx.DebugWriteLine(string.Format("New Tick. Processing?: {0}. Suite Run: {1}", _processingNextTestsRound, _suiteRuns.Count)))
                     .Where(n => _suiteRuns.Count > 0 && _processingNextTestsRound == 0)
                     .Do(_ => Interlocked.Exchange(ref _processingNextTestsRound, 1))
                     .SelectMany(_ => _gridConsoleScraper.GetAvailableNodesInfoAsync(_hubUrl))
@@ -103,8 +103,7 @@ namespace Autodash.Core
                     .Select(FindNextRuns)
                     .Do(_ => Interlocked.Exchange(ref _processingNextTestsRound, 0))
                     .SelectMany(nextTests => nextTests)
-                    .Select(RunTestAsync)
-                    .SelectMany(t => t)
+                    .SelectMany(RunTestAsync)
                     .Subscribe(
                         result => Debug.WriteLine("Runner Loop - Completed: " + result.TestName),
                         ex => Debug.WriteLine("Runner Loop - Error: " + ex.ToString())
@@ -115,31 +114,27 @@ namespace Autodash.Core
         private async Task<UnitTestResult> RunTestAsync(Tuple<ParallelSuiteRunContext, TestRunContext> context)
         {
             Debug.WriteLine("RunTestAsync - start: {0}", Thread.CurrentThread.ManagedThreadId);
-            await Task.Delay(TimeSpan.FromSeconds(8));
-            Debug.WriteLine("RunTestAsync - finished: {0}", Thread.CurrentThread.ManagedThreadId);
-            return new UnitTestResult(context.Item2.UnitTestInfo.TestName);
+            var suiteRunContext = context.Item1;
+            var testRunContext = context.Item2;
 
-            //Debug.WriteLine("RunTestAsync - start: {0}", Thread.CurrentThread.ManagedThreadId);
-            //var suiteRunContext = context.Item1;
-            //var testRunContext = context.Item2;
-            //var task = testRunContext.UnitTestCollection.Runner.Run(testRunContext).ContinueWith(t =>
-            //{
-            //    var result = t.Result;
-            //    Debug.WriteLine("RunTestAsync - result: {0}", Thread.CurrentThread.ManagedThreadId);
+            testRunContext.UnitTestResult.AddOngoingBrowserTest(testRunContext.GridNodeBrowserInfo.BrowserName);
+            var result = await testRunContext.UnitTestCollection.Runner.Run(testRunContext);
+            testRunContext.UnitTestResult.RemoveOngoingBrowserTest(testRunContext.GridNodeBrowserInfo.BrowserName);
 
-            //    var test = (from collResult in suiteRunContext.SuiteRun.Result.CollectionResults
-            //                from testResult in collResult.UnitTestResults
-            //                where collResult.AssemblyName == testRunContext.UnitTestCollection.AssemblyName
-            //                      && testResult.TestName == testRunContext.UnitTestInfo.TestName
-            //                select testResult).First();
+            var test = (from collResult in suiteRunContext.SuiteRun.Result.CollectionResults
+                        from testResult in collResult.UnitTestResults
+                        where collResult.AssemblyName == testRunContext.UnitTestCollection.AssemblyName
+                              && testResult.TestName == testRunContext.UnitTestInfo.TestName
+                        select testResult).First();
 
-            //    lock (test.BrowserResults)
-            //    {
-            //        test.BrowserResults.Add(result);
-            //    }
-            //    return test;
-            //});
-            //return task;
+            lock (test.BrowserResults)
+            {
+                test.BrowserResults.Add(result);
+            }
+
+            Debug.WriteLine("RunTestAsync - result: {0}", Thread.CurrentThread.ManagedThreadId);
+
+            return test;
         }
 
         private IEnumerable<Tuple<ParallelSuiteRunContext, TestRunContext>> FindNextRuns(GridNodeManager gridNodeManager)
@@ -153,10 +148,11 @@ namespace Autodash.Core
                 {
                     firstSuiteDequeued = suiteRunContext;
                 }
-                else if (firstSuiteDequeued == suiteRunContext && prevBrowserNodesCount > gridNodeManager.GetAvailableBrowserNodes().Count()) 
+                else if (firstSuiteDequeued == suiteRunContext && prevBrowserNodesCount >= gridNodeManager.GetAvailableBrowserNodes().Count()) 
                 {
                     //we break when we have completed a full scan of the suites and no more
                     //tests can be run given the grid node browsers available.
+                    _suiteRuns.Enqueue(suiteRunContext);// back to the end of the queue
                     yield break; 
                 }
 
@@ -173,18 +169,19 @@ namespace Autodash.Core
                 {
                     _suiteRuns.Enqueue(suiteRunContext);// back to the end of the queue
 
-                    Tuple<UnitTestCollection, UnitTestInfo, GridNodeBrowserInfo> nextTest =
+                    Tuple<UnitTestCollection, UnitTestInfo, UnitTestResult, GridNodeBrowserInfo> nextTest =
                         suiteRunContext.FindNextTestToRun(gridNodeManager);
 
                     if (nextTest != null)
                     {
-                        gridNodeManager.InUse(nextTest.Item3);
+                        gridNodeManager.Book(nextTest.Item4);
 
                         var test = new TestRunContext(
                             nextTest.Item2,
                             nextTest.Item1,
-                            suiteRunContext.SuiteRun.TestSuiteSnapshot.Configuration,
                             nextTest.Item3,
+                            suiteRunContext.SuiteRun.TestSuiteSnapshot.Configuration,
+                            nextTest.Item4,
                             suiteRunContext.CancellationToken
                             );
 

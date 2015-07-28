@@ -1,26 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Reactive.Disposables;
-using System.Reactive.Threading.Tasks;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentValidation;
 using NSubstitute;
+using NSubstitute.Core;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Autodash.Core.Tests
 {
     public class ParallelSuiteRunRunnerTests
     {
+        private static IUnitTestRunner Runner;
+
         private static UnitTestCollection[] GetUnitTestCollections()
         {
             var test1 = new UnitTestInfo("Test1", null);
             var test2 = new UnitTestInfo("Test2", null);
-            var unitTestCollection = new UnitTestCollection(null, null, new[] { test1, test2 }, null);
+            var unitTestCollection = new UnitTestCollection(null, null, new[] { test1, test2 }, Runner);
             return new UnitTestCollection[] { unitTestCollection };
+        }
+
+        private static void CreateRunnerMock()
+        {
+            Runner = Substitute.For<IUnitTestRunner>();
+            Runner.Run(Arg.Any<TestRunContext>()).Returns(GetRunnerResult);
+        }
+
+        private static async Task<UnitTestBrowserResult> GetRunnerResult(CallInfo ci)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(4));
+            return new UnitTestBrowserResult
+            {
+                Browser = ci.Arg<TestRunContext>().GridNodeBrowserInfo.BrowserName
+            };
         }
 
         private static SuiteRun GetSuiteRun()
@@ -77,6 +89,8 @@ namespace Autodash.Core.Tests
         [Fact]
         public async Task Foo()
         {
+            CreateRunnerMock();
+
             var discoverer = Substitute.For<ITestSuiteUnitTestDiscoverer>();
             discoverer.Discover(Arg.Any<string>()).Returns(GetUnitTestCollections());
 

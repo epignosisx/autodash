@@ -18,7 +18,7 @@ namespace Autodash.Core
                 }).ToArray();
         }
 
-        public void InUse(GridNodeBrowserInfo browserNode)
+        public void Book(GridNodeBrowserInfo browserNode)
         {
             foreach (var node in _nodes)
             {

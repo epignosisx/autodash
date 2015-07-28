@@ -64,7 +64,7 @@ namespace Autodash.Core.Tests
 
             //act
             GridNodeBrowserInfo[] result = subject.GetAvailableBrowserNodes().ToArray();
-            subject.InUse(result[0]);
+            subject.Book(result[0]);
             result = subject.GetAvailableBrowserNodes().ToArray();
 
             Assert.Equal(result.Length, 1);
