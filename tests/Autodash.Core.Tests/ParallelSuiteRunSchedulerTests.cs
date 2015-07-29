@@ -16,23 +16,34 @@ namespace Autodash.Core.Tests
         {
             var test1 = new UnitTestInfo("Test1", null);
             var test2 = new UnitTestInfo("Test2", null);
-            var unitTestCollection = new UnitTestCollection(null, null, new[] { test1, test2 }, Runner);
+            var unitTestCollection = new UnitTestCollection("TheAssemblyName.dll", null, new[] { test1, test2 }, Runner);
             return new UnitTestCollection[] { unitTestCollection };
         }
 
-        private static void CreateRunnerMock()
+        private static void CreateAlwaysFailRunnerMock(int millisecondsDelay)
         {
             Runner = Substitute.For<IUnitTestRunner>();
-            Runner.Run(Arg.Any<TestRunContext>()).Returns(GetRunnerResult);
+            Runner.Run(Arg.Any<TestRunContext>()).Returns(async (CallInfo ci)=> {
+                await Task.Delay(millisecondsDelay);
+                return new UnitTestBrowserResult
+                {
+                    Browser = ci.Arg<TestRunContext>().GridNodeBrowserInfo.BrowserName
+                };
+            });
         }
 
-        private static async Task<UnitTestBrowserResult> GetRunnerResult(CallInfo ci)
+        private static void CreateAlwaysPassRunnerMock(int millisecondsDelay)
         {
-            await Task.Delay(TimeSpan.FromSeconds(4));
-            return new UnitTestBrowserResult
+            Runner = Substitute.For<IUnitTestRunner>();
+            Runner.Run(Arg.Any<TestRunContext>()).Returns(async (CallInfo ci) =>
             {
-                Browser = ci.Arg<TestRunContext>().GridNodeBrowserInfo.BrowserName
-            };
+                await Task.Delay(millisecondsDelay);
+                return new UnitTestBrowserResult
+                {
+                    Passed = true,
+                    Browser = ci.Arg<TestRunContext>().GridNodeBrowserInfo.BrowserName
+                };
+            });
         }
 
         private static SuiteRun GetSuiteRun()
@@ -48,17 +59,6 @@ namespace Autodash.Core.Tests
                         Browsers = new[] { "firefox", "chrome" },
                         RetryAttempts = 2,
                         SelectedTests = new[] { "Test1", "Test2" }
-                    }
-                },
-                Result = new SuiteRunResult
-                {
-                    CollectionResults = new UnitTestCollectionResult[]{
-                        new UnitTestCollectionResult{
-                            UnitTestResults = new List<UnitTestResult>{
-                                new UnitTestResult { TestName = "Test1" },
-                                new UnitTestResult { TestName = "Test2" }
-                            }
-                        }
                     }
                 }
             };
@@ -85,11 +85,19 @@ namespace Autodash.Core.Tests
             return gridNodes;
         }
 
-
-        [Fact]
-        public async Task Foo()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(50)]
+        [InlineData(100)]
+        [InlineData(500)]
+        [InlineData(600)]
+        [InlineData(700)]
+        [InlineData(1000)]
+        [InlineData(5000)]
+        [InlineData(6000)]
+        public async Task RunningSuiteWhereAllTestFail(int delay)
         {
-            CreateRunnerMock();
+            CreateAlwaysFailRunnerMock(delay);
 
             var discoverer = Substitute.For<ITestSuiteUnitTestDiscoverer>();
             discoverer.Discover(Arg.Any<string>()).Returns(GetUnitTestCollections());
@@ -108,10 +116,72 @@ namespace Autodash.Core.Tests
 
             var result = await subject.Run(suiteRun, CancellationToken.None);
 
+            subject.Dispose();
+
             Assert.NotNull(result);
+            Assert.False(result.Result.Passed);
+            Assert.NotEmpty(result.Result.Details);
+            Assert.Equal(2, result.Result.FailedTotal);
+            Assert.Equal(0, result.Result.PassedTotal);
+            Assert.Equal(1, result.Result.CollectionResults.Count);
+            Assert.NotEmpty(result.Result.CollectionResults[0].AssemblyName);
+            Assert.Equal(2, result.Result.CollectionResults[0].UnitTestResults.Count);
+            Assert.NotEmpty(result.Result.CollectionResults[0].UnitTestResults[0].TestName);
+            Assert.NotEmpty(result.Result.CollectionResults[0].UnitTestResults[1].TestName);
+            Assert.False(result.Result.CollectionResults[0].UnitTestResults[0].Passed);
+            Assert.False(result.Result.CollectionResults[0].UnitTestResults[1].Passed);
+            Assert.Equal(4, result.Result.CollectionResults[0].UnitTestResults[0].BrowserResults.Count);
+            Assert.Equal(4, result.Result.CollectionResults[0].UnitTestResults[1].BrowserResults.Count);
         }
 
+        [Theory]
+        [InlineData(0)]
+        [InlineData(50)]
+        [InlineData(100)]
+        [InlineData(500)]
+        [InlineData(600)]
+        [InlineData(700)]
+        [InlineData(1000)]
+        [InlineData(5000)]
+        [InlineData(6000)]
+        public async Task RunningSuiteWhereAllTestPass(int delay)
+        {
+            CreateAlwaysPassRunnerMock(delay);
 
+            var discoverer = Substitute.For<ITestSuiteUnitTestDiscoverer>();
+            discoverer.Discover(Arg.Any<string>()).Returns(GetUnitTestCollections());
+
+            var scraper = Substitute.For<IGridConsoleScraper>();
+            scraper.GetAvailableNodesInfoAsync(Arg.Any<Uri>()).Returns(Task.FromResult(GetGridNodes()));
+
+            var repository = Substitute.For<ISuiteRunSchedulerRepository>();
+            repository.GetScheduledSuiteRunsAsync().Returns(Task.FromResult(new List<SuiteRun>(0)));
+            repository.GetTestSuitesWithScheduleAsync().Returns(Task.FromResult(new List<TestSuite>(0)));
+            repository.GetGridConfigurationAsync().Returns(Task.FromResult(GetGridConfig()));
+
+            var suiteRun = GetSuiteRun();
+
+            var subject = new ParallelSuiteRunner(discoverer, scraper, repository);
+
+            var result = await subject.Run(suiteRun, CancellationToken.None);
+
+            subject.Dispose();
+
+            Assert.NotNull(result);
+            Assert.True(result.Result.Passed);
+            Assert.NotEmpty(result.Result.Details);
+            Assert.Equal(0, result.Result.FailedTotal);
+            Assert.Equal(2, result.Result.PassedTotal);
+            Assert.Equal(1, result.Result.CollectionResults.Count);
+            Assert.NotEmpty(result.Result.CollectionResults[0].AssemblyName);
+            Assert.Equal(2, result.Result.CollectionResults[0].UnitTestResults.Count);
+            Assert.NotEmpty(result.Result.CollectionResults[0].UnitTestResults[0].TestName);
+            Assert.NotEmpty(result.Result.CollectionResults[0].UnitTestResults[1].TestName);
+            Assert.True(result.Result.CollectionResults[0].UnitTestResults[0].Passed);
+            Assert.True(result.Result.CollectionResults[0].UnitTestResults[1].Passed);
+            Assert.Equal(2, result.Result.CollectionResults[0].UnitTestResults[0].BrowserResults.Count);
+            Assert.Equal(2, result.Result.CollectionResults[0].UnitTestResults[1].BrowserResults.Count);
+        }
     }
 
     public class ParallelSuiteRunSchedulerTests

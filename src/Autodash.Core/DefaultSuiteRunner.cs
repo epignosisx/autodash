@@ -25,18 +25,15 @@ namespace Autodash.Core
             if (run.Result != null)
                 return await Task.FromResult(run);
 
-            run.Result = new SuiteRunResult
-            {
-                CollectionResults = new UnitTestCollectionResult[testColls.Length]
-            };
+            run.Result = new SuiteRunResult();
 
             for (int i = 0; i < testColls.Length;i++)
             {
-                run.Result.CollectionResults[i] = new UnitTestCollectionResult
+                run.Result.CollectionResults.Add(new UnitTestCollectionResult
                 {
                     AssemblyName = testColls[i].AssemblyName,
                     UnitTestResults = new List<UnitTestResult>()
-                };
+                });
             }
 
             TestSuiteConfiguration config = run.TestSuiteSnapshot.Configuration;

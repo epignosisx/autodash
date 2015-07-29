@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
@@ -9,19 +10,20 @@ using FluentValidation.Results;
 
 namespace Autodash.Core
 {
-    public class ParallelSuiteRunner2 : ISuiteRunner
+    public class ParallelSuiteRunner : ISuiteRunner, IDisposable
     {
         private readonly ITestSuiteUnitTestDiscoverer _unitTestDiscoverer;
         private readonly IGridConsoleScraper _gridConsoleScraper;
         private readonly ISuiteRunSchedulerRepository _repository;
-        private readonly ConcurrentQueue<ParallelSuiteRunnerQueueItem> _testsQueue = new ConcurrentQueue<ParallelSuiteRunnerQueueItem>();
+        private readonly Queue<ParallelSuiteRunnerQueueItem> _testsQueue = new Queue<ParallelSuiteRunnerQueueItem>();
+        private readonly HashSet<ParallelSuiteRunnerQueueItem> _runningTests = new HashSet<ParallelSuiteRunnerQueueItem>();
         private Uri _hubUrl;
 
         private IDisposable _subscription;
         private int _isInitialized = 0;
         private int _processingNextTestsRound = 0;
 
-        public ParallelSuiteRunner2(
+        public ParallelSuiteRunner(
             ITestSuiteUnitTestDiscoverer unitTestDiscoverer, 
             IGridConsoleScraper gridConsoleScraper,
             ISuiteRunSchedulerRepository repository)
@@ -54,19 +56,21 @@ namespace Autodash.Core
 
             var config = run.TestSuiteSnapshot.Configuration;
             var taskCompletionSource = new TaskCompletionSource<SuiteRun>();
+            run.Result = new SuiteRunResult();
 
-            for (int i = 0; i < testColls.Length; i++)
+            lock (_testsQueue)
             {
-                UnitTestCollection unitTestColl = testColls[i];
-
-                foreach (UnitTestInfo test in unitTestColl.Tests)
+                foreach (UnitTestCollection unitTestColl in testColls)
                 {
-                    bool shouldRun = config.SelectedTests == null || config.ContainsTest(test.TestName);
-                    if (shouldRun)
+                    foreach (UnitTestInfo test in unitTestColl.Tests)
                     {
-                        foreach (var browser in config.Browsers)
+                        bool shouldRun = config.SelectedTests == null || config.ContainsTest(test.TestName);
+                        if (shouldRun)
                         {
-                            _testsQueue.Enqueue(new ParallelSuiteRunnerQueueItem(browser, test, unitTestColl, run, taskCompletionSource, cancellationToken));    
+                            foreach (var browser in config.Browsers)
+                            {
+                                _testsQueue.Enqueue(new ParallelSuiteRunnerQueueItem(browser, test, unitTestColl, run, taskCompletionSource, cancellationToken));
+                            }
                         }
                     }
                 }
@@ -88,27 +92,180 @@ namespace Autodash.Core
                     .Do(_ => Interlocked.Exchange(ref _processingNextTestsRound, 1))
                     .SelectMany(_ => _gridConsoleScraper.GetAvailableNodesInfoAsync(_hubUrl))
                     .Select(nodes => new GridNodeManager(nodes))
-                    .Select(F)
-                    .Subscribe();
+                    .Select(FindNextTests)
+                    .Do(_ => Interlocked.Exchange(ref _processingNextTestsRound, 0))
+                    .SelectMany(tests => tests)
+                    .SelectMany(RunTestAsync)
+                    .Subscribe(test =>
+                    {
+                        Debug.WriteLine(test);
+                    });
             }
         }
 
-        private IEnumerable<ParallelSuiteRunnerQueueItem> FindNextRuns(GridNodeManager gridNodeManager)
+        private async Task<ParallelSuiteRunnerQueueItem> RunTestAsync(Tuple<ParallelSuiteRunnerQueueItem, GridNodeBrowserInfo> testInfo)
         {
-            ParallelSuiteRunnerQueueItem test;
-            while (_testsQueue.TryDequeue(out test))
+            Debug.WriteLine("[{0:000}] RunTestAsync - Start: {1}", Thread.CurrentThread.ManagedThreadId, testInfo.Item1);
+            var test = testInfo.Item1;
+            var nodeBrowser = testInfo.Item2;
+            
+            var context = new TestRunContext(
+                test.UnitTestInfo, 
+                test.UnitTestCollection, 
+                null, 
+                test.SuiteRun.TestSuiteSnapshot.Configuration, 
+                nodeBrowser, 
+                CancellationToken.None
+            );
+
+            lock (_runningTests)
+                _runningTests.Add(test);
+
+            UnitTestBrowserResult result = await test.UnitTestCollection.Runner.Run(context);
+
+            lock (_runningTests)
+                _runningTests.Remove(test);
+
+            HandleTestComplete(test, result);
+            return test;
+        }
+
+        private void HandleTestComplete(ParallelSuiteRunnerQueueItem test, UnitTestBrowserResult browserResult)
+        {
+            lock (_testsQueue)
             {
-                if (test.CancellationToken.IsCancellationRequested)
+                lock (test.SuiteRun.Result)
                 {
-                    if (test.SuiteRun.Result == null)
+                    //0. Check if cancellation was requested
+                    if (test.CancellationToken.IsCancellationRequested)
                     {
-                        test.SuiteRun.Result.Details
+                        test.SuiteRun.Result.Details = "Suite Run was cancelled during execution.";
+                        test.TaskCompletionSource.TrySetResult(test.SuiteRun);
+                        return;
+                    }
+
+                    //1. add result
+                    var result = test.SuiteRun.Result;
+                    var collResult = result.CollectionResults.FirstOrDefault(n => n.AssemblyName == test.UnitTestCollection.AssemblyName);
+                    if (collResult == null)
+                    {
+                        collResult = new UnitTestCollectionResult { AssemblyName = test.UnitTestCollection.AssemblyName };
+                        result.CollectionResults.Add(collResult);
+                    }
+
+                    var testResult = collResult.UnitTestResults.FirstOrDefault(n => n.TestName == test.UnitTestInfo.TestName);
+                    if (testResult == null)
+                    {
+                        testResult = new UnitTestResult(test.UnitTestInfo.TestName);
+                        collResult.UnitTestResults.Add(testResult);
+                    }
+
+                    testResult.BrowserResults.Add(browserResult);
+
+                    //2. check if we the retry limit has been reached
+                    var allBrowserResults = testResult.BrowserResults.Where(n => n.Browser == browserResult.Browser).ToList();
+                    var allFailures = allBrowserResults.All(n => !n.Passed);
+                    var maxRetryAttempts = test.SuiteRun.TestSuiteSnapshot.Configuration.RetryAttempts;
+                    if (allFailures && allBrowserResults.Count < maxRetryAttempts)
+                    {
+                        _testsQueue.Enqueue(test);
+                        return;
+                    }
+
+                    //3. check if suite is complete.
+                    int pendingTests = _testsQueue.Count(n => n.SuiteRun == test.SuiteRun);
+                    int runningTests = 0;
+                    lock (_runningTests)
+                        runningTests = _runningTests.Count(n => n.SuiteRun == test.SuiteRun);
+
+                    if (pendingTests + runningTests == 0)
+                    {
+                        test.SuiteRun.Result.Details = "Ran to Completion";
+                        test.TaskCompletionSource.TrySetResult(test.SuiteRun);
                     }
                 }
             }
         }
-    }
 
+        private IEnumerable<Tuple<ParallelSuiteRunnerQueueItem, GridNodeBrowserInfo>> FindNextTests(GridNodeManager gridNodeManager)
+        {
+            ParallelSuiteRunnerQueueItem firstTest = null;
+            int prevBrowserNodesCount = gridNodeManager.GetAvailableBrowserNodes().Count();
+            lock (_testsQueue)
+            {
+                while (_testsQueue.Count > 0)
+                {
+                    ParallelSuiteRunnerQueueItem test = _testsQueue.Dequeue();
+                    if (test.CancellationToken.IsCancellationRequested)
+                    {
+                        HandleCancelledSuiteRun(test);
+                    }
+                    else
+                    {
+                        if (firstTest == null)
+                        {
+                            firstTest = test;
+                        }
+                        else if (firstTest == test && prevBrowserNodesCount >= gridNodeManager.GetAvailableBrowserNodes().Count())
+                        {
+                            //we break when we have completed a full scan of the tests and no other
+                            //test can be run given a grid node browser given what is available.
+                            _testsQueue.Enqueue(test);// back to the queue
+                            yield break;
+                        }
+
+                        GridNodeBrowserInfo browserNode;
+                        if (gridNodeManager.TryBook(test.Browser, out browserNode))
+                        {
+                            if (firstTest == test)
+                                firstTest = null;
+
+                            yield return Tuple.Create(test, browserNode);
+                        }
+                        else
+                        {
+                            _testsQueue.Enqueue(test);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void HandleCancelledSuiteRun(ParallelSuiteRunnerQueueItem test)
+        {
+            //remove from queue other tests from the same suite
+            ParallelSuiteRunnerQueueItem firstOtherTest = null;
+            while (_testsQueue.Count > 0)
+            {
+                ParallelSuiteRunnerQueueItem otherTest = _testsQueue.Dequeue();
+                if (otherTest.SuiteRun != test.SuiteRun)
+                {
+                    _testsQueue.Enqueue(otherTest);
+                    if (firstOtherTest == null)
+                        firstOtherTest = otherTest;
+                    else if (firstOtherTest == otherTest)
+                        break;
+                }
+            }
+
+            lock (test.SuiteRun.Result)
+            {
+                test.SuiteRun.Result.Details = "Suite Run was cancelled during execution.";
+            }
+
+            test.TaskCompletionSource.TrySetResult(test.SuiteRun);
+        }
+
+        public void Dispose()
+        {
+            if (_subscription != null)
+            {
+                _subscription.Dispose();
+                _subscription = null;
+            }
+        }
+    }
+    
     public class ParallelSuiteRunnerQueueItem
     {
         public ParallelSuiteRunnerQueueItem(
@@ -133,5 +290,10 @@ namespace Autodash.Core
         public SuiteRun SuiteRun { get; private set; }
         public TaskCompletionSource<SuiteRun> TaskCompletionSource { get; set; }
         public CancellationToken CancellationToken { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0} - {1}", UnitTestInfo.TestName, Browser);
+        }
     }
 }
