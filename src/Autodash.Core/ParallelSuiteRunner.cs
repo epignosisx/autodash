@@ -153,7 +153,7 @@ namespace Autodash.Core
                     //we break when we have completed a full scan of the suites and no more
                     //tests can be run given the grid node browsers available.
                     _suiteRuns.Enqueue(suiteRunContext);// back to the end of the queue
-                    yield break; 
+                    yield break;
                 }
 
                 if (suiteRunContext.CancellationToken.IsCancellationRequested)
