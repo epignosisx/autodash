@@ -122,9 +122,7 @@
     <Compile Include="MsTestDiscoverer.cs" />
     <Compile Include="MsTestRunner.cs" />
     <Compile Include="ObservableExtensions.cs" />
-    <Compile Include="ParallelSuiteRunContext.cs" />
     <Compile Include="ParallelSuiteRunner.cs" />
-    <Compile Include="ParallelSuiteRunner2.cs" />
     <Compile Include="ParallelSuiteRunScheduler.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
