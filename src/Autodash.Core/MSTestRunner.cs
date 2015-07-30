@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.Emit;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -189,6 +191,164 @@ namespace Autodash.Core
         {
             //make it truly async by listening to the Process.Exited event
             return Task.Run(() => RunTest(context.UnitTestInfo, context.UnitTestCollection, context.TestSuiteConfiguration, context.GridNodeBrowserInfo.BrowserName, 1));
+        }
+    }
+
+
+    public class MsTestRunner2 : IUnitTestRunner
+    {
+        private static readonly string CommandTemplate =
+            "call \"C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\Tools\\VsDevCmd.bat\"" + Environment.NewLine +
+            "@set \"PATH=C:\\projects\\autodash\\tools\\;%PATH%\"" + Environment.NewLine +
+            "mstest.exe /testcontainer:{0} /test:{1} /resultsfile:\"{2}\"";
+
+        private static readonly XmlSerializer TestRunSerializer = new XmlSerializer(typeof(TestRun));
+
+        public string TestRunnerName {
+            get { return "MSTest Runner"; }
+        }
+
+        public Task<UnitTestResult> Run(UnitTestInfo unitTest, UnitTestCollection testCollection, TestSuiteConfiguration config,
+            CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<UnitTestBrowserResult> Run(TestRunContext context)
+        {
+            
+        }
+
+        private static void CopyDirectory(string sourcePath, string destPath)
+        {
+            if (!Directory.Exists(destPath))
+            {
+                Directory.CreateDirectory(destPath);
+            }
+
+            foreach (string file in Directory.GetFiles(sourcePath))
+            {
+                string dest = Path.Combine(destPath, Path.GetFileName(file));
+                File.Copy(file, dest);
+            }
+
+            foreach (string folder in Directory.GetDirectories(sourcePath))
+            {
+                string dest = Path.Combine(destPath, Path.GetFileName(folder));
+                CopyDirectory(folder, dest);
+            }
+        }
+
+        private static UnitTestBrowserResult RunTest(UnitTestInfo unitTest, UnitTestCollection testCollection, TestSuiteConfiguration config, string browser, int attempt)
+        {
+            string tempFilename = RemoveInvalidChars(unitTest.ShortTestName + "_" + browser);
+            string testDir = Path.Combine(config.TestAssembliesPath, tempFilename);
+            if (Directory.Exists(testDir))
+                Directory.Delete(testDir, true);
+
+            CopyDirectory(config.TestAssembliesPath, testDir);
+
+            string commandFullpath = Path.Combine(testDir, "command.bat");
+            string resultFullpath = Path.Combine(testDir, "report.trx");
+
+            string commandContent = string.Format(CommandTemplate,
+                Path.GetFileName(testCollection.AssemblyPath),
+                unitTest.TestName,
+                resultFullpath,
+                browser,
+                config.EnvironmentUrl
+            );
+
+            File.WriteAllText(commandFullpath, commandContent);
+
+            var info = new ProcessStartInfo();
+            info.WorkingDirectory = config.TestAssembliesPath;
+            info.FileName = Path.Combine(Environment.ExpandEnvironmentVariables("%windir%"), @"System32\cmd.exe");
+            info.UseShellExecute = false;
+            info.WindowStyle = ProcessWindowStyle.Hidden;
+            info.ErrorDialog = false;
+            info.CreateNoWindow = true;
+            info.Arguments = "/c \"" + commandFullpath + "\"";
+            info.RedirectStandardError = true;
+            info.RedirectStandardOutput = true;
+
+            Process process = new Process();
+            process.StartInfo = info;
+            process.EnableRaisingEvents = true;
+
+
+            StringBuilder stdout = new StringBuilder();
+            DataReceivedEventHandler stdoutHandler = null;
+            stdoutHandler = (o, e) => stdout.Append(e.Data);
+            process.OutputDataReceived += stdoutHandler;
+
+            StringBuilder stderr = new StringBuilder();
+            DataReceivedEventHandler stderrHandler = null;
+            stderrHandler = (o, e) => stderr.Append(e.Data);
+            process.ErrorDataReceived += stderrHandler;
+
+            EventHandler exitedHandler = null;
+            
+            exitedHandler = (o, e) =>
+            {
+                process.OutputDataReceived -= stdoutHandler;
+                process.ErrorDataReceived -= stderrHandler;
+                process.Exited -= exitedHandler;
+            };
+            process.Exited += exitedHandler;
+
+            //string stdout = process.StandardOutput.ReadToEnd();
+            //string stderr = process.StandardError.ReadToEnd();
+
+            TimeSpan timeout = config.TestTimeout == TimeSpan.Zero ? TimeSpan.FromMinutes(30) : config.TestTimeout;
+            process.WaitForExit((int)timeout.TotalMilliseconds);
+
+            TestRun report;
+            using (var stream = File.Open(resultFullpath, FileMode.Open))
+            {
+                report = (TestRun)TestRunSerializer.Deserialize(stream);
+            }
+
+            //clean up
+            Directory.Delete(testDir, true);
+
+            bool passed = report.ResultSummary.Counters.passed == "1";
+
+            string testOutput = "";
+            if (report.Results.Length > 0 && report.Results[0].Output != null)
+                testOutput = report.Results[0].Output.StdOut;
+
+            var result = new UnitTestBrowserResult
+            {
+                Attempt = attempt,
+                Browser = browser,
+                StartTime = report.Results[0].startTime,
+                EndTime = report.Results[0].endTime,
+                Stdout = stdout + Environment.NewLine + "=================" + Environment.NewLine + testOutput,
+                Stderr = stderr,
+                Passed = passed
+            };
+            return result;
+        }
+        
+        private static string RemoveInvalidChars(string name)
+        {
+            string invalid = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+            foreach (char c in invalid)
+            {
+                name = name.Replace(c.ToString(), "");
+            }
+            return name;
+        }
+
+        private static EventHandler CreateEventHandler()
+        {
+            EventHandler handler = null;
+            handler = (o, e) =>
+            {
+                Process process = (Process) o;
+                process.Exited -= handler;
+            };
         }
     }
 }
