@@ -111,10 +111,9 @@ namespace Autodash.Core
             var context = new TestRunContext(
                 test.UnitTestInfo, 
                 test.UnitTestCollection, 
-                null, 
                 test.SuiteRun.TestSuiteSnapshot.Configuration, 
                 nodeBrowser, 
-                CancellationToken.None
+                testInfo.Item1.CancellationToken
             );
 
             lock (_runningTests)
