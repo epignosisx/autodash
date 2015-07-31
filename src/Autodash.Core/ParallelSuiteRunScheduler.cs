@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
@@ -37,15 +38,23 @@ namespace Autodash.Core
             foreach (var run in runs)
                 _onDemandQueue.Enqueue(run);
 
-            //TODO: make robust
-            Observable.Interval(TimeSpan.FromSeconds(10))
+            StartTimer();
+        }
+
+        private void StartTimer()
+        {
+            Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(10))
                 .Do(async _ => await ReloadGridConfig())
                 .Where(gridCon => _runningSuites.Count < _gridConfig.MaxParallelTestSuitesRunning)
                 .Select(_ => NextSuiteToRun())
                 .Where(suiteRun => suiteRun != null)
                 .SelectMany(RunSuite)
                 .SelectMany(SuiteCompleted)
-                .Subscribe();
+                .Subscribe(_ => { }, (ex) =>
+                {
+                    Debug.WriteLine(ex);
+                    StartTimer();
+                });
         }
 
         private async Task<SeleniumGridConfiguration> ReloadGridConfig()

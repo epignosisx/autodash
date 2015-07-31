@@ -95,10 +95,10 @@ namespace Autodash.Core
                     .Do(_ => Interlocked.Exchange(ref _processingNextTestsRound, 0))
                     .SelectMany(tests => tests)
                     .SelectMany(RunTestAsync)
-                    .Subscribe(test =>
-                    {
-                        Debug.WriteLine(test);
-                    });
+                    .Subscribe(
+                        test => Debug.WriteLine(test), 
+                        ex => Debug.WriteLine("ERRORRRRRRR: " + ex.ToString())
+                    );
             }
         }
 

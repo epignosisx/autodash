@@ -283,7 +283,21 @@ namespace Autodash.Core
 
             var completionSource = new TaskCompletionSource<UnitTestBrowserResult>();
             var cancellationToken = new CancellationTokenSource(timeout);
-            cancellationToken.Token.Register(() => completionSource.TrySetCanceled(), false);
+            DateTime timeoutStartDate = DateTime.UtcNow;
+            
+            cancellationToken.Token.Register(() =>
+            {
+                var result = new UnitTestBrowserResult
+                {
+                    Browser = browser,
+                    Passed = false,
+                    StartTime = timeoutStartDate,
+                    EndTime = DateTime.UtcNow,
+                    Stdout = "Test timed out"
+                };
+                completionSource.TrySetResult(result);
+            }, false);
+
             EventHandler exitedHandler = null;
             exitedHandler = (o, e) =>
             {

@@ -91,7 +91,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BoundedUpdatableCollection.cs" />
     <Compile Include="BrowserNameMapper.cs" />
     <Compile Include="DefaultSuiteRunSchedulerRepository.cs" />
     <Compile Include="DefaultTestSuiteUnitTestDiscoverer.cs" />
@@ -105,7 +104,6 @@
     <Compile Include="ITestSuiteUnitTestDiscoverer.cs" />
     <Compile Include="MongoDatabaseExtensions.cs" />
     <Compile Include="MsTestExecutionReport.cs" />
-    <Compile Include="DefaultSuiteRunner.cs" />
     <Compile Include="Dynamic.cs" />
     <Compile Include="IUnitTestDiscoverer.cs" />
     <Compile Include="IUnitTestRunner.cs" />

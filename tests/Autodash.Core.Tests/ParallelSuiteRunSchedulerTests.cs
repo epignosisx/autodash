@@ -46,16 +46,6 @@ namespace Autodash.Core.Tests
             });
         }
 
-        private static void CreateTimedOutRunnerMock()
-        {
-            Runner = Substitute.For<IUnitTestRunner>();
-            Runner.Run(Arg.Any<TestRunContext>()).Returns(async (CallInfo ci) =>
-            {
-                await Task.Delay(5);
-                throw new TaskCanceledException();
-            });
-        }
-
         private static SuiteRun GetSuiteRun()
         {
             return new SuiteRun
@@ -191,46 +181,6 @@ namespace Autodash.Core.Tests
             Assert.True(result.Result.CollectionResults[0].UnitTestResults[1].Passed);
             Assert.Equal(2, result.Result.CollectionResults[0].UnitTestResults[0].BrowserResults.Count);
             Assert.Equal(2, result.Result.CollectionResults[0].UnitTestResults[1].BrowserResults.Count);
-        }
-
-        [Fact]
-        public async Task SuiteRunnerMarksTimedOutTestsAsFailed()
-        {
-            CreateTimedOutRunnerMock();
-
-            var discoverer = Substitute.For<ITestSuiteUnitTestDiscoverer>();
-            discoverer.Discover(Arg.Any<string>()).Returns(GetUnitTestCollections());
-
-            var scraper = Substitute.For<IGridConsoleScraper>();
-            scraper.GetAvailableNodesInfoAsync(Arg.Any<Uri>()).Returns(Task.FromResult(GetGridNodes()));
-
-            var repository = Substitute.For<ISuiteRunSchedulerRepository>();
-            repository.GetScheduledSuiteRunsAsync().Returns(Task.FromResult(new List<SuiteRun>(0)));
-            repository.GetTestSuitesWithScheduleAsync().Returns(Task.FromResult(new List<TestSuite>(0)));
-            repository.GetGridConfigurationAsync().Returns(Task.FromResult(GetGridConfig()));
-
-            var suiteRun = GetSuiteRun();
-
-            var subject = new ParallelSuiteRunner(discoverer, scraper, repository);
-
-            var result = await subject.Run(suiteRun, CancellationToken.None);
-
-            subject.Dispose();
-
-            Assert.NotNull(result);
-            Assert.False(result.Result.Passed);
-            Assert.NotEmpty(result.Result.Details);
-            Assert.Equal(2, result.Result.FailedTotal);
-            Assert.Equal(0, result.Result.PassedTotal);
-            Assert.Equal(1, result.Result.CollectionResults.Count);
-            Assert.NotEmpty(result.Result.CollectionResults[0].AssemblyName);
-            Assert.Equal(2, result.Result.CollectionResults[0].UnitTestResults.Count);
-            Assert.NotEmpty(result.Result.CollectionResults[0].UnitTestResults[0].TestName);
-            Assert.NotEmpty(result.Result.CollectionResults[0].UnitTestResults[1].TestName);
-            Assert.False(result.Result.CollectionResults[0].UnitTestResults[0].Passed);
-            Assert.False(result.Result.CollectionResults[0].UnitTestResults[1].Passed);
-            Assert.Equal(4, result.Result.CollectionResults[0].UnitTestResults[0].BrowserResults.Count);
-            Assert.Equal(4, result.Result.CollectionResults[0].UnitTestResults[1].BrowserResults.Count);
         }
     }
 }
