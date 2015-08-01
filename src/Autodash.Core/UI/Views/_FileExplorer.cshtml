@@ -1,0 +1,28 @@
+﻿@using System
+@using System.Linq;
+@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.FileExplorerVm>
+@{
+    Layout = "";
+}
+
+<table class="table table-condensed suite-runs-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Filename</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var file in Model.Files)
+        {
+            <tr>
+                <td style="width:30px">
+                    <a href="@file.EditLink"><span class="glyphicon glyphicon-pencil"></span></a>
+                </td>
+                <td>@file.Filename</td>
+                
+            </tr>
+        }
+    </tbody>
+
+</table>

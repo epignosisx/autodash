@@ -6,8 +6,6 @@ namespace Autodash.Core
     public class UnitTestBrowserResult
     {
         public string Browser { get; set; }
-        [Obsolete]
-        public int Attempt { get; set; } //TODO: remove
         public string Stdout { get; set; }
         public string Stderr { get; set; }
         public bool Passed { get; set; }

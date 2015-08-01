@@ -18,7 +18,6 @@ namespace Autodash.Core.UI.Models
         public int? IntervalHours { get; set; }
 
         public ValidationFailure[] Errors { get; set; }
-        public bool EnableBrowserExecutionInParallel { get; set; }
 
         public CreateSuiteVm()
         {

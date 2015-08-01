@@ -54,8 +54,7 @@ namespace Autodash.Core.UI.Modules
                         EnvironmentUrl = vm.EnvironmentUrl,
                         Browsers = vm.Browsers,
                         RetryAttempts = vm.RetryAttempts,
-                        TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes),
-                        EnableBrowserExecutionInParallel = vm.EnableBrowserExecutionInParallel
+                        TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes)
                     },
                     Schedule = vm.Time.HasValue ? new TestSuiteSchedule {
                         Time = vm.Time.Value,
@@ -99,8 +98,7 @@ namespace Autodash.Core.UI.Modules
                         Browsers = vm.Browsers,
                         RetryAttempts = vm.RetryAttempts,
                         TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes),
-                        TestAssembliesPath = existingSuite.Configuration.TestAssembliesPath,
-                        EnableBrowserExecutionInParallel = vm.EnableBrowserExecutionInParallel
+                        TestAssembliesPath = existingSuite.Configuration.TestAssembliesPath
                     },
                     Schedule = vm.Time.HasValue ? new TestSuiteSchedule
                     {
@@ -158,10 +156,23 @@ namespace Autodash.Core.UI.Modules
 
                 var suiteRuns = await database.GetSuiteRunsBySuiteIdAsync(id);
 
+                var fileExplorer = container.Resolve<ITestSuiteFileExplorer>();;
+                var files = fileExplorer.GetFiles(suite.Configuration.TestAssembliesPath)
+                                        .Select(n => new FileExplorerItem
+                                        {
+                                            Filename = n,
+                                            EditLink = string.Format("/suites/{0}/file-editor?file={1}", Uri.EscapeDataString(suite.Id), Uri.EscapeDataString(n))
+                                        }).ToList();
+
                 var vm = new SuiteDetailsVm
                 {
                     Suite = suite,
-                    SuiteRuns = suiteRuns
+                    SuiteRuns = suiteRuns,
+                    FileExplorer = new FileExplorerVm
+                    {
+                        TestSuiteId = suite.Id,
+                        Files = files
+                    }
                 };
 
                 return View["SuiteDetails", vm];
@@ -279,6 +290,42 @@ namespace Autodash.Core.UI.Modules
                 return Response.AsJson(new { SuiteRunId = run.Id });
             };
 
+            Get["/suites/{id}/file-editor", true] = async (parameters, ct) =>
+            {
+                var database = container.Resolve<IMongoDatabase>();
+                string id = parameters.id;
+                string fileName = Request.Query.file;
+                var suite = await database.GetSuiteByIdAsync(id);
+
+                var fileExplorer = container.Resolve<ITestSuiteFileExplorer>();
+                var content = fileExplorer.GetFileContent(suite.Configuration.TestAssembliesPath, fileName);
+
+                var vm = new FileExplorerItem
+                {
+                    TestSuiteId = id,
+                    Filename = fileName,
+                    FileContent = content,
+                };
+
+                return View["FileEditor", vm];
+            };
+
+            Post["/suites/file-editor", true] = async (parameters, ct) =>
+            {
+                FileExplorerItem vm = this.Bind<FileExplorerItem>();
+
+                var database = container.Resolve<IMongoDatabase>();
+                var suite = await database.GetSuiteByIdAsync(vm.TestSuiteId);
+
+                var fileExplorer = container.Resolve<ITestSuiteFileExplorer>();
+                fileExplorer.UpdateFileContent(
+                    suite.Configuration.TestAssembliesPath, 
+                    vm.Filename,
+                    vm.FileContent
+                );
+
+                return Response.AsRedirect("/suites/" + Uri.EscapeDataString(vm.TestSuiteId));
+            };
         }
 
     }

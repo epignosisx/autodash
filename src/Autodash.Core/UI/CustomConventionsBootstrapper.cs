@@ -17,14 +17,14 @@ namespace Autodash.Core.UI
             existingContainer.Register<IMongoDatabase>((container, parameters) => MongoDatabaseProvider.GetDatabase());
             existingContainer.Register<ITestAssembliesRepository>(new FileSystemTestAssembliesRepository(repoPath));
             existingContainer.Register<ITestSuiteUnitTestDiscoverer, DefaultTestSuiteUnitTestDiscoverer>().AsSingleton();
-            
+            existingContainer.Register<ITestSuiteFileExplorer>(new XmlOnlyTestSuiteFileExplorer());
+
             existingContainer.Register<IGridConsoleScraper, DefaultGridConsoleScraper>().AsSingleton();
             
             existingContainer.Register<ISuiteRunSchedulerRepository, DefaultSuiteRunSchedulerRepository>().AsSingleton();
             existingContainer.Register<ISuiteRunner, ParallelSuiteRunner>().AsSingleton();
             existingContainer.Register<ISuiteRunScheduler, ParallelSuiteRunScheduler>().AsSingleton();
-            //existingContainer.Register<ISuiteRunner, DefaultSuiteRunner>().AsSingleton();
-            //existingContainer.Register<ISuiteRunScheduler, DefaultSuiteRunScheduler>().AsSingleton();
+            
             
             existingContainer.Register<CreateProjectCommand>();
             existingContainer.Register<CreateSuiteCommand>();

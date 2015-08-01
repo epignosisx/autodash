@@ -89,7 +89,7 @@ namespace Autodash.Core
             stderrHandler = (o, e) => stderr.Append(e.Data);
             process.ErrorDataReceived += stderrHandler;
 
-            TimeSpan timeout = config.TestTimeout == TimeSpan.Zero ? TimeSpan.FromMinutes(30) : config.TestTimeout;
+            TimeSpan timeout = config.TestTimeout == TimeSpan.Zero ? TimeSpan.FromMinutes(10) : config.TestTimeout;
 
             var completionSource = new TaskCompletionSource<UnitTestBrowserResult>();
             var cancellationToken = new CancellationTokenSource(timeout);

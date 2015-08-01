@@ -10,9 +10,9 @@ namespace Autodash.Core.Tests
 {
     public class ParallelSuiteRunRunnerTests
     {
-        private static IUnitTestRunner Runner;
+        private IUnitTestRunner Runner;
 
-        private static UnitTestCollection[] GetUnitTestCollections()
+        private UnitTestCollection[] GetUnitTestCollections()
         {
             var test1 = new UnitTestInfo("Test1", null);
             var test2 = new UnitTestInfo("Test2", null);
@@ -20,7 +20,7 @@ namespace Autodash.Core.Tests
             return new UnitTestCollection[] { unitTestCollection };
         }
 
-        private static void CreateAlwaysFailRunnerMock(int millisecondsDelay)
+        private void CreateAlwaysFailRunnerMock(int millisecondsDelay)
         {
             Runner = Substitute.For<IUnitTestRunner>();
             Runner.Run(Arg.Any<TestRunContext>()).Returns(async (CallInfo ci)=> {
@@ -32,7 +32,7 @@ namespace Autodash.Core.Tests
             });
         }
 
-        private static void CreateAlwaysPassRunnerMock(int millisecondsDelay)
+        private void CreateAlwaysPassRunnerMock(int millisecondsDelay)
         {
             Runner = Substitute.For<IUnitTestRunner>();
             Runner.Run(Arg.Any<TestRunContext>()).Returns(async (CallInfo ci) =>
@@ -46,7 +46,7 @@ namespace Autodash.Core.Tests
             });
         }
 
-        private static SuiteRun GetSuiteRun()
+        private SuiteRun GetSuiteRun()
         {
             return new SuiteRun
             {
@@ -64,12 +64,12 @@ namespace Autodash.Core.Tests
             };
         }
 
-        private static SeleniumGridConfiguration GetGridConfig()
+        private SeleniumGridConfiguration GetGridConfig()
         {
             return new SeleniumGridConfiguration {HubUrl = "http://localhost", MaxParallelTestSuitesRunning = 1};
         }
 
-        private static List<GridNodeInfo> GetGridNodes()
+        private List<GridNodeInfo> GetGridNodes()
         {
             var gridNodes = new List<GridNodeInfo>{
                 new GridNodeInfo {
@@ -87,14 +87,17 @@ namespace Autodash.Core.Tests
 
         [Theory]
         [InlineData(0)]
+        [InlineData(30)]
         [InlineData(50)]
         [InlineData(100)]
+        [InlineData(150)]
+        [InlineData(200)]
         [InlineData(500)]
         [InlineData(600)]
         [InlineData(700)]
-        [InlineData(1000)]
-        [InlineData(5000)]
-        [InlineData(6000)]
+        //[InlineData(1000)]
+        //[InlineData(5000)]
+        //[InlineData(6000)]
         public async Task RunningSuiteWhereAllTestFail(int delay)
         {
             CreateAlwaysFailRunnerMock(delay);
@@ -136,14 +139,17 @@ namespace Autodash.Core.Tests
 
         [Theory]
         [InlineData(0)]
+        [InlineData(30)]
         [InlineData(50)]
         [InlineData(100)]
+        [InlineData(150)]
+        [InlineData(200)]
         [InlineData(500)]
         [InlineData(600)]
         [InlineData(700)]
-        [InlineData(1000)]
-        [InlineData(5000)]
-        [InlineData(6000)]
+        //[InlineData(1000)]
+        //[InlineData(5000)]
+        //[InlineData(6000)]
         public async Task RunningSuiteWhereAllTestPass(int delay)
         {
             CreateAlwaysPassRunnerMock(delay);

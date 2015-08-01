@@ -103,6 +103,7 @@
     <Compile Include="IGridConsoleScraper.cs" />
     <Compile Include="ISuiteRunSchedulerRepository.cs" />
     <Compile Include="ITestRunnerPreProcessor.cs" />
+    <Compile Include="ITestSuiteFileExplorer.cs" />
     <Compile Include="ITestSuiteUnitTestDiscoverer.cs" />
     <Compile Include="MongoDatabaseExtensions.cs" />
     <Compile Include="MsTestExecutionReport.cs" />
@@ -161,6 +162,7 @@
     <Compile Include="UnitTestTagSelector.cs" />
     <Compile Include="UpdateGridCommand.cs" />
     <Compile Include="UpdateGridConfigValidator.cs" />
+    <Compile Include="XmlOnlyTestSuiteFileExplorer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -207,6 +209,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="UI\Views\GridConfig.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\Views\_FileExplorer.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\Views\FileEditor.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

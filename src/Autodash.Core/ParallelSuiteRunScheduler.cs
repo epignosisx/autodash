@@ -44,6 +44,7 @@ namespace Autodash.Core
         private void StartTimer()
         {
             Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(10))
+                .Where(n => _gridConfig != null)
                 .Do(async _ => await ReloadGridConfig())
                 .Where(gridCon => _runningSuites.Count < _gridConfig.MaxParallelTestSuitesRunning)
                 .Select(_ => NextSuiteToRun())
