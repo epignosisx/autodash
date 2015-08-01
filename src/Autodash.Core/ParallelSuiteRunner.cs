@@ -16,6 +16,7 @@ namespace Autodash.Core
         private readonly ISuiteRunSchedulerRepository _repository;
         private readonly Queue<ParallelSuiteRunnerQueueItem> _testsQueue = new Queue<ParallelSuiteRunnerQueueItem>();
         private readonly HashSet<ParallelSuiteRunnerQueueItem> _runningTests = new HashSet<ParallelSuiteRunnerQueueItem>();
+        private SeleniumGridConfiguration _gridConfig;
         private Uri _hubUrl;
 
         private IDisposable _subscription;
@@ -75,8 +76,8 @@ namespace Autodash.Core
                 }
             }
 
-            var gridConfig = await _repository.GetGridConfigurationAsync();
-            _hubUrl = new Uri(gridConfig.HubUrl + "grid/console");
+            _gridConfig = await _repository.GetGridConfigurationAsync();
+            _hubUrl = new Uri(_gridConfig.HubUrl + "grid/console");
 
             EnsureInitialized();
             return await taskCompletionSource.Task;
@@ -113,7 +114,8 @@ namespace Autodash.Core
                 test.UnitTestCollection, 
                 test.SuiteRun.TestSuiteSnapshot.Configuration, 
                 nodeBrowser, 
-                testInfo.Item1.CancellationToken
+                testInfo.Item1.CancellationToken,
+                _gridConfig
             );
 
             lock (_runningTests)

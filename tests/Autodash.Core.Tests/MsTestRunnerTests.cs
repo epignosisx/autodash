@@ -19,7 +19,7 @@ namespace Autodash.Core.Tests
                 TestAssembliesPath = Environment.CurrentDirectory
             };
             var browserNode = new GridNodeBrowserInfo {BrowserName = "chrome"};
-            var context = new TestRunContext(unitTest, coll, config, browserNode, CancellationToken.None);
+            var context = new TestRunContext(unitTest, coll, config, browserNode, CancellationToken.None, null);
 
             UnitTestBrowserResult result = await subject.Run(context);
 
@@ -39,18 +39,18 @@ namespace Autodash.Core.Tests
                 TestAssembliesPath = Environment.CurrentDirectory
             };
             var browserNode = new GridNodeBrowserInfo { BrowserName = "chrome" };
-            var context = new TestRunContext(unitTest, coll, config, browserNode, CancellationToken.None);
+            var context = new TestRunContext(unitTest, coll, config, browserNode, CancellationToken.None, null);
             UnitTestBrowserResult result = await subject.Run(context);
 
             Assert.False(result.Passed);
-            Assert.False(Directory.Exists(Path.Combine(Environment.CurrentDirectory, "SuccessTest_chrome")));
+            Assert.False(Directory.Exists(Path.Combine(Environment.CurrentDirectory, "FailTest_chrome")));
         }
 
         [Fact]
         public async Task TestThatTimesOutThrows()
         {
             MsTestRunner subject = new MsTestRunner();
-            UnitTestInfo unitTest = new UnitTestInfo("Autodash.MsTest.ValidTests.UnitTest1.SuccessTest", null);
+            UnitTestInfo unitTest = new UnitTestInfo("Autodash.MsTest.ValidTests.UnitTest1.AnotherSuccessTest", null);
             UnitTestCollection coll = new UnitTestCollection("Autodash.MsTest.ValidTests", "Autodash.MsTest.ValidTests.dll", new[] { unitTest }, subject);
             TestSuiteConfiguration config = new TestSuiteConfiguration
             {
@@ -60,8 +60,10 @@ namespace Autodash.Core.Tests
             };
 
             var browserNode = new GridNodeBrowserInfo { BrowserName = "chrome" };
-            var context = new TestRunContext(unitTest, coll, config, browserNode, CancellationToken.None);
-            await Assert.ThrowsAsync<TaskCanceledException>(() => subject.Run(context));
+            var context = new TestRunContext(unitTest, coll, config, browserNode, CancellationToken.None, null);
+            UnitTestBrowserResult result = await subject.Run(context);
+            Assert.False(result.Passed);
+            Assert.Equal(result.Stdout, "Test timed out");
         }
     }
 }

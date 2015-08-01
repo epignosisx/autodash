@@ -9,19 +9,22 @@ namespace Autodash.Core
         public TestSuiteConfiguration TestSuiteConfiguration { get; private set; }
         public GridNodeBrowserInfo GridNodeBrowserInfo { get; private set; }
         public CancellationToken CancellationToken { get; private set; }
+        public SeleniumGridConfiguration SeleniumGridConfiguration { get; private set; }
 
         public TestRunContext(
             UnitTestInfo unitTestInfo,
             UnitTestCollection unitTestCollection,
             TestSuiteConfiguration testSuiteConfiguration,
             GridNodeBrowserInfo gridNodeBrowserInfo,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            SeleniumGridConfiguration seleniumGridConfiguration)
         {
             UnitTestInfo = unitTestInfo;
             UnitTestCollection = unitTestCollection;
             TestSuiteConfiguration = testSuiteConfiguration;
             GridNodeBrowserInfo = gridNodeBrowserInfo;
             CancellationToken = cancellationToken;
+            SeleniumGridConfiguration = seleniumGridConfiguration;
         }
     }
 }

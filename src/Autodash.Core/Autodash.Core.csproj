@@ -91,6 +91,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplyTestSettingsPreProcessor.cs" />
     <Compile Include="BrowserNameMapper.cs" />
     <Compile Include="DefaultSuiteRunSchedulerRepository.cs" />
     <Compile Include="DefaultTestSuiteUnitTestDiscoverer.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="GridNodeManager.cs" />
     <Compile Include="IGridConsoleScraper.cs" />
     <Compile Include="ISuiteRunSchedulerRepository.cs" />
+    <Compile Include="ITestRunnerPreProcessor.cs" />
     <Compile Include="ITestSuiteUnitTestDiscoverer.cs" />
     <Compile Include="MongoDatabaseExtensions.cs" />
     <Compile Include="MsTestExecutionReport.cs" />
@@ -112,7 +114,6 @@
     <Compile Include="CreateProjectValidator.cs" />
     <Compile Include="CreateSuiteCommand.cs" />
     <Compile Include="CreateTestSuiteValidator.cs" />
-    <Compile Include="DefaultSuiteRunScheduler.cs" />
     <Compile Include="FileSystemTestAssembliesRepository.cs" />
     <Compile Include="ISuiteRunner.cs" />
     <Compile Include="ISuiteRunScheduler.cs" />
@@ -130,6 +131,8 @@
     <Compile Include="SuiteRunResultStatus.cs" />
     <Compile Include="SuiteRunStatus.cs" />
     <Compile Include="TestRunContext.cs" />
+    <Compile Include="TestRunnerPreProcessorContext.cs" />
+    <Compile Include="TestRunnerPreProcessorProvider.cs" />
     <Compile Include="TestSuite.cs" />
     <Compile Include="TestSuiteConfiguration.cs" />
     <Compile Include="TestSuiteSchedule.cs" />

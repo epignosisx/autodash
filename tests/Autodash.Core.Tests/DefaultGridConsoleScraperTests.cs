@@ -6,7 +6,7 @@ namespace Autodash.Core.Tests
 {
     public class DefaultGridConsoleScraperTests
     {
-        [Fact]
+        [Fact(Skip = "Integration Test. Requires Selenium Grid to be running.")]
         [Trait("GridHubIntegration", "true")]
         public async Task ReturnsNodesWhenHubIsOpenAndHasRegisteredNodes()
         {

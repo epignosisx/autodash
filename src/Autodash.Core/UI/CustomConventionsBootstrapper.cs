@@ -30,6 +30,8 @@ namespace Autodash.Core.UI
             existingContainer.Register<CreateSuiteCommand>();
             existingContainer.Register<UpdateGridCommand>();
 
+            TestRunnerPreProcessorProvider.Add(new ApplyTestSettingsPreProcessor());
+
             JsonSettings.MaxJsonLength = int.MaxValue;
 
             var scheduler = existingContainer.Resolve<ISuiteRunScheduler>();
