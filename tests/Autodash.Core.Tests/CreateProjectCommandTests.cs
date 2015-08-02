@@ -11,7 +11,7 @@ namespace Autodash.Core.Tests
         {
             //arrange
             var db = await MongoTestDbProvider.GetDatabase();
-            var cmd = new CreateProjectCommand(db);
+            var cmd = new CreateProjectCommand(db, new FakeLoggerProvider());
             Project project = new Project();
             project.Name = "Test Project";
 
@@ -28,7 +28,7 @@ namespace Autodash.Core.Tests
         {
             //arrange
             var db = await MongoTestDbProvider.GetDatabase();
-            var cmd = new CreateProjectCommand(db);
+            var cmd = new CreateProjectCommand(db, new FakeLoggerProvider());
             Project project = new Project();
             project.Name = null;
 

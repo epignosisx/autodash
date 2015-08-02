@@ -115,7 +115,7 @@ namespace Autodash.Core.Tests
 
             var suiteRun = GetSuiteRun();
 
-            var subject = new ParallelSuiteRunner(discoverer, scraper, repository);
+            var subject = new ParallelSuiteRunner(discoverer, scraper, repository, new FakeLoggerProvider());
 
             var result = await subject.Run(suiteRun, CancellationToken.None);
 
@@ -167,7 +167,7 @@ namespace Autodash.Core.Tests
 
             var suiteRun = GetSuiteRun();
 
-            var subject = new ParallelSuiteRunner(discoverer, scraper, repository);
+            var subject = new ParallelSuiteRunner(discoverer, scraper, repository, new FakeLoggerProvider());
 
             var result = await subject.Run(suiteRun, CancellationToken.None);
 

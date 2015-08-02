@@ -1,10 +1,13 @@
-﻿using MongoDB.Driver;
+﻿using System.Configuration;
+using MongoDB.Driver;
 using Nancy;
 using Nancy.Conventions;
 using Nancy.Json;
 using Nancy.TinyIoc;
 using System;
 using System.IO;
+using NLog;
+using NLog.Targets;
 
 namespace Autodash.Core.UI
 {
@@ -12,7 +15,10 @@ namespace Autodash.Core.UI
     {
         protected override void ConfigureApplicationContainer(TinyIoCContainer existingContainer)
         {
-            var repoPath = Path.Combine(Environment.CurrentDirectory, "Repository");
+            var repoPath = ConfigurationManager.AppSettings["RepositoryPath"] ?? Path.Combine(Environment.CurrentDirectory, "Repository");
+
+            LogManager.ThrowExceptions = true;
+            existingContainer.Register<ILoggerProvider>(new DefaultLoggerProvider());
 
             existingContainer.Register<IMongoDatabase>((container, parameters) => MongoDatabaseProvider.GetDatabase());
             existingContainer.Register<ITestAssembliesRepository>(new FileSystemTestAssembliesRepository(repoPath));
@@ -24,8 +30,7 @@ namespace Autodash.Core.UI
             existingContainer.Register<ISuiteRunSchedulerRepository, DefaultSuiteRunSchedulerRepository>().AsSingleton();
             existingContainer.Register<ISuiteRunner, ParallelSuiteRunner>().AsSingleton();
             existingContainer.Register<ISuiteRunScheduler, ParallelSuiteRunScheduler>().AsSingleton();
-            
-            
+
             existingContainer.Register<CreateProjectCommand>();
             existingContainer.Register<CreateSuiteCommand>();
             existingContainer.Register<UpdateGridCommand>();

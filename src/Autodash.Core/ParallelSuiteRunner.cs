@@ -14,6 +14,7 @@ namespace Autodash.Core
         private readonly ITestSuiteUnitTestDiscoverer _unitTestDiscoverer;
         private readonly IGridConsoleScraper _gridConsoleScraper;
         private readonly ISuiteRunSchedulerRepository _repository;
+        private readonly ILoggerWrapper _logger;
         private readonly Queue<ParallelSuiteRunnerQueueItem> _testsQueue = new Queue<ParallelSuiteRunnerQueueItem>();
         private readonly HashSet<ParallelSuiteRunnerQueueItem> _runningTests = new HashSet<ParallelSuiteRunnerQueueItem>();
         private SeleniumGridConfiguration _gridConfig;
@@ -26,11 +27,13 @@ namespace Autodash.Core
         public ParallelSuiteRunner(
             ITestSuiteUnitTestDiscoverer unitTestDiscoverer, 
             IGridConsoleScraper gridConsoleScraper,
-            ISuiteRunSchedulerRepository repository)
+            ISuiteRunSchedulerRepository repository,
+            ILoggerProvider loggerProvider)
         {
             _unitTestDiscoverer = unitTestDiscoverer;
             _gridConsoleScraper = gridConsoleScraper;
             _repository = repository;
+            _logger = loggerProvider.GetLogger(GetType().Name);
         }
 
         public async Task<SuiteRun> Run(SuiteRun run, CancellationToken cancellationToken)
@@ -96,9 +99,10 @@ namespace Autodash.Core
                     .Do(_ => Interlocked.Exchange(ref _processingNextTestsRound, 0))
                     .SelectMany(tests => tests)
                     .SelectMany(RunTestAsync)
+                    .RetryWithBackoffStrategy(10)
                     .Subscribe(
-                        test => Debug.WriteLine(test), 
-                        ex => Debug.WriteLine("ERRORRRRRRR: " + ex.ToString())
+                        test => _logger.Info("Finished Test: {0} - {1}", test.UnitTestInfo.TestName, test.Browser), 
+                        ex => _logger.Error(ex, "Timer failed")
                     );
             }
         }

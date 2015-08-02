@@ -9,11 +9,13 @@ namespace Autodash.Core
     {
         private readonly IMongoDatabase _db;
         private readonly ITestAssembliesRepository _assembliesRepo;
-        
-        public CreateSuiteCommand(IMongoDatabase db, ITestAssembliesRepository assembliesRepo)
+        private readonly ILoggerWrapper _logger;
+
+        public CreateSuiteCommand(IMongoDatabase db, ITestAssembliesRepository assembliesRepo, ILoggerProvider loggerProvider)
         {
             _db = db;
             _assembliesRepo = assembliesRepo;
+            _logger = loggerProvider.GetLogger(GetType().Name);
         }
 
         public async Task ExecuteAsync(TestSuite suite, string testAssembliesTempLocation)
@@ -32,6 +34,8 @@ namespace Autodash.Core
             suite.Configuration.TestAssembliesPath = _assembliesRepo.MoveToTestSuite(suite, testAssembliesTempLocation);
             
             await coll.ReplaceOneAsync<TestSuite>(n => n.Id == suite.Id, suite);
+            _logger.Info("Test Suite created {0} - {1}", suite.Id, suite.Name);
+
         }
     }
 

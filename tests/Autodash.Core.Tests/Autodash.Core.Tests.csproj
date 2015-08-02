@@ -83,6 +83,7 @@
     <Compile Include="CreateProjectCommandTests.cs" />
     <Compile Include="CreateSuiteCommandTests.cs" />
     <Compile Include="DefaultGridConsoleScraperTests.cs" />
+    <Compile Include="FakeLoggerProvider.cs" />
     <Compile Include="GridNodeInfoTests.cs" />
     <Compile Include="GridNodeManagerTests.cs" />
     <Compile Include="MongoTestDbProvider.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="UnitTestTagSelectorTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
