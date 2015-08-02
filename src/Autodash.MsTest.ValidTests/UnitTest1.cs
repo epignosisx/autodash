@@ -18,6 +18,14 @@ namespace Autodash.MsTest.ValidTests
         }
 
         [TestMethod]
+        public void AnotherSuccessTest()
+        {
+            Console.WriteLine("Running UnitTest1.AnotherSuccessTest");
+            Thread.Sleep(TimeSpan.FromSeconds(5));
+            Assert.IsTrue(true);
+        }
+
+        [TestMethod]
         public void FailTest()
         {
             Console.WriteLine("Running UnitTest1.FailTest");

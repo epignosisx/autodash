@@ -29,7 +29,8 @@ namespace Autodash.Core.Tests
             suite.Configuration = new TestSuiteConfiguration
             {
                 Browsers = new[] {"Internet Explorer", "Firefox"},
-                TestAssembliesPath = "Foo\\Bar"
+                TestAssembliesPath = "Foo\\Bar",
+                EnvironmentUrl = "http://localhost:8090"
             };
 
             //act
@@ -56,7 +57,8 @@ namespace Autodash.Core.Tests
             suite.Configuration = new TestSuiteConfiguration
             {
                 Browsers = new[] { "Internet Explorer", "Firefox" },
-                TestAssembliesPath = "Foo\\Bar"
+                TestAssembliesPath = "Foo\\Bar",
+                EnvironmentUrl = "http://localhost:8090"
             };
 
             //act

@@ -33,6 +33,9 @@
     <Reference Include="FluentValidation">
       <HintPath>..\..\packages\FluentValidation.5.5.0.0\lib\Net40\FluentValidation.dll</HintPath>
     </Reference>
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>..\..\packages\HtmlAgilityPack.1.4.9\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="MongoDB.Bson">
       <HintPath>..\..\packages\MongoDB.Bson.2.0.0\lib\net45\MongoDB.Bson.dll</HintPath>
     </Reference>
@@ -63,6 +66,19 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Reactive.Core">
+      <HintPath>..\..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces">
+      <HintPath>..\..\packages\Rx-Interfaces.2.2.5\lib\net45\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq">
+      <HintPath>..\..\packages\Rx-Linq.2.2.5\lib\net45\System.Reactive.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.PlatformServices, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Rx-PlatformServices.2.2.5\lib\net45\System.Reactive.PlatformServices.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -75,15 +91,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BoundedUpdatableCollection.cs" />
+    <Compile Include="ApplyTestSettingsPreProcessor.cs" />
+    <Compile Include="BrowserNameMapper.cs" />
+    <Compile Include="DefaultSuiteRunSchedulerRepository.cs" />
     <Compile Include="DefaultTestSuiteUnitTestDiscoverer.cs" />
     <Compile Include="DefaultGridConsoleScraper.cs" />
+    <Compile Include="GridConsoleScraperException.cs" />
     <Compile Include="GridNodeBrowserInfo.cs" />
+    <Compile Include="GridNodeInfo.cs" />
+    <Compile Include="GridNodeManager.cs" />
     <Compile Include="IGridConsoleScraper.cs" />
+    <Compile Include="ISuiteRunSchedulerRepository.cs" />
+    <Compile Include="ITestRunnerPreProcessor.cs" />
+    <Compile Include="ITestSuiteFileExplorer.cs" />
     <Compile Include="ITestSuiteUnitTestDiscoverer.cs" />
     <Compile Include="MongoDatabaseExtensions.cs" />
     <Compile Include="MsTestExecutionReport.cs" />
-    <Compile Include="DefaultSuiteRunner.cs" />
     <Compile Include="Dynamic.cs" />
     <Compile Include="IUnitTestDiscoverer.cs" />
     <Compile Include="IUnitTestRunner.cs" />
@@ -92,19 +115,25 @@
     <Compile Include="CreateProjectValidator.cs" />
     <Compile Include="CreateSuiteCommand.cs" />
     <Compile Include="CreateTestSuiteValidator.cs" />
-    <Compile Include="DefaultSuiteRunScheduler.cs" />
     <Compile Include="FileSystemTestAssembliesRepository.cs" />
     <Compile Include="ISuiteRunner.cs" />
     <Compile Include="ISuiteRunScheduler.cs" />
     <Compile Include="ITestAssembliesRepository.cs" />
     <Compile Include="MsTestDiscoverer.cs" />
     <Compile Include="MsTestRunner.cs" />
+    <Compile Include="ObservableExtensions.cs" />
+    <Compile Include="ParallelSuiteRunner.cs" />
+    <Compile Include="ParallelSuiteRunScheduler.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SuiteRun.cs" />
+    <Compile Include="SuiteRunForRunnerValidator.cs" />
     <Compile Include="SuiteRunResult.cs" />
     <Compile Include="SuiteRunResultStatus.cs" />
     <Compile Include="SuiteRunStatus.cs" />
+    <Compile Include="TestRunContext.cs" />
+    <Compile Include="TestRunnerPreProcessorContext.cs" />
+    <Compile Include="TestRunnerPreProcessorProvider.cs" />
     <Compile Include="TestSuite.cs" />
     <Compile Include="TestSuiteConfiguration.cs" />
     <Compile Include="TestSuiteSchedule.cs" />
@@ -133,6 +162,7 @@
     <Compile Include="UnitTestTagSelector.cs" />
     <Compile Include="UpdateGridCommand.cs" />
     <Compile Include="UpdateGridConfigValidator.cs" />
+    <Compile Include="XmlOnlyTestSuiteFileExplorer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -179,6 +209,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="UI\Views\GridConfig.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\Views\_FileExplorer.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\Views\FileEditor.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

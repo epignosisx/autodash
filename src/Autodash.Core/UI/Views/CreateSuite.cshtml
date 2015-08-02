@@ -1,8 +1,7 @@
-﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.CreateSuiteVm>
+﻿@using Autodash.Core
+@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.CreateSuiteVm>
 @{
     Layout = "_Layout.cshtml";
-
-    string parallelExecutionTooltip = "Parallel execution speeds up suite run execution. However, depending on the test it could bring unexpected results. Ex: if a test adds a product to the shopping cart of user 'A', and then tries to validate the shopping cart product count was incremented, it could potentially find that the product was incremented twice because of another browser excution incrementing the cart for user 'A'.";
 }
 
 <h1>New Test Suite</h1>
@@ -28,23 +27,20 @@
         <div class="form-group">
             <label for="Browsers">Browsers</label>
             <div class="checkbox">
-                <label><input type="checkbox" name="Browsers" value="Chrome" checked />Chrome</label>&nbsp;
-                <label><input type="checkbox" name="Browsers" value="Firefox" />Firefox</label>&nbsp;
-                <label><input type="checkbox" name="Browsers" value="InternetExplorer" />IE</label>
+                <label><input type="checkbox" name="Browsers" value="@BrowserNames.SeleniumChrome" checked />@BrowserNames.UiChrome</label>&nbsp;
+                <label><input type="checkbox" name="Browsers" value="@BrowserNames.SeleniumFirefox" />@BrowserNames.UiFirefox</label>&nbsp;
+                <label><input type="checkbox" name="Browsers" value="@BrowserNames.SeleniumIe" />@BrowserNames.UiIe</label>
             </div>
         </div>
-
+        
         <div class="form-group">
-            <label for="EnableBrowserExecutionInParallel">
-                <input type="checkbox" name="EnableBrowserExecutionInParallel" @(Model.EnableBrowserExecutionInParallel ? "checked='checked'" : "") />
-                Enable parallel execution of tests in browsers
-            </label>
+            <label for="SuiteName">Environment Url</label>
+            <input type="text" class="form-control" name="EnvironmentUrl" value="@Model.EnvironmentUrl" required maxlength="100" />
             <p class="help-block">
-                By enabling parallel execution each test will be run simultaneously in all selected browsers.
-                <a href="#" data-toggle="popover" data-content="@parallelExecutionTooltip"><span class="glyphicon glyphicon-question-sign text-danger"></span></a>
+                Enter the root url. Ex: http://www.some-url.com
             </p>
         </div>
-
+        
         <div class="form-group">
             <label for="RetryAttempts">Retry attempts</label>
             <input type="number" class="form-control" name="RetryAttempts" value="@Model.RetryAttempts" required maxlength="1" />

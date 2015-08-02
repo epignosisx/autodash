@@ -1,7 +1,6 @@
 using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System.Globalization;
 
 namespace Autodash.Core
 {
@@ -28,6 +27,18 @@ namespace Autodash.Core
         public double DurationMinutes 
         { 
             get { return Duration.TotalMinutes; } 
+        }
+
+        public void MarkAsRunning()
+        {
+            StartedOn = DateTime.UtcNow;
+            Status = SuiteRunStatus.Running;
+        }
+
+        public void MarkAsCompleted()
+        {
+            CompletedOn = DateTime.UtcNow;
+            Status = SuiteRunStatus.Complete;
         }
 
         public static SuiteRun CreateSuiteRun(TestSuite suite, DateTime scheduledOn)

@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 
 namespace Autodash.Core
 {
     public class DefaultGridConsoleScraper : IGridConsoleScraper
     {
-        private readonly static Regex ImgRegex = new Regex("<img.*? title='(.*?)'.*?/>", RegexOptions.Compiled);
-
-        public async Task<List<GridNodeBrowserInfo>> GetAvailableNodesInfoAsync(Uri gridConsoleUrl, IWebProxy proxy = null)
+        public async Task<List<GridNodeInfo>> GetAvailableNodesInfoAsync(Uri gridConsoleUrl, IWebProxy proxy = null)
         {
             if (gridConsoleUrl == null)
                 throw new ArgumentNullException("gridConsoleUrl");
@@ -31,20 +30,33 @@ namespace Autodash.Core
                 throw new GridConsoleScraperException(gridConsoleUrl, ex);
             }
 
-            var matches = ImgRegex.Matches(html);
-            var nodes = new List<GridNodeBrowserInfo>(matches.Count);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
 
-            foreach (Match m in matches)
+            var nodes = new List<GridNodeInfo>();
+            foreach (var nodeDiv in doc.DocumentNode.SelectNodes("//div[@class='proxy']"))
             {
-                if (m.Groups.Count == 2)
+                var node = new GridNodeInfo();
+                var proxyId = nodeDiv.SelectSingleNode("//p[@class='proxyid']");
+                var imgs = nodeDiv.SelectNodes("//div[@type='browsers']//img");
+                var settings = nodeDiv.SelectNodes("//div[@type='config']//p").Select(n => n.InnerText);
+
+                string text = proxyId.InnerText;//id : http://10.240.240.74:5555, OS : VISTA
+                var parts = text.Split(new []{','}, StringSplitOptions.RemoveEmptyEntries);
+                node.Id = parts[0].Replace("id : ", "");
+                node.Os = parts[1].Replace(" OS : ", "");
+                node.MaxSessions = int.Parse(settings.First(n => n.StartsWith("maxSession:")).Replace("maxSession:", ""));
+
+                foreach (var img in imgs)
                 {
-                    string value = m.Groups[1].Value;
                     GridNodeBrowserInfo nodeBrowser;
-                    if (GridNodeBrowserInfo.TryParse(value, out nodeBrowser))
+                    if (GridNodeBrowserInfo.TryParse(img.Attributes["title"].Value, out nodeBrowser))
                     {
-                        nodes.Add(nodeBrowser);
+                        node.Browsers.Add(nodeBrowser);
                     }
                 }
+
+                nodes.Add(node);
             }
 
             return nodes;

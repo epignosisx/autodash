@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Web.Management;
 using Nancy.Helpers;
 
 namespace Autodash.Core.UI.Models
@@ -11,6 +10,7 @@ namespace Autodash.Core.UI.Models
     {
         public TestSuite Suite { get; set; }
         public List<SuiteRun> SuiteRuns { get; set; }
+        public FileExplorerVm FileExplorer { get; set; }
 
         public bool IsBrowserSelected(string browser)
         {
@@ -37,6 +37,21 @@ namespace Autodash.Core.UI.Models
                 return Suite.Schedule.Interval.TotalHours.ToString(CultureInfo.InvariantCulture);
             }
         }
+
+    }
+
+    public class FileExplorerVm
+    {
+        public List<FileExplorerItem> Files { get; set; }
+        public string TestSuiteId { get; set; }
+    }
+
+    public class FileExplorerItem
+    {
+        public string Filename { get; set; }
+        public string FileContent { get; set; }
+        public string TestSuiteId { get; set; }
+        public string EditLink { get; set; }
     }
 
     public static class SuiteRunExtensions

@@ -6,7 +6,6 @@ namespace Autodash.Core
     public class UnitTestBrowserResult
     {
         public string Browser { get; set; }
-        public int Attempt { get; set; }
         public string Stdout { get; set; }
         public string Stderr { get; set; }
         public bool Passed { get; set; }
@@ -18,8 +17,7 @@ namespace Autodash.Core
 
         public override string ToString()
         {
-            return Browser + " - Passed: " + Passed + ". Attempts: " + Attempt;
+            return Browser + " - Passed: " + Passed;
         }
-
     }
 }

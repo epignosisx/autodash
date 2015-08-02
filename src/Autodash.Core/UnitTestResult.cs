@@ -9,11 +9,6 @@ namespace Autodash.Core
         public string TestName { get; set; }
         public List<UnitTestBrowserResult> BrowserResults { get; set; }
 
-        public UnitTestResult()
-        {
-            BrowserResults = new List<UnitTestBrowserResult>();
-        }
-
         [BsonIgnore]
         public bool Passed
         {
@@ -21,6 +16,16 @@ namespace Autodash.Core
             {
                 return BrowserResults.GroupBy(b => b.Browser).All(n => n.Any(p => p.Passed));
             }
+        }
+
+        public UnitTestResult()
+        {
+            BrowserResults = new List<UnitTestBrowserResult>();
+        }
+
+        public UnitTestResult(string testName) : this()
+        {
+            TestName = testName;
         }
 
         public UnitTestBrowserResult this[string browser]
