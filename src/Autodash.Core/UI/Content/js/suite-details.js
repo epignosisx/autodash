@@ -63,13 +63,18 @@
     }
 
     function mapRunsForLast10Runs(suiteRuns){
-        var i = 0, l = suiteRuns.length, run = null, data = [];
+        var i = 0,
+            l = suiteRuns.length,
+            run = null,
+            data = [];
 
-        for (; i < l; i++) {
+        suiteRuns.reverse();
+
+        for (; i < l && i < 10; i++) {
             run = suiteRuns[i];
             if (run.result != null) {
                 data.push([
-                    i + 1, { v: run.durationMinutes, f: run.durationMinutes + " mins" }, "color:" + (run.result.passed ? "#5cb85c" : "#d9534f")
+                    i + 1, { v: run.durationMinutes, f: run.durationMinutes.toFixed(2) + " mins" }, "color:" + (run.result.passed ? "#5cb85c" : "#d9534f")
                 ]);
             }
         }

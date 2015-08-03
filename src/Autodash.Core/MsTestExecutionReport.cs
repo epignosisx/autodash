@@ -1084,6 +1084,24 @@ public partial class TestRunUnitTestResultOutput
 {
     [System.Xml.Serialization.XmlElementAttribute("StdOut")]
     public string StdOut { get; set; }
+
+    [System.Xml.Serialization.XmlElementAttribute("ErrorInfo")]
+    public TestRunUnitTestResultOutputErrorInfo ErrorInfo { get; set; }
+}
+
+
+[System.SerializableAttribute()]
+[System.Diagnostics.DebuggerStepThroughAttribute()]
+[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true,
+    Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")]
+[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010",
+    IsNullable = false)]
+public partial class TestRunUnitTestResultOutputErrorInfo
+{
+    [System.Xml.Serialization.XmlElementAttribute("Message")]
+    public string Message { get; set; }
+    [System.Xml.Serialization.XmlElementAttribute("StackTrace")]
+    public string StackTrace { get; set; }
 }
 
 /// <remarks/>

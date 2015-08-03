@@ -16,12 +16,25 @@ namespace Autodash.Core
             { BrowserNames.SeleniumIe, "IE" }
         };
 
+        private readonly ILoggerWrapper _logger;
+
+        public ApplyTestSettingsPreProcessor(ILoggerProvider loggerProvider)
+        {
+            _logger = loggerProvider.GetLogger(GetType().Name);
+        }
+
         public void Process(TestRunnerPreProcessorContext context)
         {
             if (context == null) 
                 throw new ArgumentNullException("context");
 
             var configFile = Path.Combine(context.TestDirectory, "config.xml");
+            if (!File.Exists(configFile))
+            {
+                _logger.Error("config.xml file not found");
+                return;
+            }
+
             var xDoc = XDocument.Load(File.OpenRead(configFile));
             
             //browser

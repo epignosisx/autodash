@@ -16,9 +16,9 @@ namespace Autodash.Core.UI
         protected override void ConfigureApplicationContainer(TinyIoCContainer existingContainer)
         {
             var repoPath = ConfigurationManager.AppSettings["RepositoryPath"] ?? Path.Combine(Environment.CurrentDirectory, "Repository");
-
+            var loggerProvider = new DefaultLoggerProvider();
             LogManager.ThrowExceptions = true;
-            existingContainer.Register<ILoggerProvider>(new DefaultLoggerProvider());
+            existingContainer.Register<ILoggerProvider>(loggerProvider);
 
             existingContainer.Register<IMongoDatabase>((container, parameters) => MongoDatabaseProvider.GetDatabase());
             existingContainer.Register<ITestAssembliesRepository>(new FileSystemTestAssembliesRepository(repoPath));
@@ -35,7 +35,7 @@ namespace Autodash.Core.UI
             existingContainer.Register<CreateSuiteCommand>();
             existingContainer.Register<UpdateGridCommand>();
 
-            TestRunnerPreProcessorProvider.Add(new ApplyTestSettingsPreProcessor());
+            TestRunnerPreProcessorProvider.Add(new ApplyTestSettingsPreProcessor(loggerProvider));
 
             JsonSettings.MaxJsonLength = int.MaxValue;
 

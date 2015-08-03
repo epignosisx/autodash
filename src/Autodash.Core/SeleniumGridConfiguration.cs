@@ -9,6 +9,11 @@ namespace Autodash.Core
         public string Id { get; set; }
 
         public string HubUrl { get; set; }
+
+        [BsonIgnore]
+        public string RemoteWebDriverUrl {
+            get { return HubUrl + "wd/hub"; }
+        }
         public int MaxParallelTestSuitesRunning { get; set; }
     }
 }

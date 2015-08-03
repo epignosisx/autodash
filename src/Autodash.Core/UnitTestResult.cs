@@ -28,24 +28,6 @@ namespace Autodash.Core
             TestName = testName;
         }
 
-        public UnitTestBrowserResult this[string browser]
-        {
-            get
-            {
-                UnitTestBrowserResult result = null;
-                foreach (var br in BrowserResults)
-                {
-                    if (br.Browser == browser)
-                    {
-                        result = br;
-                        if (br.Passed)
-                            return br;
-                    }
-                }
-                return result;
-            }
-        }
-
         public override string ToString()
         {
             return TestName + " - Passed: " + Passed;

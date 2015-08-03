@@ -13,7 +13,8 @@ namespace Autodash.Core
     {
         private static readonly string CommandTemplate =
             "call \"C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\Tools\\VsDevCmd.bat\"" + Environment.NewLine +
-            //"@set \"PATH=C:\\projects\\autodash\\tools\\;%PATH%\"" + Environment.NewLine +
+            "set hubUrl={3}" + Environment.NewLine +
+            "set browserName={4}" + Environment.NewLine +
             "mstest.exe /testcontainer:{0} /test:{1} /resultsfile:\"{2}\"";
 
         private static readonly XmlSerializer TestRunSerializer = new XmlSerializer(typeof(TestRun));
@@ -43,8 +44,8 @@ namespace Autodash.Core
                 Path.GetFileName(testCollection.AssemblyPath),
                 unitTest.TestName,
                 resultFullpath,
-                nodeBrowser,
-                config.EnvironmentUrl
+                context.SeleniumGridConfiguration.RemoteWebDriverUrl,
+                context.GridNodeBrowserInfo.BrowserName
             );
 
             File.WriteAllText(commandFullpath, commandContent);
@@ -160,16 +161,20 @@ namespace Autodash.Core
             bool passed = report.ResultSummary.Counters.passed == "1";
 
             string testOutput = "";
-            if (report.Results.Length > 0 && report.Results[0].Output != null)
+            if (report.Results.Length > 0 && report.Results[0].Output != null && !string.IsNullOrEmpty(report.Results[0].Output.StdOut))
                 testOutput = report.Results[0].Output.StdOut;
+
+            string testError = "";
+            if (report.Results.Length > 0 && report.Results[0].Output != null && report.Results[0].Output.ErrorInfo != null)
+                testError = report.Results[0].Output.ErrorInfo.Message + Environment.NewLine + report.Results[0].Output.ErrorInfo.StackTrace;
 
             var result = new UnitTestBrowserResult
             {
                 Browser = browser,
                 StartTime = report.Results[0].startTime,
                 EndTime = report.Results[0].endTime,
-                Stdout = stdout + Environment.NewLine + "=================" + Environment.NewLine + testOutput,
-                Stderr = stderr.ToString(),
+                Stdout = stdout + Environment.NewLine + "=====MS Test=====" + Environment.NewLine + testOutput,
+                Stderr = stderr + Environment.NewLine + "=====MS Test=====" + Environment.NewLine + testError,
                 Passed = passed
             };
             return result;

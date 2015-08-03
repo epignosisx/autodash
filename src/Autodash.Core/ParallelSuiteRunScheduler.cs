@@ -48,8 +48,8 @@ namespace Autodash.Core
         private void StartTimer()
         {
             Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(10))
-                .Where(n => _gridConfig != null)
                 .Do(async _ => await ReloadGridConfig())
+                .Where(n => _gridConfig != null)
                 .Where(gridCon => _runningSuites.Count < _gridConfig.MaxParallelTestSuitesRunning)
                 .Select(_ => NextSuiteToRun())
                 .Where(suiteRun => suiteRun != null)
@@ -89,12 +89,8 @@ namespace Autodash.Core
 
         private async Task<SuiteRun> SuiteCompleted(SuiteRun suiteRun)
         {
-            Tuple<SuiteRun, CancellationTokenSource> entry;
-            if (_runningSuites.TryRemove(suiteRun.Id, out entry))
-            {
-                suiteRun.MarkAsCompleted();
-                await _repository.UpdateSuiteRunAsync(suiteRun);
-            }
+            suiteRun.MarkAsCompleted();
+            await _repository.UpdateSuiteRunAsync(suiteRun);
             return suiteRun;
         }
 

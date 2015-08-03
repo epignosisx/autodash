@@ -12,7 +12,7 @@ namespace Autodash.Core.Tests
         [Fact]
         public static void DoesNotThrow()
         {
-            ApplyTestSettingsPreProcessor subject = new ApplyTestSettingsPreProcessor();
+            ApplyTestSettingsPreProcessor subject = new ApplyTestSettingsPreProcessor(new FakeLoggerProvider());
             var context = new TestRunnerPreProcessorContext
             {
                 NodeBrowser = new GridNodeBrowserInfo

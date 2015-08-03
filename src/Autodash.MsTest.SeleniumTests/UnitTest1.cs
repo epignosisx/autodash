@@ -12,85 +12,84 @@ namespace Autodash.MsTest.SeleniumTests
     [TestClass]
     public class UnitTest1
     {
-        //private const string GridHubUrl = "http://alexappvm.cloudapp.net:4444/wd/hub";
-        private const string GridHubUrl = "http://localhost:4444/wd/hub";
+        private const string GridHubUrl = "http://alexappvm.cloudapp.net:4444/wd/hub";
+        //private const string GridHubUrl = "http://localhost:4444/wd/hub";
+
+        //[TestMethod]
+        //public void TestMethod1()
+        //{
+        //    var searches = new string[] { "rugs", "jewelry", "towel", "dress", "shoes", "bags" };
+
+        //    Parallel.ForEach(searches, new ParallelOptions{MaxDegreeOfParallelism = 1}, (term) =>
+        //    {
+        //        Console.WriteLine("============ Starting test with: {0}", term);
+        //        DesiredCapabilities capabilities = DesiredCapabilities.InternetExplorer();
+        //        IWebDriver driver = null;
+        //        try
+        //        {
+        //            driver = new RemoteWebDriver(new Uri(GridHubUrl), capabilities);
+        //            driver.Navigate().GoToUrl("https://www.etsy.com/");
+        //            var txt = driver.FindElement(By.Id("search-query"));
+        //            txt.SendKeys(term);
+        //            txt.SendKeys(OpenQA.Selenium.Keys.Enter);
+        //            bool b = driver.Url.Contains(term);
+        //            Assert.IsTrue(b);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Console.WriteLine("------------ Exception in " + term + Environment.NewLine + ex.ToString());
+        //        }
+        //        finally
+        //        {
+        //            if (driver != null)
+        //            {
+        //                driver.Quit();
+        //                driver.Dispose();    
+        //            }
+        //        }
+
+        //        Console.WriteLine("++++++++++++ Finished test with: {0}", term);
+        //    });
+
+        //    Assert.IsTrue(true);
+        //}
 
         [TestMethod]
         public void TestMethod1()
         {
-            var searches = new string[] { "rugs", "jewelry", "towel", "dress", "shoes", "bags" };
-
-            Parallel.ForEach(searches, new ParallelOptions{MaxDegreeOfParallelism = 1}, (term) =>
-            {
-                Console.WriteLine("============ Starting test with: {0}", term);
-                DesiredCapabilities capabilities = DesiredCapabilities.InternetExplorer();
-                IWebDriver driver = null;
-                try
-                {
-                    driver = new RemoteWebDriver(new Uri(GridHubUrl), capabilities);
-                    driver.Navigate().GoToUrl("https://www.etsy.com/");
-                    var txt = driver.FindElement(By.Id("search-query"));
-                    txt.SendKeys(term);
-                    txt.SendKeys(OpenQA.Selenium.Keys.Enter);
-                    bool b = driver.Url.Contains(term);
-                    Assert.IsTrue(b);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("------------ Exception in " + term + Environment.NewLine + ex.ToString());
-                }
-                finally
-                {
-                    if (driver != null)
-                    {
-                        driver.Quit();
-                        driver.Dispose();    
-                    }
-                }
-
-                Console.WriteLine("++++++++++++ Finished test with: {0}", term);
-            });
-
-            Assert.IsTrue(true);
-        }
-
-        [TestMethod]
-        public void TestMethod2()
-        {
-            DesiredCapabilities capabilities = DesiredCapabilities.Chrome();
-            IWebDriver driver = new RemoteWebDriver(new Uri(GridHubUrl), capabilities);
+            IWebDriver driver = GetDriver();
             driver.Navigate().GoToUrl("https://www.etsy.com/");
             var txt = driver.FindElement(By.Id("search-query"));
             txt.SendKeys("jewelry");
             txt.SendKeys(OpenQA.Selenium.Keys.Enter);
-            Thread.Sleep(TimeSpan.FromSeconds(10));
+            Thread.Sleep(TimeSpan.FromSeconds(2));
             bool b = driver.Url.Contains("jewelry");
             Assert.IsTrue(b);
             driver.Quit();
             driver.Dispose();
         }
 
-        [TestMethod]
-        public void TestMethod3()
-        {
-            IWebDriver driver;
-            DesiredCapabilities capability = DesiredCapabilities.Firefox();
-            capability.SetCapability("platform", "WIN8");
-            capability.SetCapability("version", "33");
-            capability.SetCapability("gridlasticUser", "JmbfdfAXLgrs6NgnjOEBb2TYtujj5WdE");
-            capability.SetCapability("gridlasticKey", "8eKckaZWghedVlq4ZUw1NfQ6AZgvMj0L");
-            capability.SetCapability("video", "True");
-            driver = new RemoteWebDriver(
-              new Uri("http://CCLDEV.gridlastic.com:80/wd/hub/"), capability
-            );
-            driver.Navigate().GoToUrl("http://www.google.com/ncr");
-            IWebElement query = driver.FindElement(By.Name("q"));
-            query.SendKeys("webdriver");
-            query.Submit();
-            string sessionId = capability.GetCapability("webdriver.remote.sessionid") as string;
-            Console.WriteLine("Video: https://s3.amazonaws.com/4ad4a405-ef2a-b3d3-a629-1ab0a2d338b1/65769dff-3809-7109-8d05-93476425fe18/play.html?" + sessionId);
-            driver.Quit();
-        }
+        //[TestMethod]
+        //public void TestMethod3()
+        //{
+        //    IWebDriver driver;
+        //    DesiredCapabilities capability = DesiredCapabilities.Firefox();
+        //    capability.SetCapability("platform", "WIN8");
+        //    capability.SetCapability("version", "33");
+        //    capability.SetCapability("gridlasticUser", "JmbfdfAXLgrs6NgnjOEBb2TYtujj5WdE");
+        //    capability.SetCapability("gridlasticKey", "8eKckaZWghedVlq4ZUw1NfQ6AZgvMj0L");
+        //    capability.SetCapability("video", "True");
+        //    driver = new RemoteWebDriver(
+        //      new Uri("http://CCLDEV.gridlastic.com:80/wd/hub/"), capability
+        //    );
+        //    driver.Navigate().GoToUrl("http://www.google.com/ncr");
+        //    IWebElement query = driver.FindElement(By.Name("q"));
+        //    query.SendKeys("webdriver");
+        //    query.Submit();
+        //    string sessionId = capability.GetCapability("webdriver.remote.sessionid") as string;
+        //    Console.WriteLine("Video: https://s3.amazonaws.com/4ad4a405-ef2a-b3d3-a629-1ab0a2d338b1/65769dff-3809-7109-8d05-93476425fe18/play.html?" + sessionId);
+        //    driver.Quit();
+        //}
 
         public static string Base64Encode(string plainText)
         {
@@ -127,5 +126,33 @@ namespace Autodash.MsTest.SeleniumTests
         //    driver.Quit();
         //    driver.Dispose();
         //}
+
+        private static IWebDriver GetDriver()
+        {
+            string hubUrl = Environment.GetEnvironmentVariable("hubUrl") ?? GridHubUrl;
+            string browserName = Environment.GetEnvironmentVariable("browserName") ?? "internet explorer";
+            string browserVersion = Environment.GetEnvironmentVariable("browserVersion");
+
+            Console.WriteLine("Hub Url: " + hubUrl);
+            Console.WriteLine("Browser Name: " + browserName);
+            DesiredCapabilities capabilities;
+            switch (browserName)
+            {
+                case "chrome":
+                    capabilities = DesiredCapabilities.Chrome();
+                    break;
+                case "internet explorer":
+                    capabilities = DesiredCapabilities.InternetExplorer();
+                    break;
+                case "firefox":
+                    capabilities = DesiredCapabilities.Firefox();
+                    break;
+                default:
+                    throw new InvalidOperationException("Unknown browser");
+            }
+
+            IWebDriver driver = new RemoteWebDriver(new Uri(hubUrl), capabilities);
+            return driver;
+        }
     }
 }
