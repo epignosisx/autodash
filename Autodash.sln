@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{91B39D
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Autodash.ServiceHost", "Autodash.ServiceHost\Autodash.ServiceHost.csproj", "{0C93545B-6E45-4CBC-A439-2A564824429A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{672995C5-735A-4647-8F1C-770A9C8B3756}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{672995C5-735A-4647-8F1C-770A9C8B3756}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{672995C5-735A-4647-8F1C-770A9C8B3756}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C93545B-6E45-4CBC-A439-2A564824429A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C93545B-6E45-4CBC-A439-2A564824429A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C93545B-6E45-4CBC-A439-2A564824429A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C93545B-6E45-4CBC-A439-2A564824429A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
