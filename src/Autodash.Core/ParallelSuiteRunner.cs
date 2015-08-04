@@ -125,7 +125,21 @@ namespace Autodash.Core
             lock (_runningTests)
                 _runningTests.Add(test);
 
-            UnitTestBrowserResult result = await test.UnitTestCollection.Runner.Run(context);
+            UnitTestBrowserResult result;
+            try
+            {
+                result = await test.UnitTestCollection.Runner.Run(context);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Test Runner failed.");
+                result = new UnitTestBrowserResult
+                {
+                    Browser = context.GridNodeBrowserInfo.BrowserName,
+                    Passed = false,
+                    Stderr = ex.ToString()
+                };
+            }
 
             lock (_runningTests)
                 _runningTests.Remove(test);
