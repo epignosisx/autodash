@@ -35,7 +35,11 @@ namespace Autodash.Core
                 return;
             }
 
-            var xDoc = XDocument.Load(File.OpenRead(configFile));
+            XDocument xDoc = null;
+            using (var stream = File.OpenRead(configFile))
+            {
+                xDoc = XDocument.Load(stream);
+            }
             
             //browser
             var browser = xDoc.XPathSelectElement("/framework/browser/name");

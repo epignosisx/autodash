@@ -8,71 +8,77 @@
     ViewBag.EmbedResources = Model.EmbedResources;
 }
 
-<div class="row">
-    <h1>@Model.Project.Name</h1>
-    <p>
-        <strong>Suite Name:</strong> @Model.SuiteRun.TestSuiteSnapshot.Name
-        <strong>Started On:</strong> @Model.SuiteRun.StartedOn
-        <strong>Duration:</strong> @Model.SuiteRun.Duration.ToString(@"hh\:mm\:ss")
-    </p>
-    <p><strong>Status:</strong> @Model.SuiteRun.Result.Details</p>
-</div>
+@if (!Model.DownloadMode)
+{
+    <ol class="breadcrumb mt10">
+        <li><a href="/">Home</a></li>
+        <li><a href="/projects/@Model.SuiteRun.TestSuiteSnapshot.ProjectId">Project</a></li>
+        <li><a href="/suites/@Model.SuiteRun.TestSuiteId">Suite</a></li>
+        <li class="active">Suite Run</li>
+    </ol>
+}
+
+<h1>@Model.Project.Name</h1>
+<p>
+    <strong>Suite Name:</strong> @Model.SuiteRun.TestSuiteSnapshot.Name
+    <strong>Started On:</strong> @Model.SuiteRun.StartedOn
+    <strong>Duration:</strong> @Model.SuiteRun.Duration.ToString(@"hh\:mm\:ss")
+</p>
+<p><strong>Status:</strong> @Model.SuiteRun.Result.Details</p>
 
 <div class="row">
     <div id="passed-failed-pie" style="float:left;width: 500px; height: 200px;"></div>
     <div id="passed-failed-columns" style="float:left;width: 350px; height: 200px;"></div>
 </div>
 
-<div class="row">
-    <table class="table">
-        <thead>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Test Name</th>
+            @foreach (var browser in Model.SuiteRun.TestSuiteSnapshot.Configuration.Browsers.OrderBy(n => n))
+            {
+                <th class="browser-result">@browser</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var test in Model.SuiteRun.Result.CollectionResults.SelectMany(n => n.UnitTestResults))
+        {
             <tr>
-                <th>Test Name</th>
-                @foreach (var browser in Model.SuiteRun.TestSuiteSnapshot.Configuration.Browsers.OrderBy(n => n))
+                <td>@test.TestName</td>
+                @foreach (var browser in Model.GetBrowserResults(test))
                 {
-                    <th class="browser-result">@browser</th>
+                    <td class="browser-result @(browser.Passed ? "bg-success" : "bg-danger")">
+                        <span>@browser.Duration.ToString("mm\\:ss")</span>
+                        <div class="hidden details">
+                            <table class="table table-condensed browser-result-details">
+                                <tbody>
+                                    <tr>
+                                        <th>Duration</th>
+                                        <td>@browser.Duration.ToString("mm\\:ss\\.ff")</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Start Time</th>
+                                        <td>@browser.StartTime.ToLongTimeString()</td>
+                                    </tr>
+                                    <tr>
+                                        <th>End Time</th>
+                                        <td>@browser.EndTime.ToLongTimeString()</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h4>Standard Output <small><a href="#output" class="glyphicon glyphicon-copy" title="Copy to clipboard"></a></small></h4>
+                            <pre id="output" style="max-height: 250px">@browser.Stdout</pre>
+                            <h4>Standard Error <small><a href="#error" class="glyphicon glyphicon-copy" title="Copy to clipboard"></a></small></h4>
+                            <pre id="error" style="max-height: 250px">@browser.Stderr</pre>
+                        </div>
+                    </td>
                 }
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var test in Model.SuiteRun.Result.CollectionResults.SelectMany(n => n.UnitTestResults))
-            {
-                <tr>
-                    <td>@test.TestName</td>
-                    @foreach (var browser in Model.GetBrowserResults(test))
-                    {
-                        <td class="browser-result @(browser.Passed ? "bg-success" : "bg-danger")">
-                            <span>@browser.Duration.ToString("mm\\:ss")</span>
-                            <div class="hidden details">
-                                <table class="table table-condensed browser-result-details">
-                                    <tbody>
-                                        <tr>
-                                            <th>Duration</th>
-                                            <td>@browser.Duration.ToString("mm\\:ss\\.ff")</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Start Time</th>
-                                            <td>@browser.StartTime.ToLongTimeString()</td>
-                                        </tr>
-                                        <tr>
-                                            <th>End Time</th>
-                                            <td>@browser.EndTime.ToLongTimeString()</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                                <h4>Standard Output <small><a href="#output" class="glyphicon glyphicon-copy" title="Copy to clipboard"></a></small></h4>
-                                <pre id="output" style="max-height: 250px">@browser.Stdout</pre>
-                                <h4>Standard Error <small><a href="#error" class="glyphicon glyphicon-copy" title="Copy to clipboard"></a></small></h4>
-                                <pre id="error" style="max-height: 250px">@browser.Stderr</pre>
-                            </div>
-                        </td>
-                    }
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+        }
+    </tbody>
+</table>
 
 <div class="modal fade" id="test-details">
     <div class="modal-dialog modal-lg">

@@ -4,12 +4,16 @@
     Layout = "_Layout.cshtml";
 }
 
-<div class="row">
-    <h1>@Model.Project.Name</h1>
-    <p>@Model.Project.Description</p>
-</div>
+<ol class="breadcrumb mt10">
+    <li><a href="/">Home</a></li>
+    <li class="active">Project</li>
+</ol>
 
-<div class="row text-right">
+<h1>@Model.Project.Name</h1>
+<p>@Model.Project.Description</p>
+
+
+<div class="text-right">
     <form enctype="application/x-www-form-urlencoded" action="/projects/delete" method="post" style="display:inline">
         <input type="hidden" name="id" value="@Model.Project.Id"/>
         <button type="submit" id="btn-delete-project" class="btn btn-danger" href="/projects/@Model.Project.Id/suites/create"><span class="glyphicon glyphicon-remove-sign"></span> Delete Project</button>
@@ -17,7 +21,7 @@
     <a class="btn btn-primary" href="/projects/@Model.Project.Id/suites/create"><span class="glyphicon glyphicon-plus-sign"></span> Create Suite</a>
 </div>
 
-<div class="row mt10">
+<div class="mt10">
     @{ int i = 0;}
     @foreach (var suite in Model.Suites)
     {

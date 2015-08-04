@@ -98,7 +98,8 @@ namespace Autodash.Core.UI.Modules
                         Browsers = vm.Browsers,
                         RetryAttempts = vm.RetryAttempts,
                         TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes),
-                        TestAssembliesPath = existingSuite.Configuration.TestAssembliesPath
+                        TestAssembliesPath = existingSuite.Configuration.TestAssembliesPath,
+                        SelectedTests = existingSuite.Configuration.SelectedTests
                     },
                     Schedule = vm.Time.HasValue ? new TestSuiteSchedule
                     {

@@ -4,6 +4,12 @@
     Layout = "_Layout.cshtml";
 }
 
+<ol class="breadcrumb mt10">
+    <li><a href="/">Home</a></li>
+    <li><a href="/projects/@Model.ProjectId">Project</a></li>
+    <li class="active">New Test Suite</li>
+</ol>
+
 <h1>New Test Suite</h1>
 
 <form method="post" enctype="multipart/form-data" action="/suites/create">
@@ -21,7 +27,7 @@
         <label for="TestAssembliesZip">Test Assemblies</label>
         <input type="file" class="form-control" name="TestAssembliesZip" required />
     </div>
-    
+
     <fieldset class="mt30">
         <legend>Configuration</legend>
         <div class="form-group">
@@ -32,7 +38,7 @@
                 <label><input type="checkbox" name="Browsers" value="@BrowserNames.SeleniumIe" />@BrowserNames.UiIe</label>
             </div>
         </div>
-        
+
         <div class="form-group">
             <label for="SuiteName">Environment Url</label>
             <input type="text" class="form-control" name="EnvironmentUrl" value="@Model.EnvironmentUrl" required maxlength="100" />
@@ -40,7 +46,7 @@
                 Enter the root url. Ex: http://www.some-url.com
             </p>
         </div>
-        
+
         <div class="form-group">
             <label for="RetryAttempts">Retry attempts</label>
             <input type="number" class="form-control" name="RetryAttempts" value="@Model.RetryAttempts" required maxlength="1" />
@@ -74,7 +80,6 @@
 
     <button type="submit" class="btn btn-success">Submit</button>
 </form>
-
 @section scripts{
     <script>
         $(function () {

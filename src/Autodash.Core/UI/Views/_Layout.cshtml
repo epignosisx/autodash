@@ -25,7 +25,7 @@
     }
 </head>
 <body>
-    @if (ViewBag.SilentMode == null)
+    @if (ViewBag.SilentMode == null || !ViewBag.SilentMode)
     {   
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">

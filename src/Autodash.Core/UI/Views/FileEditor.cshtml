@@ -3,13 +3,17 @@
     Layout = "_Layout.cshtml";
 }
 
+<div class="mt10">
+    <a href="/suites/@Model.TestSuiteId"><span class="glyphicon glyphicon-arrow-left"></span> Back to test suite</a>
+</div>
+
 <h1>File Editor</h1>
 <h5>@Model.Filename</h5>
 
 <form action="/suites/file-editor" method="POST" enctype="application/x-www-form-urlencoded">
-    
-    <input type="hidden" name="Filename" value="@Model.Filename"/>
-    <input type="hidden" name="TestSuiteId" value="@Model.TestSuiteId"/>
+
+    <input type="hidden" name="Filename" value="@Model.Filename" />
+    <input type="hidden" name="TestSuiteId" value="@Model.TestSuiteId" />
 
     <div class="form-group">
         <label for="Content"></label>
@@ -19,3 +23,4 @@
     <button type="submit" class="btn btn-success">Submit</button>
 
 </form>
+

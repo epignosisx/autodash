@@ -3,12 +3,17 @@
     Layout = "_Layout.cshtml";
 }
 
+<ol class="breadcrumb mt10">
+    <li><a href="/">Home</a></li>
+    <li class="active">New Project</li>
+</ol>
+
 <h1>New Project</h1>
 
 <form method="post" enctype="application/x-www-form-urlencoded" action="/projects/create">
 
     @Html.Partial("_ValidationSummary", Model.Errors)
-    
+
     <div class="form-group">
         <label for="ProjectName">Project Name</label>
         <input type="text" class="form-control" name="ProjectName" required maxlength="100" />
@@ -21,3 +26,4 @@
 
     <button type="submit" class="btn btn-success">Submit</button>
 </form>
+
