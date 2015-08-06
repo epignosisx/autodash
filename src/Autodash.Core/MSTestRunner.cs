@@ -15,6 +15,7 @@ namespace Autodash.Core
             "call \"C:\\Program Files (x86)\\Microsoft Visual Studio 12.0\\Common7\\Tools\\VsDevCmd.bat\"" + Environment.NewLine +
             "set hubUrl={3}" + Environment.NewLine +
             "set browserName={4}" + Environment.NewLine +
+            "set browserVersion={5}" + Environment.NewLine +
             "mstest.exe /testcontainer:{0} /test:{1} /resultsfile:\"{2}\"";
 
         private static readonly XmlSerializer TestRunSerializer = new XmlSerializer(typeof(TestRun));
@@ -45,7 +46,8 @@ namespace Autodash.Core
                 unitTest.TestName,
                 resultFullpath,
                 context.SeleniumGridConfiguration.RemoteWebDriverUrl,
-                context.GridNodeBrowserInfo.BrowserName
+                context.GridNodeBrowserInfo.BrowserName,
+                context.GridNodeBrowserInfo.Version
             );
 
             File.WriteAllText(commandFullpath, commandContent);
