@@ -1,4 +1,5 @@
-﻿using System.Linq.Dynamic;
+﻿using System.Globalization;
+using System.Linq.Dynamic;
 using Autodash.Core.UI.Models;
 using FluentValidation.Results;
 using MongoDB.Driver;
@@ -20,9 +21,12 @@ namespace Autodash.Core.UI.Modules
         public SuitesModule(TinyIoCContainer container)
         {
             Get["/projects/{id}/suites/create"] = parameters => {
+                var availableBrowserProvider = container.Resolve<ISeleniumGridBrowserProvider>();
+
                 var vm = new CreateSuiteVm
                 {
-                    ProjectId = parameters.id
+                    ProjectId = parameters.id,
+                    AvailableBrowsers = GetAvailableBrowsers(availableBrowserProvider).ToList()
                 };
 
                 return View["CreateSuite", vm];
@@ -52,7 +56,7 @@ namespace Autodash.Core.UI.Modules
                     Configuration = new TestSuiteConfiguration
                     {
                         EnvironmentUrl = vm.EnvironmentUrl,
-                        Browsers = vm.Browsers,
+                        Browsers = vm.GetBrowsers().ToArray(),
                         RetryAttempts = vm.RetryAttempts,
                         TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes)
                     },
@@ -95,7 +99,7 @@ namespace Autodash.Core.UI.Modules
                     Configuration = new TestSuiteConfiguration
                     {
                         EnvironmentUrl = vm.EnvironmentUrl,
-                        Browsers = vm.Browsers,
+                        Browsers = vm.GetBrowsers().ToArray(),
                         RetryAttempts = vm.RetryAttempts,
                         TestTimeout = TimeSpan.FromMinutes(vm.TestTimeoutMinutes),
                         TestAssembliesPath = existingSuite.Configuration.TestAssembliesPath,
@@ -165,6 +169,8 @@ namespace Autodash.Core.UI.Modules
                                             EditLink = string.Format("/suites/{0}/file-editor?file={1}", Uri.EscapeDataString(suite.Id), Uri.EscapeDataString(n))
                                         }).ToList();
 
+                var availableBrowserProvider = container.Resolve<ISeleniumGridBrowserProvider>();
+                
                 var vm = new SuiteDetailsVm
                 {
                     Suite = suite,
@@ -173,7 +179,8 @@ namespace Autodash.Core.UI.Modules
                     {
                         TestSuiteId = suite.Id,
                         Files = files
-                    }
+                    },
+                    AvailableBrowsers = GetAvailableBrowsers(availableBrowserProvider).ToList()
                 };
 
                 return View["SuiteDetails", vm];
@@ -329,5 +336,13 @@ namespace Autodash.Core.UI.Modules
             };
         }
 
+        private static IEnumerable<KeyValuePair<string, string>> GetAvailableBrowsers(ISeleniumGridBrowserProvider browserProvider)
+        {
+            var textInfo = CultureInfo.CurrentCulture.TextInfo;
+            foreach (var browser in browserProvider.GetBrowsers())
+            {
+                yield return new KeyValuePair<string, string>(browser.Name + "|" + browser.Version, textInfo.ToTitleCase(browser.ToString()));
+            }
+        }
     }
 }

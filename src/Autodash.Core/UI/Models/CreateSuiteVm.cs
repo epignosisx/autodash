@@ -1,4 +1,6 @@
-﻿using FluentValidation.Results;
+﻿using System.Collections;
+using System.Collections.Generic;
+using FluentValidation.Results;
 using System;
 
 namespace Autodash.Core.UI.Models
@@ -18,12 +20,29 @@ namespace Autodash.Core.UI.Models
         public int? IntervalHours { get; set; }
 
         public ValidationFailure[] Errors { get; set; }
+        public List<KeyValuePair<string, string>> AvailableBrowsers { get; set; }
 
         public CreateSuiteVm()
         {
             RetryAttempts = 3;
             TestTimeoutMinutes = 10;
             Errors = new ValidationFailure[0];
+        }
+
+        public IEnumerable<Browser> GetBrowsers()
+        {
+            if(Browsers == null)
+                yield break;
+
+            foreach (var browser in Browsers)
+            {
+                var parts = browser.Split('|');
+                yield return new Browser
+                {
+                    Name = parts[0],
+                    Version = parts[1]
+                };
+            }
         }
     }
 }

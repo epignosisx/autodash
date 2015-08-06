@@ -97,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplyTestSettingsPreProcessor.cs" />
+    <Compile Include="Browser.cs" />
     <Compile Include="BrowserNameMapper.cs" />
     <Compile Include="DefaultSuiteRunSchedulerRepository.cs" />
     <Compile Include="DefaultTestSuiteUnitTestDiscoverer.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="GridNodeManager.cs" />
     <Compile Include="IGridConsoleScraper.cs" />
     <Compile Include="ILoggerProvider.cs" />
+    <Compile Include="ISeleniumGridBrowserProvider.cs" />
     <Compile Include="ISuiteRunSchedulerRepository.cs" />
     <Compile Include="ITestRunnerPreProcessor.cs" />
     <Compile Include="ITestSuiteFileExplorer.cs" />

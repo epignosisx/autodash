@@ -61,7 +61,7 @@ namespace Autodash.Core
             {
                 foreach (var browser in TestSuiteSnapshot.Configuration.Browsers)
                 {
-                    if (test.BrowserResults.All(n => n.Browser != browser))
+                    if (test.BrowserResults.All(n => !n.Browser.Equals(browser)))
                     {
                         test.BrowserResults.Add(new UnitTestBrowserResult
                         {

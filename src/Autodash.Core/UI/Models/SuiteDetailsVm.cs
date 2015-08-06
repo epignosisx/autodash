@@ -12,9 +12,12 @@ namespace Autodash.Core.UI.Models
         public List<SuiteRun> SuiteRuns { get; set; }
         public FileExplorerVm FileExplorer { get; set; }
 
-        public bool IsBrowserSelected(string browser)
+        public List<KeyValuePair<string, string>> AvailableBrowsers { get; set; }
+
+        public bool IsBrowserSelected(string browserVersion)
         {
-            return Suite.Configuration.Browsers.Contains(browser);
+            string[] parts = browserVersion.Split('|');
+            return Suite.Configuration.Browsers.Any(b => b.Name == parts[0] && b.Version == parts[1]);
         }
 
         public string ScheduleTime

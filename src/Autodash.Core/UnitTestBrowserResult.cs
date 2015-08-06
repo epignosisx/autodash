@@ -5,7 +5,7 @@ namespace Autodash.Core
 {
     public class UnitTestBrowserResult
     {
-        public string Browser { get; set; }
+        public Browser Browser { get; set; }
         public string Stdout { get; set; }
         public string Stderr { get; set; }
         public bool Passed { get; set; }

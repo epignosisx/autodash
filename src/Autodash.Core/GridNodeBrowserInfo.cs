@@ -9,6 +9,7 @@ namespace Autodash.Core
         public string Protocol { get; set; }
         public int MaxInstances { get; set; }
         public string Platform { get; set; }
+        public string Version { get; set; }
 
         public static bool TryParse(string value, out GridNodeBrowserInfo nodeBrowserInfo)
         {
@@ -37,9 +38,13 @@ namespace Autodash.Core
                     case "maxInstances":
                         nodeBrowserInfo.MaxInstances = int.Parse(tuple.Value);
                         break;
+                    case "version":
+                        nodeBrowserInfo.Version = tuple.Value;
+                        break;
                 }
             }
             return true;
         }
+
     }
 }

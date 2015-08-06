@@ -99,7 +99,7 @@ namespace Autodash.Core
                     .Do(_ => Interlocked.Exchange(ref _processingNextTestsRound, 0))
                     .SelectMany(tests => tests)
                     .SelectMany(RunTestAsync)
-                    .RetryWithBackoffStrategy(10)
+                    .RetryWithBackoffStrategy(50)
                     .Subscribe(
                         test => _logger.Info("Finished Test: {0} - {1}", test.UnitTestInfo.TestName, test.Browser), 
                         ex => _logger.Error(ex, "Timer failed")
@@ -109,7 +109,7 @@ namespace Autodash.Core
 
         private async Task<ParallelSuiteRunnerQueueItem> RunTestAsync(Tuple<ParallelSuiteRunnerQueueItem, GridNodeBrowserInfo> testInfo)
         {
-            Debug.WriteLine("[{0:000}] RunTestAsync - Start: {1}", Thread.CurrentThread.ManagedThreadId, testInfo.Item1);
+            Debug.WriteLine("[{0:00000}] RunTestAsync - Start: {1}", Thread.CurrentThread.ManagedThreadId, testInfo.Item1);
             var test = testInfo.Item1;
             var nodeBrowser = testInfo.Item2;
             
@@ -135,7 +135,7 @@ namespace Autodash.Core
                 _logger.Error(ex, "Test Runner failed.");
                 result = new UnitTestBrowserResult
                 {
-                    Browser = context.GridNodeBrowserInfo.BrowserName,
+                    Browser = new Browser(nodeBrowser.BrowserName, nodeBrowser.Version),
                     Passed = false,
                     Stderr = ex.ToString()
                 };
@@ -145,6 +145,7 @@ namespace Autodash.Core
                 _runningTests.Remove(test);
 
             HandleTestComplete(test, result);
+            Debug.WriteLine("[{0:00000}] RunTestAsync - End: {1}", Thread.CurrentThread.ManagedThreadId, testInfo.Item1);
             return test;
         }
 
@@ -287,7 +288,7 @@ namespace Autodash.Core
     public class ParallelSuiteRunnerQueueItem
     {
         public ParallelSuiteRunnerQueueItem(
-            string browser, 
+            Browser browser, 
             UnitTestInfo unitTestInfo, 
             UnitTestCollection unitTestCollection, 
             SuiteRun suiteRun,
@@ -302,7 +303,7 @@ namespace Autodash.Core
             UnitTestCollection = unitTestCollection;
         }
 
-        public string Browser { get; private set; }
+        public Browser Browser { get; private set; }
         public UnitTestInfo UnitTestInfo { get; private set; }
         public UnitTestCollection UnitTestCollection { get; private set; }
         public SuiteRun SuiteRun { get; private set; }

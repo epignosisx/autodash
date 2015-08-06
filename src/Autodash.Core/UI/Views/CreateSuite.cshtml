@@ -33,9 +33,10 @@
         <div class="form-group">
             <label for="Browsers">Browsers</label>
             <div class="checkbox">
-                <label><input type="checkbox" name="Browsers" value="@BrowserNames.SeleniumChrome" checked />@BrowserNames.UiChrome</label>&nbsp;
-                <label><input type="checkbox" name="Browsers" value="@BrowserNames.SeleniumFirefox" />@BrowserNames.UiFirefox</label>&nbsp;
-                <label><input type="checkbox" name="Browsers" value="@BrowserNames.SeleniumIe" />@BrowserNames.UiIe</label>
+                @foreach (var browser in Model.AvailableBrowsers)
+                {
+                    <label><input type="checkbox" name="Browsers" value="@browser.Key" />@browser.Value</label><text>&nbsp;</text>
+                }
             </div>
         </div>
 

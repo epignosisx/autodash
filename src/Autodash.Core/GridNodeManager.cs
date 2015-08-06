@@ -30,11 +30,11 @@ namespace Autodash.Core
             }
         }
 
-        public bool TryBook(string browser, out GridNodeBrowserInfo nodeBrowser)
+        public bool TryBook(Browser browser, out GridNodeBrowserInfo nodeBrowser)
         {
             lock (_nodes)
             {
-                nodeBrowser = GetAvailableBrowserNodes().FirstOrDefault(n => n.BrowserName == browser);
+                nodeBrowser = GetAvailableBrowserNodes().FirstOrDefault(n => n.BrowserName == browser.Name && n.Version == browser.Version);
                 if (nodeBrowser != null)
                 {
                     Book(nodeBrowser);

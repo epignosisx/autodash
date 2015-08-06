@@ -100,7 +100,7 @@ namespace Autodash.Core
             {
                 var result = new UnitTestBrowserResult
                 {
-                    Browser = nodeBrowser.BrowserName,
+                    Browser = new Browser(nodeBrowser.BrowserName, nodeBrowser.Version),
                     Passed = false,
                     StartTime = timeoutStartDate,
                     EndTime = DateTime.UtcNow,
@@ -117,7 +117,7 @@ namespace Autodash.Core
                 process.Exited -= exitedHandler;
                 cancellationToken.Dispose();
 
-                UnitTestBrowserResult result = HandleTestCompletion(nodeBrowser.BrowserName, resultFullpath, testDir, stdout, stderr);
+                UnitTestBrowserResult result = HandleTestCompletion(nodeBrowser, resultFullpath, testDir, stdout, stderr);
                 completionSource.TrySetResult(result);
             };
 
@@ -147,7 +147,7 @@ namespace Autodash.Core
             //}
         }
 
-        private static UnitTestBrowserResult HandleTestCompletion(string browser, string resultFullpath, string testDir, StringBuilder stdout, StringBuilder stderr)
+        private static UnitTestBrowserResult HandleTestCompletion(GridNodeBrowserInfo nodeBrowser, string resultFullpath, string testDir, StringBuilder stdout, StringBuilder stderr)
         {
             TestRun report;
             using (var stream = File.Open(resultFullpath, FileMode.Open))
@@ -170,7 +170,7 @@ namespace Autodash.Core
 
             var result = new UnitTestBrowserResult
             {
-                Browser = browser,
+                Browser = new Browser(nodeBrowser.BrowserName, nodeBrowser.Version),
                 StartTime = report.Results[0].startTime,
                 EndTime = report.Results[0].endTime,
                 Stdout = stdout + Environment.NewLine + "=====MS Test=====" + Environment.NewLine + testOutput,

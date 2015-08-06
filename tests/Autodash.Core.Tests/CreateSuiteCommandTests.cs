@@ -28,7 +28,7 @@ namespace Autodash.Core.Tests
             };
             suite.Configuration = new TestSuiteConfiguration
             {
-                Browsers = new[] {"Internet Explorer", "Firefox"},
+                Browsers = new[] { new Browser(BrowserNames.SeleniumIe), new Browser(BrowserNames.SeleniumFirefox) },
                 TestAssembliesPath = "Foo\\Bar",
                 EnvironmentUrl = "http://localhost:8090"
             };
@@ -56,7 +56,7 @@ namespace Autodash.Core.Tests
             suite.Schedule = null;
             suite.Configuration = new TestSuiteConfiguration
             {
-                Browsers = new[] { "Internet Explorer", "Firefox" },
+                Browsers = new[] { new Browser(BrowserNames.SeleniumIe), new Browser(BrowserNames.SeleniumFirefox) },
                 TestAssembliesPath = "Foo\\Bar",
                 EnvironmentUrl = "http://localhost:8090"
             };

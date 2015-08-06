@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Autodash.Core
 {
     public class TestSuiteConfiguration
     {
-        public string[] Browsers { get; set; }
+        public Browser[] Browsers { get; set; }
         public string TestAssembliesPath { get; set; }
         public TimeSpan TestTimeout { get; set; }
         public int RetryAttempts { get; set; }

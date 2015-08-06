@@ -1,4 +1,5 @@
-﻿@using Autodash.Core.UI.Models
+﻿@using System.Linq
+@using Autodash.Core.UI.Models
 @inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.ProjectDetailsVm>
 @{
     Layout = "_Layout.cshtml";
@@ -50,7 +51,7 @@
                                     <tbody>
                                         <tr>
                                             <th>Browsers</th>
-                                            <td>@string.Join(", ", suite.Suite.Configuration.Browsers)</td>
+                                            <td>@string.Join(", ", suite.Suite.Configuration.Browsers.Select(b => b.ToString()))</td>
                                         </tr>
                                         <tr>
                                             <th>Test Retry Attempts</th>

@@ -25,9 +25,14 @@ namespace Autodash.Core.Tests
             Runner = Substitute.For<IUnitTestRunner>();
             Runner.Run(Arg.Any<TestRunContext>()).Returns(async (CallInfo ci)=> {
                 await Task.Delay(millisecondsDelay);
+                var browserNode = ci.Arg<TestRunContext>().GridNodeBrowserInfo;
                 return new UnitTestBrowserResult
                 {
-                    Browser = ci.Arg<TestRunContext>().GridNodeBrowserInfo.BrowserName
+                    Browser = new Browser
+                    {
+                        Name = browserNode.BrowserName,
+                        Version = browserNode.Version
+                    }
                 };
             });
         }
@@ -38,10 +43,15 @@ namespace Autodash.Core.Tests
             Runner.Run(Arg.Any<TestRunContext>()).Returns(async (CallInfo ci) =>
             {
                 await Task.Delay(millisecondsDelay);
+                var browserNode = ci.Arg<TestRunContext>().GridNodeBrowserInfo;
                 return new UnitTestBrowserResult
                 {
                     Passed = true,
-                    Browser = ci.Arg<TestRunContext>().GridNodeBrowserInfo.BrowserName
+                    Browser = new Browser
+                    {
+                        Name = browserNode.BrowserName,
+                        Version = browserNode.Version
+                    }
                 };
             });
         }
@@ -56,7 +66,7 @@ namespace Autodash.Core.Tests
                     {
                         TestAssembliesPath = "c:\\",
                         EnvironmentUrl = "http://localhost",
-                        Browsers = new[] { "firefox", "chrome" },
+                        Browsers = new[] { new Browser(BrowserNames.SeleniumFirefox), new Browser(BrowserNames.SeleniumChrome) },
                         RetryAttempts = 2,
                         SelectedTests = new[] { "Test1", "Test2" }
                     }

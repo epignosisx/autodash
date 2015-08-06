@@ -55,7 +55,7 @@ namespace Autodash.Core
                 .Where(suiteRun => suiteRun != null)
                 .SelectMany(RunSuite)
                 .SelectMany(SuiteCompleted)
-                .RetryWithBackoffStrategy(10)
+                .RetryWithBackoffStrategy(50)
                 .Subscribe(n => 
                     _logger.Info("Suite Run {0} - {1} completed.", n.Id, n.TestSuiteSnapshot.Name), 
                     ex => _logger.Error(ex, "Scheduler timer failed")
