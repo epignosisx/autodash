@@ -7,7 +7,6 @@ using Nancy.TinyIoc;
 using System;
 using System.IO;
 using NLog;
-using NLog.Targets;
 
 namespace Autodash.Core.UI
 {

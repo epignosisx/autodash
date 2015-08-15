@@ -10,8 +10,8 @@
     <li class="active">Project</li>
 </ol>
 
-<h1>@Model.Project.Name</h1>
-<p>@Model.Project.Description</p>
+<h1>@Model.Project.Name <small style="font-size:15px">@Model.Project.Description</small></h1>
+<p>@string.Join(", ", Model.Project.MemberEmails ?? Enumerable.Empty<string>())</p>
 
 
 <div class="text-right">
@@ -20,6 +20,7 @@
         <button type="submit" id="btn-delete-project" class="btn btn-danger" href="/projects/@Model.Project.Id/suites/create"><span class="glyphicon glyphicon-remove-sign"></span> Delete Project</button>
     </form>
     <a class="btn btn-primary" href="/projects/@Model.Project.Id/suites/create"><span class="glyphicon glyphicon-plus-sign"></span> Create Suite</a>
+    <a class="btn btn-primary" href="/projects/@Model.Project.Id/edit"><span class="glyphicon glyphicon-plus-sign"></span> Edit Project</a>
 </div>
 
 <div class="mt10">

@@ -109,6 +109,7 @@
     <Compile Include="IGridConsoleScraper.cs" />
     <Compile Include="ILoggerProvider.cs" />
     <Compile Include="ISeleniumGridBrowserProvider.cs" />
+    <Compile Include="ISuiteRunCompletedNotifier.cs" />
     <Compile Include="ISuiteRunSchedulerRepository.cs" />
     <Compile Include="ITestRunnerPreProcessor.cs" />
     <Compile Include="ITestSuiteFileExplorer.cs" />
@@ -170,6 +171,7 @@
     <Compile Include="UnitTestTagSelector.cs" />
     <Compile Include="UpdateGridCommand.cs" />
     <Compile Include="UpdateGridConfigValidator.cs" />
+    <Compile Include="UpdateProjectValidator.cs" />
     <Compile Include="XmlOnlyTestSuiteFileExplorer.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -223,6 +225,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="UI\Views\FileEditor.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\Views\EditProject.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

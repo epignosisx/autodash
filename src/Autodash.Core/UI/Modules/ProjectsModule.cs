@@ -79,13 +79,31 @@ namespace Autodash.Core.UI.Modules
                 return View["CreateProject", vm];
             };
 
+            Get["/projects/{id}/edit", true] = async (x, ct) =>
+            {
+                string projectId = x.id;
+                var db = container.Resolve<IMongoDatabase>();
+                var query = Builders<Project>.Filter.Eq(n => n.Id, projectId);
+                var project = await db.GetCollection<Project>("Project").FindAsync(query).ToFirstOrDefaultAsync();
+                var vm = new EditProjectVm
+                {
+                    Id = project.Id,
+                    Description = project.Description,
+                    ProjectName = project.Name,
+                    MemberEmails = string.Join(", ", project.MemberEmails ?? Enumerable.Empty<string>())
+                };
+
+                return View["EditProject", vm];
+            };
+
             Post["/projects/create", true] = async (x, ct) =>
             {
                 var vm = this.Bind<CreateProjectVm>();
                 
                 var project = new Project{
                     Name = vm.ProjectName,
-                    Description = vm.Description
+                    Description = vm.Description,
+                    MemberEmails = vm.GetIndividualMemberEmails().ToArray()
                 };
 
                 var cmd = container.Resolve<CreateProjectCommand>();
@@ -103,6 +121,33 @@ namespace Autodash.Core.UI.Modules
                 return Response.AsRedirect(string.Format("/projects/{0}/suites/create", project.Id));
             };
 
+            Post["/projects/update", true] = async (x, ct) =>
+            {
+                var vm = this.Bind<EditProjectVm>();
+
+                var project = new Project
+                {
+                    Id = vm.Id,
+                    Name = vm.ProjectName,
+                    Description = vm.Description,
+                    MemberEmails = vm.GetIndividualMemberEmails().ToArray()
+                };
+
+                var cmd = container.Resolve<UpdateProjectCommand>();
+
+                try
+                {
+                    await cmd.ExecuteAsync(project);
+                }
+                catch (ValidationException ex)
+                {
+                    vm.Errors = ex.Errors.ToArray();
+                    return View["EditProject", vm];
+                }
+
+                return Response.AsRedirect(string.Format("/projects/{0}", project.Id));
+            };
+
             Post["/projects/delete", true] = async (x, ct) =>
             {
                 string id = Request.Form.id;
@@ -112,4 +157,5 @@ namespace Autodash.Core.UI.Modules
             };
         }
     }
+
 }

@@ -1,0 +1,38 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.EditProjectVm>
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<ol class="breadcrumb mt10">
+    <li><a href="/">Home</a></li>
+    <li><a href="/projects/@Model.Id">Project</a></li>
+    <li class="active">Edit</li>
+</ol>
+
+<h1>Edit Project</h1>
+
+<form method="post" enctype="application/x-www-form-urlencoded" action="/projects/update">
+
+    @Html.Partial("_ValidationSummary", Model.Errors)
+    
+    <input type="hidden" name="Id" value="@Model.Id" />
+
+    <div class="form-group">
+        <label for="ProjectName">Project Name</label>
+        <input type="text" class="form-control" name="ProjectName" required maxlength="100" value="@Model.ProjectName"/>
+    </div>
+
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <input type="text" class="form-control" name="Description" required maxlength="500" value="@Model.Description">
+    </div>
+    
+    <div class="form-group">
+        <label for="MemberEmails">Member Emails</label>
+        <input type="text" class="form-control" name="MemberEmails" maxlength="500" value="@Model.MemberEmails">
+        <p class="help-block">Enter emails separated by comma.</p>
+    </div>
+
+    <button type="submit" class="btn btn-success">Submit</button>
+</form>
+
