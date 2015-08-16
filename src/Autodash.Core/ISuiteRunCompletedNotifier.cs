@@ -9,11 +9,10 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
-using NLog;
+using System.IO;
 
 namespace Autodash.Core
 {
@@ -24,17 +23,21 @@ namespace Autodash.Core
 
     public class SuiteRunCompletedEmailNotifier : ISuiteRunCompletedNotifier
     {
-        private readonly IMongoDatabase _db;
+        private readonly Func<IMongoDatabase> _dbFactory;
         private readonly ILoggerWrapper _logger;
+        private readonly Uri _websiteRoot;
+        private readonly string _emailTemplatePath;
         private readonly ConcurrentQueue<SuiteRun> _notificationQueue = new ConcurrentQueue<SuiteRun>();
 
         private int _isInitialized;
         private IDisposable _subscription;
 
-        public SuiteRunCompletedEmailNotifier(IMongoDatabase db, ILoggerProvider loggerProvider)
+        public SuiteRunCompletedEmailNotifier(Func<IMongoDatabase> dbFactory, ILoggerProvider loggerProvider, Uri websiteRoot, string emailTemplatePath)
         {
-            _db = db;
+            _dbFactory = dbFactory;
             _logger = loggerProvider.GetLogger(GetType().Name);
+            _websiteRoot = websiteRoot;
+            _emailTemplatePath = emailTemplatePath;
         }
 
         public void Notify(SuiteRun suiteRun)
@@ -61,12 +64,16 @@ namespace Autodash.Core
 
         private async Task<Unit> SendNotifications()
         {
-            var emailConfig = await _db.GetCollection<EmailConfiguration>("EmailConfiguration").FindAsync(new BsonDocument()).ToFirstOrDefaultAsync();
+            var db = _dbFactory();
+            var emailConfig = await db.GetCollection<EmailConfiguration>("EmailConfiguration").FindAsync(new BsonDocument()).ToFirstOrDefaultAsync();
             if (emailConfig == null || string.IsNullOrEmpty(emailConfig.SmtpServer))
                 return await Task.FromResult(Unit.Default);
 
-            var projects = await _db.GetCollection<Project>("Project").FindAsync(new BsonDocument()).ToListAsync();
+            var projects = await db.GetCollection<Project>("Project").FindAsync(new BsonDocument()).ToListAsync();
 
+            string emailTemplate = File.ReadAllText(_emailTemplatePath);
+            StringBuilder sb = new StringBuilder();
+            
             try
             {
                 SuiteRun suiteRun;
@@ -79,7 +86,10 @@ namespace Autodash.Core
                         if (project == null)
                             continue;
 
-                        SendEmail(emailConfig, project, suiteRun, smtp);
+                        sb.Clear();
+                        sb.Append(emailTemplate);
+
+                        SendEmail(emailConfig, project, suiteRun, smtp, sb);
                     }
                 }
             }
@@ -87,9 +97,11 @@ namespace Autodash.Core
             {
                 _logger.Error(ex, "Could not send suite run completed email");
             }
+
+            return Unit.Default;
         }
 
-        private void SendEmail(EmailConfiguration emailConfig, Project project, SuiteRun suiteRun, SmtpClient smtp)
+        private void SendEmail(EmailConfiguration emailConfig, Project project, SuiteRun suiteRun, SmtpClient smtp, StringBuilder emailTemplate)
         {
             try
             {
@@ -102,17 +114,23 @@ namespace Autodash.Core
                     suiteRun.TestSuiteSnapshot.Name, suiteRun.Result.PassedTotal, suiteRun.Result.FailedTotal
                 );
                 
+                emailTemplate.Replace("{{{{Summary}}}}", summary);
+                emailTemplate.Replace("{{{{PassedTotal}}}}", suiteRun.Result.PassedTotal.ToString(CultureInfo.InvariantCulture));
+                emailTemplate.Replace("{{{{FailedTotal}}}}", suiteRun.Result.FailedTotal.ToString(CultureInfo.InvariantCulture));
+
+                UriBuilder uriBuilder = new UriBuilder(_websiteRoot);
+                uriBuilder.Path = "/runs/" + Uri.EscapeDataString(suiteRun.Id) + "/report";                
+                emailTemplate.Replace("{{{{ReportUrl}}}}", uriBuilder.ToString());
+
+                uriBuilder.Path = "/runs" + Uri.EscapeDataString(suiteRun.Id) + "/report.html";
+                emailTemplate.Replace("{{{{DownloadUrl}}}}", uriBuilder.ToString());
+
                 msg.Subject = summary;
-
-                string body = "";
-                body = body.Replace("{{{{Summary}}}}", summary)
-                           .Replace("{{{{PassedTotal}}}}", suiteRun.Result.PassedTotal.ToString(CultureInfo.InvariantCulture))
-                           .Replace("{{{{FailedTotal}}}}", suiteRun.Result.FailedTotal.ToString(CultureInfo.InvariantCulture))
-                           .Replace("{{{{ReportUrl}}}}", "http://localhost:8080/runs/" + suiteRun.Id + "/report");
-
-                msg.Body = body;
+                msg.Body = emailTemplate.ToString();
 
                 smtp.Send(msg);
+
+                _logger.Info("Suite run completion email sent. " + summary);
             }
             catch (Exception ex)
             {

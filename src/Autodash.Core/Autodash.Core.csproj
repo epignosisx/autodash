@@ -185,6 +185,9 @@
     <Content Include="UI\Content\js\test-explorer.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="UI\Content\suite-complete-tmpl.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="UI\Views\Projects.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

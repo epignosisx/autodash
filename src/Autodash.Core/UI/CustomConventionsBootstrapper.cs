@@ -19,6 +19,14 @@ namespace Autodash.Core.UI
             LogManager.ThrowExceptions = true;
             existingContainer.Register<ILoggerProvider>(loggerProvider);
 
+            var websiteRoot = new Uri(ConfigurationManager.AppSettings["WebsiteRoot"]);
+            var emailNotifier = new SuiteRunCompletedEmailNotifier(
+                MongoDatabaseProvider.GetDatabase, 
+                loggerProvider, websiteRoot, 
+                Path.Combine(Environment.CurrentDirectory, "UI\\Content\\suite-complete-tmpl.html")
+            );
+            existingContainer.Register<ISuiteRunCompletedNotifier>(emailNotifier);
+
             existingContainer.Register<IMongoDatabase>((container, parameters) => MongoDatabaseProvider.GetDatabase());
             existingContainer.Register<ITestAssembliesRepository>(new FileSystemTestAssembliesRepository(repoPath));
             existingContainer.Register<ITestSuiteUnitTestDiscoverer, DefaultTestSuiteUnitTestDiscoverer>().AsSingleton();

@@ -230,6 +230,7 @@
 
 			.test-summary{
 				border-collapse: collapse;
+				line-height:1;
 			}
 			.test-summary td, .test-summary th{
 				border:1px solid #505050;
@@ -403,22 +404,22 @@
                                                                 <h1 class="h1">Autodash</h1>
                                                                 <h4 class="h4">Test Suite Run Summary</h4>
                                                                 <table class="test-summary" border="1" cellpadding="0" cellspacing="0">
-																	<thead>
-																		<tr>
-																			<th>Passed</th>
-																			<th>Failed</th>
-																		</tr>
-																	</thead>
 																	<tbody>
 																		<tr>
-																			<td style="background:#5cb85c"><strong>{{{{PassedTotal}}}}</strong></td>
-																			<td style="background:#d9534f"><strong>{{{{FailedTotal}}}}</strong></td>
+																			<td style="background:#5cb85c">
+																				<strong style="font-size:70px">{{{{PassedTotal}}}}</strong>
+																				<p style="margin:0">Passed</p>
+																			</td>
+																			<td style="background:#d9534f">
+																				<strong style="font-size:70px">{{{{FailedTotal}}}}</strong>
+																				<p style="margin:0">Failed</p>
+																			</td>
 																		</tr>
 																	</tbody>
 																</table>
                                                                 <br />
                                                                 <br />
-                                                                The detailed report has been attached or you can see it <a href="{{{{ReportUrl}}}}">online.</a>
+                                                                The full report can be found <a href="{{{{ReportUrl}}}}">online.</a> or downloaded <a href="{{{{DownloadUrl}}}}">here</a>.
                                                             </div>
 														</td>
                                                     </tr>
