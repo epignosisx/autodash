@@ -58,6 +58,10 @@ namespace Autodash.Core.UI
 
             this.Conventions.ViewLocationConventions.Add((viewName, model, context) => string.Concat("UI/Views/", viewName));
 
+            var engine = container.Resolve<Nancy.ViewEngines.Razor.RazorViewEngine>();
+            
+            StaticConfiguration.DisableErrorTraces = false;
+
             this.Conventions.StaticContentsConventions.Add(
                 StaticContentConventionBuilder.AddDirectory("assets", @"UI/Content")
             );
