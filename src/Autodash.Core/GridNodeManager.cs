@@ -34,7 +34,7 @@ namespace Autodash.Core
         {
             lock (_nodes)
             {
-                nodeBrowser = GetAvailableBrowserNodes().FirstOrDefault(n => n.BrowserName == browser.Name && n.Version == browser.Version);
+                nodeBrowser = GetAvailableBrowserNodes().FirstOrDefault(n => n.IsMatch(browser));
                 if (nodeBrowser != null)
                 {
                     Book(nodeBrowser);

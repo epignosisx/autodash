@@ -46,5 +46,13 @@ namespace Autodash.Core
             return true;
         }
 
+        public bool IsMatch(Browser browser)
+        {
+            if (browser.Name != BrowserName)
+                return false;
+            if (string.IsNullOrEmpty(browser.Version))
+                return true;
+            return browser.Version == Version;
+        }
     }
 }

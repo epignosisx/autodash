@@ -136,7 +136,7 @@ namespace Autodash.Core
                 result = new UnitTestBrowserResult
                 {
                     Browser = new Browser(nodeBrowser.BrowserName, nodeBrowser.Version),
-                    Passed = false,
+                    Outcome = TestOutcome.Failed,
                     Stderr = ex.ToString()
                 };
             }
@@ -181,9 +181,9 @@ namespace Autodash.Core
 
                     testResult.BrowserResults.Add(browserResult);
 
-                    //2. check if we the retry limit has been reached
+                    //2. check if the retry limit has been reached
                     var allBrowserResults = testResult.BrowserResults.Where(n => n.Browser == browserResult.Browser).ToList();
-                    var allFailures = allBrowserResults.All(n => !n.Passed);
+                    var allFailures = allBrowserResults.All(n => n.Outcome != TestOutcome.Passed);
                     var maxRetryAttempts = test.SuiteRun.TestSuiteSnapshot.Configuration.RetryAttempts;
                     if (allFailures && allBrowserResults.Count < maxRetryAttempts)
                     {

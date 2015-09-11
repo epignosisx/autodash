@@ -11,7 +11,7 @@ namespace Autodash.Core.Tests
             UnitTestCollection result = subject.DiscoverTests("Autodash.MsTest.ValidTests.dll");
             Assert.Equal("Autodash.MsTest.ValidTests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null", result.AssemblyName);
             Assert.Equal("Autodash.MsTest.ValidTests.dll", result.AssemblyPath);
-            Assert.Equal(4, result.Tests.Length);
+            Assert.Equal(5, result.Tests.Length);
         }
     }
 }

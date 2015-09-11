@@ -16,11 +16,23 @@ namespace Autodash.Core.UI.Models
     public class ProjectSuiteRunDetail
     {
         public double DurationMinutes { get; set; }
-        public bool Passed { get; set; }
+        public TestOutcome Outcome { get; set; }
+
+        public string BgColor()
+        {
+            switch (Outcome)
+            {
+                case TestOutcome.Passed: 
+                    return "bg-success";
+                case TestOutcome.Inconclusive: 
+                    return "bg-warning";
+            }
+            return "bg-danger";
+        }
 
         public override string ToString()
         {
-            return (Passed ? "Passed" : "Failed") + ". Took " + DurationMinutes.ToString("0.00") + " mins";
+            return Outcome + ". Took " + DurationMinutes.ToString("0.00") + " mins";
         }
     }
 }
