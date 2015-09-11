@@ -61,7 +61,9 @@ namespace Autodash.MsTest.SeleniumTests
                     throw new InvalidOperationException("Unknown browser");
             }
 
-            capabilities.SetCapability(CapabilityType.Version, "9");
+            if (!string.IsNullOrEmpty(browserVersion))
+                capabilities.SetCapability(CapabilityType.Version, browserVersion);
+
             IWebDriver driver = new RemoteWebDriver(new Uri(hubUrl), capabilities);
             return driver;
         }
