@@ -91,6 +91,8 @@ namespace Autodash.Core
         {
             suiteRun.MarkAsCompleted();
             await _repository.UpdateSuiteRunAsync(suiteRun);
+            Tuple<SuiteRun, CancellationTokenSource> ignore;
+            _runningSuites.TryRemove(suiteRun.Id, out ignore);
             return suiteRun;
         }
 
