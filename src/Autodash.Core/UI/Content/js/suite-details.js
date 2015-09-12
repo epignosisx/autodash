@@ -74,7 +74,7 @@
             run = suiteRuns[i];
             if (run.result != null) {
                 data.push([
-                    i + 1, { v: run.durationMinutes, f: run.durationMinutes.toFixed(2) + " mins" }, "color:" + (run.result.passed ? "#5cb85c" : "#d9534f")
+                    i + 1, { v: run.durationMinutes, f: run.durationMinutes.toFixed(2) + " mins" }, "color:" + (global.outcomeToBgColor(run.result.outcome))
                 ]);
             }
         }

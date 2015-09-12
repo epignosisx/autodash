@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Autodash.Core
 {
-    public class Browser : IEquatable<Browser>, IComparer<Browser>
+    public class Browser : IEquatable<Browser>, IComparer<Browser>, IComparable<Browser>
     {
         public string Name { get; set; }
         public string Version { get; set; }
@@ -38,6 +38,11 @@ namespace Autodash.Core
             return string.Compare(x.Version, y.Version, StringComparison.Ordinal);
         }
 
+        public int CompareTo(Browser other)
+        {
+            return Compare(this, other);
+        }
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
@@ -63,6 +68,8 @@ namespace Autodash.Core
                 return ((Name != null ? Name.GetHashCode() : 0)*397) ^ (Version != null ? Version.GetHashCode() : 0);
             }
         }
+
+
 
         public override string ToString()
         {
