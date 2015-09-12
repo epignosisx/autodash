@@ -117,6 +117,7 @@ namespace Autodash.Core.Tests
 
             var scraper = Substitute.For<IGridConsoleScraper>();
             scraper.GetAvailableNodesInfoAsync(Arg.Any<Uri>()).Returns(Task.FromResult(GetGridNodes()));
+            scraper.GetAvailableNodesInfo(Arg.Any<Uri>()).Returns(GetGridNodes());
 
             var repository = Substitute.For<ISuiteRunSchedulerRepository>();
             repository.GetScheduledSuiteRunsAsync().Returns(Task.FromResult(new List<SuiteRun>(0)));
@@ -169,6 +170,7 @@ namespace Autodash.Core.Tests
 
             var scraper = Substitute.For<IGridConsoleScraper>();
             scraper.GetAvailableNodesInfoAsync(Arg.Any<Uri>()).Returns(Task.FromResult(GetGridNodes()));
+            scraper.GetAvailableNodesInfo(Arg.Any<Uri>()).Returns(GetGridNodes());
 
             var repository = Substitute.For<ISuiteRunSchedulerRepository>();
             repository.GetScheduledSuiteRunsAsync().Returns(Task.FromResult(new List<SuiteRun>(0)));

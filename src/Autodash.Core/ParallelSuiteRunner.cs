@@ -41,7 +41,10 @@ namespace Autodash.Core
             if (run == null)
                 throw new ArgumentNullException("run");
 
-            var validator = new SuiteRunForRunnerValidator();
+            _gridConfig = await _repository.GetGridConfigurationAsync();
+            _hubUrl = new Uri(_gridConfig.HubUrl + "grid/console");
+
+            var validator = new SuiteRunForRunnerValidator(_gridConsoleScraper, _hubUrl);
             ValidationResult validationResult = validator.Validate(run);
             if (!validationResult.IsValid)
             {
@@ -78,9 +81,6 @@ namespace Autodash.Core
                     }
                 }
             }
-
-            _gridConfig = await _repository.GetGridConfigurationAsync();
-            _hubUrl = new Uri(_gridConfig.HubUrl + "grid/console");
 
             EnsureInitialized();
             return await taskCompletionSource.Task;

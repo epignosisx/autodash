@@ -69,8 +69,6 @@ namespace Autodash.Core
             }
         }
 
-
-
         public override string ToString()
         {
             if (string.IsNullOrEmpty(Version))

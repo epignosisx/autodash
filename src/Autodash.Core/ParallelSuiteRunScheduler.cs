@@ -64,7 +64,7 @@ namespace Autodash.Core
 
         private async Task<SeleniumGridConfiguration> ReloadGridConfig()
         {
-            if (_gridConfig == null || _rand.Next(100) < 20)
+            if (_gridConfig == null || _rand.Next(100) < 10)
             {
                 _gridConfig = await _repository.GetGridConfigurationAsync();
                 _logger.Info("Grid Config reloaded");

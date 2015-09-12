@@ -10,12 +10,11 @@ namespace Autodash.Core
         public GridNodeManager(IEnumerable<GridNodeInfo> nodes)
         {
             _nodes = (from node in nodes
-                select new GridNodeInfoWrapper
-                {
-                    Node = node,
-                    Browsers = node.Browsers.Where(n => n.Protocol == "WebDriver")
-                        .ToDictionary(n => n, n => false)
-                }).ToArray();
+                      select new GridNodeInfoWrapper
+                      {
+                          Node = node,
+                          Browsers = node.Browsers.Where(n => n.Protocol == GridNodeBrowserInfo.WebDriverProtocol).ToDictionary(n => n, n => false)
+                      }).ToArray();
         }
 
         public void Book(GridNodeBrowserInfo browserNode)
@@ -34,7 +33,7 @@ namespace Autodash.Core
         {
             lock (_nodes)
             {
-                nodeBrowser = GetAvailableBrowserNodes().FirstOrDefault(n => n.IsMatch(browser));
+                nodeBrowser = GetAvailableBrowserNodes().FirstOrDefault(n => n.Satisfies(browser));
                 if (nodeBrowser != null)
                 {
                     Book(nodeBrowser);

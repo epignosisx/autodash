@@ -62,7 +62,7 @@ namespace Autodash.Core
             CollectionResults = new List<UnitTestCollectionResult>();
         }
 
-        public SuiteRunResult(string details)
+        public SuiteRunResult(string details) : this()
         {
             Details = details;
         }

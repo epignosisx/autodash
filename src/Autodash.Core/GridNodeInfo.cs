@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Autodash.Core
 {
@@ -12,6 +13,11 @@ namespace Autodash.Core
         public GridNodeInfo()
         {
             Browsers = new List<GridNodeBrowserInfo>();
+        }
+
+        public bool Satisfies(Browser browser, string seleniumProtocol)
+        {
+            return Browsers.Any(n => n.Protocol == seleniumProtocol && n.Satisfies(browser));
         }
     }
 }
