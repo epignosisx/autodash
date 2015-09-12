@@ -176,6 +176,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Content Include="UI\Content\js\global.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="UI\Content\js\suite-details.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

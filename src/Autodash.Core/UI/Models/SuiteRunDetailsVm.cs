@@ -41,5 +41,10 @@ namespace Autodash.Core.UI.Models
                 }
             }
         }
+
+        public string BgColor(TestOutcome outcome)
+        {
+            return TestOutcomeColorHelper.BgColor(outcome);
+        }
     }
 }

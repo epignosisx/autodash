@@ -40,7 +40,7 @@ namespace Autodash.Core.UI.Models
                 yield return new Browser
                 {
                     Name = parts[0],
-                    Version = parts[1]
+                    Version = string.IsNullOrEmpty(parts[1]) ? null : parts[1]
                 };
             }
         }

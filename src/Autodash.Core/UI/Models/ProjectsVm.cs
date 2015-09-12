@@ -20,19 +20,27 @@ namespace Autodash.Core.UI.Models
 
         public string BgColor()
         {
-            switch (Outcome)
-            {
-                case TestOutcome.Passed: 
-                    return "bg-success";
-                case TestOutcome.Inconclusive: 
-                    return "bg-warning";
-            }
-            return "bg-danger";
+            return TestOutcomeColorHelper.BgColor(Outcome);
         }
 
         public override string ToString()
         {
             return Outcome + ". Took " + DurationMinutes.ToString("0.00") + " mins";
+        }
+    }
+
+    public static class TestOutcomeColorHelper
+    {
+        public static string BgColor(TestOutcome outcome)
+        {
+            switch (outcome)
+            {
+                case TestOutcome.Passed:
+                    return "bg-success";
+                case TestOutcome.Inconclusive:
+                    return "bg-warning";
+            }
+            return "bg-danger";
         }
     }
 }

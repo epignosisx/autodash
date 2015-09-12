@@ -23,8 +23,8 @@ namespace Autodash.Core
 
     public enum TestOutcome
     {
-        Failed,
-        Passed,
-        Inconclusive
+        Failed = 0,
+        Passed = 1,
+        Inconclusive = 2
     }
 }

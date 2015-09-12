@@ -48,7 +48,7 @@
                 <td>@test.TestName</td>
                 @foreach (var browser in Model.GetBrowserResults(test))
                 {
-                    <td class="browser-result @(browser.Passed ? "bg-success" : "bg-danger")">
+                    <td class="browser-result @Model.BgColor(browser.Outcome)">
                         <span>@browser.Duration.ToString("mm\\:ss")</span>
                         <div class="hidden details">
                             <table class="table table-condensed browser-result-details">
