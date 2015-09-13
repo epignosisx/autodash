@@ -25,7 +25,7 @@ namespace Autodash.Core.UI.Models
 
         public override string ToString()
         {
-            return Outcome + ". Took " + DurationMinutes.ToString("0.00") + " mins";
+            return Outcome + ". Duration " + DurationMinutes.ToString("0.00") + " mins";
         }
     }
 

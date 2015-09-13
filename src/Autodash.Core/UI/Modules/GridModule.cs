@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using Autodash.Core.UI.Models;
 using FluentValidation;
+using FluentValidation.Results;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Nancy;
@@ -36,7 +37,13 @@ namespace Autodash.Core.UI.Modules
                         {
                             vm.JsonConfig = await webClient.DownloadStringTaskAsync(new Uri(vm.GridConfig));
                         }
-                        catch{}
+                        catch
+                        {
+                            vm.Errors = new[]
+                            {
+                                new ValidationFailure("JsonConfig", "Could not connect to grid. This could be because the grid is down or cannot be reached.")
+                            };
+                        }
                     }
                 }
 

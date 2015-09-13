@@ -1,4 +1,5 @@
-﻿@using System.Linq
+﻿@using System.Globalization
+@using System.Linq
 @using Autodash.Core.UI.Models
 @inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.ProjectDetailsVm>
 @{
@@ -10,19 +11,24 @@
     <li class="active">Project</li>
 </ol>
 
-<h1>@Model.Project.Name <small style="font-size:15px">@Model.Project.Description</small></h1>
-<p>@string.Join(", ", Model.Project.MemberEmails ?? Enumerable.Empty<string>())</p>
-
-
-<div class="text-right">
-    <form enctype="application/x-www-form-urlencoded" action="/projects/delete" method="post" style="display:inline">
-        <input type="hidden" name="id" value="@Model.Project.Id"/>
-        <button type="submit" id="btn-delete-project" class="btn btn-danger" href="/projects/@Model.Project.Id/suites/create"><span class="glyphicon glyphicon-remove-sign"></span> Delete Project</button>
-    </form>
-    <a class="btn btn-primary" href="/projects/@Model.Project.Id/suites/create"><span class="glyphicon glyphicon-plus-sign"></span> Create Suite</a>
-    <a class="btn btn-primary" href="/projects/@Model.Project.Id/edit"><span class="glyphicon glyphicon-plus-sign"></span> Edit Project</a>
+<div class="row">
+    <div class="col-md-6">
+        <h1 style="margin-top:0">@Model.Project.Name <small style="font-size:15px">@Model.Project.Description</small></h1>
+        <p>@string.Join(", ", Model.Project.MemberEmails ?? Enumerable.Empty<string>())</p>
+    </div>
+    <div class="col-md-6">
+        <div class="text-right">
+            <a class="btn btn-primary" href="/projects/@Model.Project.Id/edit"><span class="glyphicon glyphicon-plus-sign"></span> Edit Project</a>
+            <a class="btn btn-primary" href="/projects/@Model.Project.Id/suites/create"><span class="glyphicon glyphicon-plus-sign"></span> Create Suite</a>
+            <form enctype="application/x-www-form-urlencoded" action="/projects/delete" method="post" style="display:inline">
+                <input type="hidden" name="id" value="@Model.Project.Id" />
+                <button type="submit" id="btn-delete-project" class="btn btn-danger" href="/projects/@Model.Project.Id/suites/create"><span class="glyphicon glyphicon-remove-sign"></span> Delete Project</button>
+            </form>
+        </div>
+    </div>
 </div>
 
+<h4>Test Suites:</h4>
 <div class="mt10">
     @{ int i = 0;}
     @foreach (var suite in Model.Suites)
@@ -35,11 +41,11 @@
                             @suite.Suite.Name
                         </a>
 
-                        <a href="/suites/@suite.Suite.Id" class="panel-action">
-                            <small><span class="glyphicon glyphicon-info-sign"></span>&nbsp;Details</small>
-                        </a>
                         <a href="#@suite.Suite.Id" class="panel-action action-delete">
                             <small><span class="glyphicon glyphicon-remove-sign"></span>&nbsp;Delete</small>
+                        </a>
+                        <a href="/suites/@suite.Suite.Id" class="panel-action">
+                            <small><span class="glyphicon glyphicon-info-sign"></span>&nbsp;Details</small>
                         </a>
                     </h4>
                 </div>
@@ -52,7 +58,7 @@
                                     <tbody>
                                         <tr>
                                             <th>Browsers</th>
-                                            <td>@string.Join(", ", suite.Suite.Configuration.Browsers.Select(b => b.ToString()))</td>
+                                            <td>@string.Join(", ", suite.Suite.Configuration.Browsers.Select(b => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(b.ToString())))</td>
                                         </tr>
                                         <tr>
                                             <th>Test Retry Attempts</th>
@@ -64,10 +70,10 @@
                                         </tr>
                                         @if (suite.Suite.Schedule != null)
                                         {
-                                        <tr>
-                                            <th>Schedule</th>
-                                            <td>@suite.Suite.Schedule.ToString()</td>
-                                        </tr>
+                                            <tr>
+                                                <th>Schedule</th>
+                                                <td>@suite.Suite.Schedule.ToString()</td>
+                                            </tr>
                                         }
                                     </tbody>
                                 </table>
@@ -88,18 +94,18 @@
 @section scripts{
     <script src="/assets/js/suite-runs.js"></script>
     <script>
-        $(function() {
-            $(".action-delete").on("click", function(e) {
+        $(function () {
+            $(".action-delete").on("click", function (e) {
                 e.preventDefault();
                 if (confirm("Are you sure you want to delete this test suite?\nAll suite runs will be deleted as well.")) {
                     var id = $(this).attr("href").split("#")[1];
-                    $.post("/suites/delete", { id: id }, function() {
+                    $.post("/suites/delete", { id: id }, function () {
                         window.location.reload();
                     });
                 }
             });
 
-            $("#btn-delete-project").on("click", function(e) {
+            $("#btn-delete-project").on("click", function (e) {
                 if (!confirm("Are you sure you want to delete this project?\nAll test suites and suite runs will be deleted as well.")) {
                     e.preventDefault();
                 }

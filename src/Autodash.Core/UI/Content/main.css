@@ -245,6 +245,10 @@ a.thumbnail.active {
 .panel-title .panel-action small{
     color: white;
 }
+.panel-title .action-delete,
+.panel-title .action-delete small {
+    color: #d9534f;
+}
 .test-explorer-table .test-name {
     width: 70%;
     -moz-word-break: break-all;

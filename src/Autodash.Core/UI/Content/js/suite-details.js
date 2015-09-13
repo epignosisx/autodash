@@ -86,7 +86,7 @@
 
         var data = new google.visualization.DataTable();
         data.addColumn('number', 'Run #');
-        data.addColumn('number', 'Took');
+        data.addColumn('number', 'Duration');
         data.addColumn({ type: 'string', role: 'style' });
 
         data.addRows(runs);
