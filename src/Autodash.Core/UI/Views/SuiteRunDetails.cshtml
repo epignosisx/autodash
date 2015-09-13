@@ -1,4 +1,5 @@
 ﻿@using System
+@using System.Globalization
 @using System.Linq
 @using Autodash.Core.UI.Models
 @inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.SuiteRunDetailsVm>
@@ -82,7 +83,7 @@
             <th>Test Name</th>
             @foreach (var browser in Model.SuiteRun.TestSuiteSnapshot.Configuration.Browsers.OrderBy(n => n))
             {
-                <th class="browser-result">@browser</th>
+                <th class="browser-result">@CultureInfo.CurrentCulture.TextInfo.ToTitleCase(browser.ToString())</th>
             }
         </tr>
     </thead>
@@ -178,7 +179,7 @@
             ]);
 
             var options = {
-                title: 'Passed/Failed %',
+                title: 'Passed / Failed / Inconclusive %',
                 colors: ['#5cb85c', '#d9534f', '#f0ad4e']
             };
 

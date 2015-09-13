@@ -56,6 +56,9 @@ namespace Autodash.Core.UI.Modules
             SuiteRun run = await database.GetSuiteRunByIdAsync(id);
             Project project = await database.GetProjectByIdAsync(run.TestSuiteSnapshot.ProjectId);
 
+            if(run.Result == null)
+                run.Result = new SuiteRunResult("Suite Run is still executing. No results are available yet.");
+
             SuiteRunDetailsVm vm = new SuiteRunDetailsVm
             {
                 Project = project,

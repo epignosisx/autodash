@@ -1,0 +1,37 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.EmailConfigVm>
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<ol class="breadcrumb mt10">
+    <li><a href="/">Home</a></li>
+    <li class="active">Email</li>
+</ol>
+
+<h1>Email Configuration</h1>
+
+<form method="post" enctype="application/x-www-form-urlencoded" action="/email">
+
+    @Html.Partial("_ValidationSummary", Model.Errors)
+
+    <fieldset class="mt30">
+
+        <legend>Configuration</legend>
+        <div class="form-group">
+            <label for="SmtpServer">Smtp Server</label>
+            <input type="text" class="form-control" name="SmtpServer" value="@Model.SmtpServer" required maxlength="150" />
+            <p class="help-block">Ex: smtp.autodash.org</p>
+        </div>
+        <div class="form-group">
+            <label for="Port">Port</label>
+            <input type="number" class="form-control" name="Port" value="@Model.Port" required />
+        </div>
+        <div class="form-group">
+            <label for="FromEmail">Email:</label>
+            <input type="text" class="form-control" name="FromEmail" value="@Model.FromEmail" required />
+            <p class="help-block">Email address to send emails from.</p>
+        </div>
+    </fieldset>
+
+    <button type="submit" class="btn btn-success">Submit</button>
+</form>

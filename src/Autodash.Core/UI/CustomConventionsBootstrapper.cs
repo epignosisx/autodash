@@ -43,6 +43,7 @@ namespace Autodash.Core.UI
             existingContainer.Register<CreateProjectCommand>();
             existingContainer.Register<CreateSuiteCommand>();
             existingContainer.Register<UpdateGridCommand>();
+            existingContainer.Register<UpdateEmailCommand>();
 
             TestRunnerPreProcessorProvider.Add(new ApplyTestSettingsPreProcessor(loggerProvider));
 

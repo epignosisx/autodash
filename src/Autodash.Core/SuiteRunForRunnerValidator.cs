@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using FluentValidation;
@@ -42,8 +43,12 @@ namespace Autodash.Core
                         unsatisfiedBrowsers.Add(browser);
                 }
 
-                if(unsatisfiedBrowsers.Count > 0)
-                    context.MessageFormatter.AppendArgument("Browsers", string.Join(", ", unsatisfiedBrowsers));
+                if (unsatisfiedBrowsers.Count > 0)
+                {
+                    var textInfo = CultureInfo.CurrentCulture.TextInfo;
+                    var browserNames = unsatisfiedBrowsers.Select(b => textInfo.ToTitleCase(b.ToString()));
+                    context.MessageFormatter.AppendArgument("Browsers", string.Join(", ", browserNames));
+                }
 
                 return unsatisfiedBrowsers.Count == 0;
             }

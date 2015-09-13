@@ -17,7 +17,7 @@ namespace Autodash.Core.UI.Models
         public bool IsBrowserSelected(string browserVersion)
         {
             string[] parts = browserVersion.Split('|');
-            return Suite.Configuration.Browsers.Any(b => b.Name == parts[0] && b.Version == parts[1]);
+            return Suite.Configuration.Browsers.Any(b => b.Name == parts[0] && (b.Version == null || b.Version == parts[1]));
         }
 
         public string ScheduleTime
