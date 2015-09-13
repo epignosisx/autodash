@@ -24,6 +24,14 @@ namespace Autodash.Core.Tests
             {
             }
 
+            public void Warning(string message)
+            {
+            }
+
+            public void Warning(string message, params object[] args)
+            {
+            }
+
             public void Error(string message)
             {
             }
