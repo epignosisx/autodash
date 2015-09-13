@@ -6,7 +6,7 @@ namespace Autodash.Core
     public class UnitTestCollection
     {
         public string AssemblyName { get; private set; }
-        public string AssemblyPath { get; private set; }
+        public string AssemblyFileName { get; private set; }
         public UnitTestInfo[] Tests { get; private set; }
         public IUnitTestRunner Runner { get; private set; }
 
@@ -15,10 +15,10 @@ namespace Autodash.Core
             Tests = new UnitTestInfo[0];
         }
 
-        public UnitTestCollection(string assemblyName, string assemblyPath, IEnumerable<UnitTestInfo> tests, IUnitTestRunner runner)
+        public UnitTestCollection(string assemblyName, string assemblyFileName, IEnumerable<UnitTestInfo> tests, IUnitTestRunner runner)
         {
             AssemblyName = assemblyName;
-            AssemblyPath = assemblyPath;
+            AssemblyFileName = assemblyFileName;
             Tests = tests.ToArray();
             Runner = runner;
         }

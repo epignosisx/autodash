@@ -17,7 +17,7 @@ namespace Autodash.Core
             "set hubUrl={3}" + Environment.NewLine +
             "set browserName={4}" + Environment.NewLine +
             "set browserVersion={5}" + Environment.NewLine +
-            "mstest.exe /testcontainer:{0} /test:{1} /resultsfile:\"{2}\"";
+            "mstest.exe /testcontainer:\"{0}\" /test:{1} /resultsfile:\"{2}\"";
 
         private static readonly XmlSerializer TestRunSerializer = new XmlSerializer(typeof(TestRun));
 
@@ -32,7 +32,7 @@ namespace Autodash.Core
             GridNodeBrowserInfo nodeBrowser = context.GridNodeBrowserInfo;
             UnitTestCollection testCollection = context.UnitTestCollection;
 
-            string tempFilename = RemoveInvalidChars(unitTest.ShortTestName + "_" + nodeBrowser.BrowserName);
+            string tempFilename = RemoveInvalidChars(unitTest.ShortTestName + "_" + nodeBrowser.BrowserName + nodeBrowser.Version);
             string testDir = Path.Combine(config.TestAssembliesPath, tempFilename);
             if (Directory.Exists(testDir))
                 Directory.Delete(testDir, true);
@@ -41,9 +41,10 @@ namespace Autodash.Core
 
             string commandFullpath = Path.Combine(testDir, "cmd.bat");
             string resultFullpath = Path.Combine(testDir, "rpt.trx");
+            string assemblyFullpath = Path.Combine(testDir, testCollection.AssemblyFileName);
 
             string commandContent = string.Format(CommandTemplate,
-                Path.GetFileName(testCollection.AssemblyPath),
+                assemblyFullpath,
                 unitTest.TestName,
                 resultFullpath,
                 context.SeleniumGridConfiguration.RemoteWebDriverUrl,
@@ -68,7 +69,7 @@ namespace Autodash.Core
             }
 
             var info = new ProcessStartInfo();
-            info.WorkingDirectory = config.TestAssembliesPath;
+            info.WorkingDirectory = testDir;
             info.FileName = Path.Combine(Environment.ExpandEnvironmentVariables("%windir%"), @"System32\cmd.exe");
             info.UseShellExecute = false;
             info.WindowStyle = ProcessWindowStyle.Hidden;
@@ -159,7 +160,7 @@ namespace Autodash.Core
             }
 
             //clean up
-            Directory.Delete(testDir, true);
+            //Directory.Delete(testDir, true);
 
             var outcome = TestOutcome.Failed;
             if(report.ResultSummary.Counters.passed == "1")

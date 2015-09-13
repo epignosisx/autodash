@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Mono.Cecil;
 
@@ -35,7 +36,7 @@ namespace Autodash.Core
                 }
             }
 
-            var testColl = new UnitTestCollection(module.Assembly.FullName, assemblyPath, tests, _runner);
+            var testColl = new UnitTestCollection(module.Assembly.FullName, Path.GetFileName(assemblyPath), tests, _runner);
             return testColl;
         }
 
