@@ -41,7 +41,7 @@ namespace Autodash.Core
                         nodeBrowserInfo.MaxInstances = int.Parse(tuple.Value);
                         break;
                     case "version":
-                        nodeBrowserInfo.Version = tuple.Value;
+                        nodeBrowserInfo.Version = string.IsNullOrWhiteSpace(tuple.Value) ? null : tuple.Value;
                         break;
                 }
             }

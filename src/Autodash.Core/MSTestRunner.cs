@@ -160,7 +160,7 @@ namespace Autodash.Core
             }
 
             //clean up
-            //Directory.Delete(testDir, true);
+            Directory.Delete(testDir, true);
 
             var outcome = TestOutcome.Failed;
             if(report.ResultSummary.Counters.passed == "1")
