@@ -21,6 +21,8 @@ namespace Autodash.Core
         void Debug(string message);
         void Info(string message);
         void Info(string message, params object[] args);
+        void Warning(string message);
+        void Warning(string message, params object[] args);
         void Error(string message);
         void Error(Exception exception, string message);
     }
@@ -47,6 +49,16 @@ namespace Autodash.Core
         public void Info(string message, params object[] args)
         {
             _logger.Info(message, args);
+        }
+
+        public void Warning(string message)
+        {
+            _logger.Warn(message);
+        }
+
+        public void Warning(string message, params object[] args)
+        {
+            _logger.Warn(message, args);
         }
 
         public void Error(string message)

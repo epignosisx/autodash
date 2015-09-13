@@ -16,15 +16,21 @@ namespace Autodash.Core
         private readonly ConcurrentDictionary<string, Tuple<SuiteRun, CancellationTokenSource>> _runningSuites = new ConcurrentDictionary<string, Tuple<SuiteRun, CancellationTokenSource>>();
         private readonly ISuiteRunSchedulerRepository _repository;
         private readonly ISuiteRunner _suiteRunner;
+        private readonly ISuiteRunCompletedNotifier _suiteRunCompletedNotifier;
         private readonly ILoggerWrapper _logger;
         private readonly List<TestSuite> _scheduledSuites = new List<TestSuite>();
         private SeleniumGridConfiguration _gridConfig;
         private DateTime _lastSuiteRunDate;
 
-        public ParallelSuiteRunScheduler(ISuiteRunSchedulerRepository repository, ISuiteRunner suiteRunner, ILoggerProvider loggerProvider)
+        public ParallelSuiteRunScheduler(
+            ISuiteRunSchedulerRepository repository, 
+            ISuiteRunner suiteRunner, 
+            ILoggerProvider loggerProvider,
+            ISuiteRunCompletedNotifier suiteRunCompletedNotifier)
         {
             _repository = repository;
             _suiteRunner = suiteRunner;
+            _suiteRunCompletedNotifier = suiteRunCompletedNotifier;
             _logger = loggerProvider.GetLogger(GetType().Name);
         }
 
@@ -93,6 +99,7 @@ namespace Autodash.Core
             await _repository.UpdateSuiteRunAsync(suiteRun);
             Tuple<SuiteRun, CancellationTokenSource> ignore;
             _runningSuites.TryRemove(suiteRun.Id, out ignore);
+            _suiteRunCompletedNotifier.Notify(suiteRun);
             return suiteRun;
         }
 

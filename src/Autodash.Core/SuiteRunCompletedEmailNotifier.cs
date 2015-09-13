@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Mail;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -57,10 +58,16 @@ namespace Autodash.Core
 
         private async Task<Unit> SendNotifications()
         {
+            if(_notificationQueue.IsEmpty)
+                return await Task.FromResult(Unit.Default);
+
             var db = _dbFactory();
             var emailConfig = await db.GetCollection<EmailConfiguration>("EmailConfiguration").FindAsync(new BsonDocument()).ToFirstOrDefaultAsync();
             if (emailConfig == null || string.IsNullOrEmpty(emailConfig.SmtpServer))
+            {
+                _logger.Warning("Smtp Server not configured. Cannot send email notifications.");
                 return await Task.FromResult(Unit.Default);
+            }
 
             var projects = await db.GetCollection<Project>("Project").FindAsync(new BsonDocument()).ToListAsync();
 
@@ -99,25 +106,29 @@ namespace Autodash.Core
             {
                 var msg = new MailMessage();
                 msg.From = new MailAddress(emailConfig.FromEmail);
+
                 foreach (var memberEmail in project.MemberEmails)
                     msg.To.Add(memberEmail);
 
-                string summary = string.Format("Autodash: {0}. Passed {1}, Failed: {2}",
-                    suiteRun.TestSuiteSnapshot.Name, suiteRun.Result.PassedTotal, suiteRun.Result.FailedTotal
-                    );
-                
+                string summary = string.Format("Autodash. Suite Run Summary. {0}. Passed {1}, Failed: {2}, Inconclusive: {3}",
+                    suiteRun.TestSuiteSnapshot.Name, suiteRun.Result.PassedTotal, suiteRun.Result.FailedTotal, suiteRun.Result.InconclusiveTotal
+                );
+
                 emailTemplate.Replace("{{{{Summary}}}}", summary);
+                emailTemplate.Replace("{{{{SuiteSummary}}}}", project.Name + " - " + suiteRun.TestSuiteSnapshot.Name);
                 emailTemplate.Replace("{{{{PassedTotal}}}}", suiteRun.Result.PassedTotal.ToString(CultureInfo.InvariantCulture));
                 emailTemplate.Replace("{{{{FailedTotal}}}}", suiteRun.Result.FailedTotal.ToString(CultureInfo.InvariantCulture));
+                emailTemplate.Replace("{{{{InconclusiveTotal}}}}", suiteRun.Result.InconclusiveTotal.ToString(CultureInfo.InvariantCulture));
 
                 UriBuilder uriBuilder = new UriBuilder(_websiteRoot);
                 uriBuilder.Path = "/runs/" + Uri.EscapeDataString(suiteRun.Id) + "/report";                
                 emailTemplate.Replace("{{{{ReportUrl}}}}", uriBuilder.ToString());
 
-                uriBuilder.Path = "/runs" + Uri.EscapeDataString(suiteRun.Id) + "/report.html";
+                uriBuilder.Path = "/runs/" + Uri.EscapeDataString(suiteRun.Id) + "/report.html";
                 emailTemplate.Replace("{{{{DownloadUrl}}}}", uriBuilder.ToString());
 
                 msg.Subject = summary;
+                msg.IsBodyHtml = true;
                 msg.Body = emailTemplate.ToString();
 
                 smtp.Send(msg);
