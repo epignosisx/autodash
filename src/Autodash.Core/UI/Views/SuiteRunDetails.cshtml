@@ -1,4 +1,5 @@
 ﻿@using System
+@using System.Globalization
 @using System.Linq
 @using Autodash.Core.UI.Models
 @inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<Autodash.Core.UI.Models.SuiteRunDetailsVm>
@@ -7,6 +8,31 @@
     ViewBag.SilentMode = Model.DownloadMode;
     ViewBag.EmbedResources = Model.EmbedResources;
 }
+
+<style type="text/css">
+    .suite-summary {
+        float: left;
+        width: 450px;
+    }
+
+    .suite-summary th, .suite-summary td {
+        text-align: center;
+        width: 150px;
+    }
+
+    .suite-summary td {
+        font-size: 1.2em;
+        color: white;
+    }
+
+    .summary-chart {
+        float:left;
+        width: 400px; 
+        height: 200px;
+        margin-left: 70px;
+    }
+
+</style>
 
 @if (!Model.DownloadMode)
 {
@@ -27,8 +53,28 @@
 <p><strong>Status:</strong> @Model.SuiteRun.Result.Details</p>
 
 <div class="row">
-    <div id="passed-failed-pie" style="float:left;width: 500px; height: 200px;"></div>
-    <div id="passed-failed-columns" style="float:left;width: 350px; height: 200px;"></div>
+    <div class="suite-summary">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Total</th>
+                    <th>Passed</th>
+                    <th>Failed</th>
+                    <th>Inconclusive</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="bg-primary">@(Model.SuiteRun.Result.PassedTotal + Model.SuiteRun.Result.FailedTotal + Model.SuiteRun.Result.InconclusiveTotal)</td>
+                    <td class="bg-success">@Model.SuiteRun.Result.PassedTotal</td>
+                    <td class="bg-danger">@Model.SuiteRun.Result.FailedTotal</td>
+                    <td class="bg-warning">@Model.SuiteRun.Result.InconclusiveTotal</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="passed-failed-pie" class="summary-chart"></div>
+
 </div>
 
 <table class="table">
@@ -37,7 +83,7 @@
             <th>Test Name</th>
             @foreach (var browser in Model.SuiteRun.TestSuiteSnapshot.Configuration.Browsers.OrderBy(n => n))
             {
-                <th class="browser-result">@browser</th>
+                <th class="browser-result">@CultureInfo.CurrentCulture.TextInfo.ToTitleCase(browser.ToString())</th>
             }
         </tr>
     </thead>
@@ -48,7 +94,7 @@
                 <td>@test.TestName</td>
                 @foreach (var browser in Model.GetBrowserResults(test))
                 {
-                    <td class="browser-result @(browser.Passed ? "bg-success" : "bg-danger")">
+                    <td class="browser-result @Model.BgColor(browser.Outcome)">
                         <span>@browser.Duration.ToString("mm\\:ss")</span>
                         <div class="hidden details">
                             <table class="table table-condensed browser-result-details">
@@ -103,7 +149,7 @@
         google.setOnLoadCallback(drawCharts);
         function drawCharts() {
             drawPassedFailedPie();
-            drawPassedFailedCols();
+            //drawPassedFailedCols();
         }
 
         function drawPassedFailedCols() {
@@ -128,12 +174,13 @@
             var data = google.visualization.arrayToDataTable([
               ['Passed/Failed', 'Total'],
               ['Passed', @Model.SuiteRun.Result.PassedTotal],
-              ['Failed', @Model.SuiteRun.Result.FailedTotal]
+              ['Failed', @Model.SuiteRun.Result.FailedTotal],
+              ['Inconclusive', @Model.SuiteRun.Result.InconclusiveTotal]
             ]);
 
             var options = {
-                title: 'Passed/Failed %',
-                colors: ['#5cb85c', '#d9534f']
+                title: 'Passed / Failed / Inconclusive %',
+                colors: ['#5cb85c', '#d9534f', '#f0ad4e']
             };
 
             var chart = new google.visualization.PieChart(document.getElementById('passed-failed-pie'));

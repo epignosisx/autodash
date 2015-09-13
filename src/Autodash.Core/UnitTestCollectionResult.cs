@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Autodash.Core
 {
@@ -13,9 +12,22 @@ namespace Autodash.Core
             UnitTestResults = new List<UnitTestResult>();
         }
 
-        public bool Passed 
+        public TestOutcome Outcome
         {
-            get { return UnitTestResults.All(n => n.Passed); }
+            get
+            {
+                if (UnitTestResults.Count == 0)
+                    return TestOutcome.Inconclusive;
+
+                foreach (var result in UnitTestResults)
+                {
+                    if(result.Outcome == TestOutcome.Failed)
+                        return TestOutcome.Failed;
+                    if (result.Outcome == TestOutcome.Inconclusive)
+                        return TestOutcome.Inconclusive;
+                }
+                return TestOutcome.Passed;
+            }
         }
     }
 }

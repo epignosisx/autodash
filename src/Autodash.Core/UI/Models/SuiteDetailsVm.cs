@@ -17,7 +17,7 @@ namespace Autodash.Core.UI.Models
         public bool IsBrowserSelected(string browserVersion)
         {
             string[] parts = browserVersion.Split('|');
-            return Suite.Configuration.Browsers.Any(b => b.Name == parts[0] && b.Version == parts[1]);
+            return Suite.Configuration.Browsers.Any(b => b.Name == parts[0] && (b.Version == null || b.Version == parts[1]));
         }
 
         public string ScheduleTime
@@ -65,11 +65,11 @@ namespace Autodash.Core.UI.Models
             return duration == TimeSpan.MaxValue ? "" : duration.TotalMinutes.ToString("0.00", CultureInfo.InvariantCulture);
         }
 
-        public static string PassedFailed(this SuiteRun run)
+        public static string PassedFailedInconclusive(this SuiteRun run)
         {
             if (run.Result == null)
                 return "";
-            return string.Format("{0} / {1}", run.Result.PassedTotal, run.Result.FailedTotal);
+            return string.Format("{0}/{1}/{2}", run.Result.PassedTotal, run.Result.FailedTotal, run.Result.InconclusiveTotal);
         }
 
         public static string StatusColored(this SuiteRun run)
@@ -77,9 +77,11 @@ namespace Autodash.Core.UI.Models
             string title = null;
             if (run.Status == SuiteRunStatus.Complete)
             {
-                if(run.Result.Passed)
+                if(run.Result.Outcome == TestOutcome.Passed)
                     title = "<span class='label label-success' title='{0}'>Complete</span>";
-                else
+                else if (run.Result.Outcome == TestOutcome.Inconclusive)
+                    title = "<span class='label label-warning' title='{0}'>Complete</span>";
+                else if (run.Result.Outcome == TestOutcome.Failed)
                     title = "<span class='label label-danger' title='{0}'>Complete</span>";
             }
             else if (run.Status == SuiteRunStatus.Scheduled)

@@ -102,6 +102,7 @@
     <Compile Include="DefaultSuiteRunSchedulerRepository.cs" />
     <Compile Include="DefaultTestSuiteUnitTestDiscoverer.cs" />
     <Compile Include="DefaultGridConsoleScraper.cs" />
+    <Compile Include="EmailConfiguration.cs" />
     <Compile Include="GridConsoleScraperException.cs" />
     <Compile Include="GridNodeBrowserInfo.cs" />
     <Compile Include="GridNodeInfo.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RxExtensions.cs" />
     <Compile Include="SuiteRun.cs" />
+    <Compile Include="SuiteRunCompletedEmailNotifier.cs" />
     <Compile Include="SuiteRunForRunnerValidator.cs" />
     <Compile Include="SuiteRunResult.cs" />
     <Compile Include="SuiteRunResultStatus.cs" />
@@ -150,12 +152,14 @@
     <Compile Include="UI\Models\CreateProjectVm.cs" />
     <Compile Include="UI\Models\CreateSuiteVm.cs" />
     <Compile Include="UI\Models\EditSuiteVm.cs" />
+    <Compile Include="UI\Models\EmailConfigVm.cs" />
     <Compile Include="UI\Models\ProjectsVm.cs" />
     <Compile Include="UI\Models\SuiteDetailsVm.cs" />
     <Compile Include="UI\Models\SuiteRunDetailsVm.cs" />
     <Compile Include="UI\Models\TestExplorerVm.cs" />
     <Compile Include="UI\Models\ProjectDetailsVm.cs" />
     <Compile Include="UI\Models\GridConfigVm.cs" />
+    <Compile Include="UI\Modules\EmailModule.cs" />
     <Compile Include="UI\Modules\GridModule.cs" />
     <Compile Include="UI\Modules\ProjectsModule.cs" />
     <Compile Include="UI\Modules\RunsModule.cs" />
@@ -169,6 +173,8 @@
     <Compile Include="UnitTestInfo.cs" />
     <Compile Include="UnitTestResult.cs" />
     <Compile Include="UnitTestTagSelector.cs" />
+    <Compile Include="UpdateEmailCommand.cs" />
+    <Compile Include="UpdateEmailConfigValidator.cs" />
     <Compile Include="UpdateGridCommand.cs" />
     <Compile Include="UpdateGridConfigValidator.cs" />
     <Compile Include="UpdateProjectValidator.cs" />
@@ -176,6 +182,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Content Include="UI\Content\js\global.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="UI\Content\js\suite-details.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -231,6 +240,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="UI\Views\EditProject.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\Views\EmailConfig.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

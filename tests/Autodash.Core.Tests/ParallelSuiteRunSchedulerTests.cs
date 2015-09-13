@@ -46,7 +46,7 @@ namespace Autodash.Core.Tests
                 var browserNode = ci.Arg<TestRunContext>().GridNodeBrowserInfo;
                 return new UnitTestBrowserResult
                 {
-                    Passed = true,
+                    Outcome = TestOutcome.Passed,
                     Browser = new Browser
                     {
                         Name = browserNode.BrowserName,
@@ -117,6 +117,7 @@ namespace Autodash.Core.Tests
 
             var scraper = Substitute.For<IGridConsoleScraper>();
             scraper.GetAvailableNodesInfoAsync(Arg.Any<Uri>()).Returns(Task.FromResult(GetGridNodes()));
+            scraper.GetAvailableNodesInfo(Arg.Any<Uri>()).Returns(GetGridNodes());
 
             var repository = Substitute.For<ISuiteRunSchedulerRepository>();
             repository.GetScheduledSuiteRunsAsync().Returns(Task.FromResult(new List<SuiteRun>(0)));
@@ -132,7 +133,7 @@ namespace Autodash.Core.Tests
             subject.Dispose();
 
             Assert.NotNull(result);
-            Assert.False(result.Result.Passed);
+            Assert.Equal(result.Result.Outcome, TestOutcome.Failed);
             Assert.NotEmpty(result.Result.Details);
             Assert.Equal(2, result.Result.FailedTotal);
             Assert.Equal(0, result.Result.PassedTotal);
@@ -141,8 +142,8 @@ namespace Autodash.Core.Tests
             Assert.Equal(2, result.Result.CollectionResults[0].UnitTestResults.Count);
             Assert.NotEmpty(result.Result.CollectionResults[0].UnitTestResults[0].TestName);
             Assert.NotEmpty(result.Result.CollectionResults[0].UnitTestResults[1].TestName);
-            Assert.False(result.Result.CollectionResults[0].UnitTestResults[0].Passed);
-            Assert.False(result.Result.CollectionResults[0].UnitTestResults[1].Passed);
+            Assert.Equal(result.Result.CollectionResults[0].UnitTestResults[0].Outcome, TestOutcome.Failed);
+            Assert.Equal(result.Result.CollectionResults[0].UnitTestResults[1].Outcome, TestOutcome.Failed);
             Assert.Equal(4, result.Result.CollectionResults[0].UnitTestResults[0].BrowserResults.Count);
             Assert.Equal(4, result.Result.CollectionResults[0].UnitTestResults[1].BrowserResults.Count);
         }
@@ -169,6 +170,7 @@ namespace Autodash.Core.Tests
 
             var scraper = Substitute.For<IGridConsoleScraper>();
             scraper.GetAvailableNodesInfoAsync(Arg.Any<Uri>()).Returns(Task.FromResult(GetGridNodes()));
+            scraper.GetAvailableNodesInfo(Arg.Any<Uri>()).Returns(GetGridNodes());
 
             var repository = Substitute.For<ISuiteRunSchedulerRepository>();
             repository.GetScheduledSuiteRunsAsync().Returns(Task.FromResult(new List<SuiteRun>(0)));
@@ -184,7 +186,7 @@ namespace Autodash.Core.Tests
             subject.Dispose();
 
             Assert.NotNull(result);
-            Assert.True(result.Result.Passed);
+            Assert.Equal(result.Result.Outcome, TestOutcome.Passed);
             Assert.NotEmpty(result.Result.Details);
             Assert.Equal(0, result.Result.FailedTotal);
             Assert.Equal(2, result.Result.PassedTotal);
@@ -193,8 +195,8 @@ namespace Autodash.Core.Tests
             Assert.Equal(2, result.Result.CollectionResults[0].UnitTestResults.Count);
             Assert.NotEmpty(result.Result.CollectionResults[0].UnitTestResults[0].TestName);
             Assert.NotEmpty(result.Result.CollectionResults[0].UnitTestResults[1].TestName);
-            Assert.True(result.Result.CollectionResults[0].UnitTestResults[0].Passed);
-            Assert.True(result.Result.CollectionResults[0].UnitTestResults[1].Passed);
+            Assert.Equal(result.Result.CollectionResults[0].UnitTestResults[0].Outcome, TestOutcome.Passed);
+            Assert.Equal(result.Result.CollectionResults[0].UnitTestResults[1].Outcome, TestOutcome.Passed);
             Assert.Equal(2, result.Result.CollectionResults[0].UnitTestResults[0].BrowserResults.Count);
             Assert.Equal(2, result.Result.CollectionResults[0].UnitTestResults[1].BrowserResults.Count);
         }

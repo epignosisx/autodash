@@ -206,13 +206,18 @@ a.thumbnail.active {
 .bg-danger{
     background-color: #d9534f;
 }
+.bg-warning{
+    background-color: #f0ad4e;
+}
 .text-success {
     color:#5cb85c;
 }
 .text-danger {
     color: #d9534f;
 }
-
+.text-warning{
+    background-color: #f0ad4e;
+}
 .main-content{
     padding-top:50px;
 }
@@ -239,6 +244,10 @@ a.thumbnail.active {
 .panel-title .panel-action, 
 .panel-title .panel-action small{
     color: white;
+}
+.panel-title .action-delete,
+.panel-title .action-delete small {
+    color: #d9534f;
 }
 .test-explorer-table .test-name {
     width: 70%;

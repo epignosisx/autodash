@@ -23,7 +23,7 @@ namespace Autodash.Core.Tests
 
             UnitTestBrowserResult result = await subject.Run(context);
 
-            Assert.True(result.Passed);
+            Assert.Equal(result.Outcome, TestOutcome.Passed);
             Assert.False(Directory.Exists(Path.Combine(Environment.CurrentDirectory, "SuccessTest_chrome")));
         }
 
@@ -42,8 +42,27 @@ namespace Autodash.Core.Tests
             var context = new TestRunContext(unitTest, coll, config, browserNode, CancellationToken.None, GetGridConfig());
             UnitTestBrowserResult result = await subject.Run(context);
 
-            Assert.False(result.Passed);
+            Assert.Equal(result.Outcome, TestOutcome.Failed);
             Assert.False(Directory.Exists(Path.Combine(Environment.CurrentDirectory, "FailTest_chrome")));
+        }
+
+        [Fact]
+        public async Task InconclusiveTestExecutesAndInconclusiveResultIsReturned()
+        {
+            MsTestRunner subject = new MsTestRunner();
+            UnitTestInfo unitTest = new UnitTestInfo("Autodash.MsTest.ValidTests.UnitTest1.InconclusiveTest", null);
+            UnitTestCollection coll = new UnitTestCollection("Autodash.MsTest.ValidTests", "Autodash.MsTest.ValidTests.dll", new[] { unitTest }, subject);
+            TestSuiteConfiguration config = new TestSuiteConfiguration
+            {
+                Browsers = new[] { new Browser { Name = BrowserNames.SeleniumChrome } },
+                TestAssembliesPath = Environment.CurrentDirectory
+            };
+            var browserNode = new GridNodeBrowserInfo { BrowserName = BrowserNames.SeleniumChrome };
+            var context = new TestRunContext(unitTest, coll, config, browserNode, CancellationToken.None, GetGridConfig());
+            UnitTestBrowserResult result = await subject.Run(context);
+
+            Assert.Equal(result.Outcome, TestOutcome.Inconclusive);
+            Assert.False(Directory.Exists(Path.Combine(Environment.CurrentDirectory, "InconclusiveTest_chrome")));
         }
 
         [Fact]
@@ -62,7 +81,7 @@ namespace Autodash.Core.Tests
             var browserNode = new GridNodeBrowserInfo { BrowserName = BrowserNames.SeleniumChrome };
             var context = new TestRunContext(unitTest, coll, config, browserNode, CancellationToken.None, GetGridConfig());
             UnitTestBrowserResult result = await subject.Run(context);
-            Assert.False(result.Passed);
+            Assert.Equal(result.Outcome, TestOutcome.Failed);
             Assert.Equal(result.Stdout, "Test timed out");
         }
 

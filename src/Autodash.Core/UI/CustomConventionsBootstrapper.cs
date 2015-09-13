@@ -39,10 +39,11 @@ namespace Autodash.Core.UI
             existingContainer.Register<ISuiteRunScheduler, ParallelSuiteRunScheduler>().AsSingleton();
 
             existingContainer.Register<ISeleniumGridBrowserProvider, StaticSeleniumGridBrowserProvider>().AsSingleton();
-
+            
             existingContainer.Register<CreateProjectCommand>();
             existingContainer.Register<CreateSuiteCommand>();
             existingContainer.Register<UpdateGridCommand>();
+            existingContainer.Register<UpdateEmailCommand>();
 
             TestRunnerPreProcessorProvider.Add(new ApplyTestSettingsPreProcessor(loggerProvider));
 

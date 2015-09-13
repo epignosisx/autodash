@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -103,7 +104,7 @@ namespace Autodash.Core
                 var result = new UnitTestBrowserResult
                 {
                     Browser = new Browser(nodeBrowser.BrowserName, nodeBrowser.Version),
-                    Passed = false,
+                    Outcome = TestOutcome.Failed,
                     StartTime = timeoutStartDate,
                     EndTime = DateTime.UtcNow,
                     Stdout = "Test timed out"
@@ -160,7 +161,11 @@ namespace Autodash.Core
             //clean up
             Directory.Delete(testDir, true);
 
-            bool passed = report.ResultSummary.Counters.passed == "1";
+            var outcome = TestOutcome.Failed;
+            if(report.ResultSummary.Counters.passed == "1")
+                outcome = TestOutcome.Passed;
+            else if(report.ResultSummary.Counters.inconclusive == "1")
+                outcome = TestOutcome.Inconclusive;
 
             string testOutput = "";
             if (report.Results.Length > 0 && report.Results[0].Output != null && !string.IsNullOrEmpty(report.Results[0].Output.StdOut))
@@ -177,7 +182,7 @@ namespace Autodash.Core
                 EndTime = report.Results[0].endTime,
                 Stdout = stdout + Environment.NewLine + "=====MS Test=====" + Environment.NewLine + testOutput,
                 Stderr = stderr + Environment.NewLine + "=====MS Test=====" + Environment.NewLine + testError,
-                Passed = passed
+                Outcome = outcome
             };
             return result;
         }
@@ -187,7 +192,7 @@ namespace Autodash.Core
             string invalid = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
             foreach (char c in invalid)
             {
-                name = name.Replace(c.ToString(), "");
+                name = name.Replace(c.ToString(CultureInfo.InvariantCulture), "");
             }
             return name;
         }

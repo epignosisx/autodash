@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -24,13 +23,13 @@ namespace Autodash.Core.UI.Models
                         Browser = browser,
                         StartTime = DateTime.MinValue,
                         EndTime = DateTime.MinValue,
-                        Passed = false,
+                        Outcome = TestOutcome.Failed,
                         Stderr = "Test did not run"
                     };
                 }
                 else
                 {
-                    var passedTest = results.FirstOrDefault(n => n.Passed);
+                    var passedTest = results.FirstOrDefault(n => n.Outcome == TestOutcome.Passed);
                     if (passedTest != null)
                     {
                         yield return passedTest;
@@ -41,6 +40,11 @@ namespace Autodash.Core.UI.Models
                     }
                 }
             }
+        }
+
+        public string BgColor(TestOutcome outcome)
+        {
+            return TestOutcomeColorHelper.BgColor(outcome);
         }
     }
 }

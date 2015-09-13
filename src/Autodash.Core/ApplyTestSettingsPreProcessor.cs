@@ -31,7 +31,7 @@ namespace Autodash.Core
             var configFile = Path.Combine(context.TestDirectory, "config.xml");
             if (!File.Exists(configFile))
             {
-                _logger.Error("config.xml file not found");
+                _logger.Warning("config.xml file not found");
                 return;
             }
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -402,18 +402,22 @@
                                                         <td valign="top">
                                                             <div mc:edit="std_content00">
                                                                 <h1 class="h1">Autodash</h1>
-                                                                <h4 class="h4">Test Suite Run Summary</h4>
+                                                                <h4 class="h4" style="color:#333333">{{{{SuiteSummary}}}}</h4>
                                                                 <table class="test-summary" border="1" cellpadding="0" cellspacing="0">
 																	<tbody>
 																		<tr>
-																			<td style="background:#5cb85c">
+																			<td style="background:#5cb85c;width:186.6666px">
 																				<strong style="font-size:70px">{{{{PassedTotal}}}}</strong>
 																				<p style="margin:0">Passed</p>
 																			</td>
-																			<td style="background:#d9534f">
-																				<strong style="font-size:70px">{{{{FailedTotal}}}}</strong>
-																				<p style="margin:0">Failed</p>
-																			</td>
+																		    <td style="background:#d9534f;width:186.6666px">
+																		        <strong style="font-size:70px">{{{{FailedTotal}}}}</strong>
+																		        <p style="margin:0">Failed</p>
+																		    </td>
+                                                                            <td style="background:#f0ad4e;width:186.6666px">
+                                                                                <strong style="font-size:70px">{{{{InconclusiveTotal}}}}</strong>
+                                                                                <p style="margin:0">Inconclusive</p>
+                                                                            </td>
 																		</tr>
 																	</tbody>
 																</table>

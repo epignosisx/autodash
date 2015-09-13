@@ -35,7 +35,7 @@ namespace Autodash.Core.UI.Modules
                     projectRuns.Add(new ProjectSuiteRunVm
                     {
                         Project = project,
-                        SuiteRuns = runs.Select(n => new ProjectSuiteRunDetail{ DurationMinutes = n.DurationMinutes, Passed = n.Result.Passed}).ToList()
+                        SuiteRuns = runs.Where(n => n.Result != null).Select(n => new ProjectSuiteRunDetail { DurationMinutes = n.DurationMinutes, Outcome = n.Result.Outcome }).ToList()
                     });
                 }
 

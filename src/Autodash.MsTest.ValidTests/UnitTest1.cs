@@ -32,5 +32,13 @@ namespace Autodash.MsTest.ValidTests
             Thread.Sleep(TimeSpan.FromSeconds(5));
             Assert.IsTrue(false);
         }
+
+        [TestMethod]
+        public void InconclusiveTest()
+        {
+            Console.WriteLine("Running UnitTest1.InconclusiveTest");
+            Thread.Sleep(TimeSpan.FromSeconds(5));
+            Assert.Inconclusive("this test is inconclusive");
+        }
     }
 }

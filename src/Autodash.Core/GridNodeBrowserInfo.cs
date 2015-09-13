@@ -5,6 +5,8 @@ namespace Autodash.Core
 {
     public class GridNodeBrowserInfo
     {
+        public const string WebDriverProtocol = "WebDriver";
+
         public string BrowserName { get; set; }
         public string Protocol { get; set; }
         public int MaxInstances { get; set; }
@@ -46,5 +48,13 @@ namespace Autodash.Core
             return true;
         }
 
+        public bool Satisfies(Browser browser)
+        {
+            if (browser.Name != BrowserName)
+                return false;
+            if (string.IsNullOrEmpty(browser.Version))
+                return true;
+            return browser.Version == Version;
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿@using System.Linq;
-@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<List<Autodash.Core.SuiteRun>>
+@using Autodash.Core.UI.Models
+@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<System.Collections.Generic.List<Autodash.Core.SuiteRun>>
 @{
     Layout = "";
 }
@@ -11,7 +12,7 @@
             <th>Date</th>
             <th>Duration (mins)</th>
             <th>Status</th>
-            <th>Passed / Failed</th>
+            <th>P/F/I&nbsp;<span class="glyphicon glyphicon-info-sign" title="Passed / Failed / Inconclusive"></span></th>
             <th>Report</th>
         </tr>
     </thead>
@@ -28,7 +29,7 @@
                         <a href="#" class="glyphicon glyphicon-stop cancel-suite-run" data-id="@run.Id" title="Cancel Suite Run"></a>
                     }
                 </td>
-                <td>@run.PassedFailed()</td>
+                <td>@run.PassedFailedInconclusive()</td>
                 <td><a href="/runs/@run.Id/report">View</a> | <a href="/runs/@run.Id/report.html">Download</a></td>
             </tr>
         }

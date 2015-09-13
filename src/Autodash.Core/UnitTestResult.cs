@@ -10,11 +10,43 @@ namespace Autodash.Core
         public List<UnitTestBrowserResult> BrowserResults { get; set; }
 
         [BsonIgnore]
-        public bool Passed
+        public TestOutcome Outcome
         {
             get
             {
-                return BrowserResults.GroupBy(b => b.Browser).All(n => n.Any(p => p.Passed));
+                var unitTestOutcome = TestOutcome.Inconclusive;
+                foreach (var br in BrowserResults.GroupBy(n => n.Browser))
+                {
+                    //find out the test outcome for each browser
+                    var browserTestOutcome = TestOutcome.Inconclusive;
+                    foreach (var attempt in br)
+                    {
+                        if (attempt.Outcome == TestOutcome.Passed)
+                        {
+                            browserTestOutcome = TestOutcome.Passed;
+                            break;
+                        }
+                        
+                        if (attempt.Outcome == TestOutcome.Failed)
+                        {
+                            browserTestOutcome = TestOutcome.Failed;
+                        }
+                    }
+
+                    //calculate the overall outcome for all browsers.
+                    if (browserTestOutcome == TestOutcome.Failed)
+                    {
+                        unitTestOutcome = TestOutcome.Failed;
+                        break;
+                    }
+                    
+                    if (browserTestOutcome == TestOutcome.Passed)
+                    {
+                        unitTestOutcome = TestOutcome.Passed;
+                    }
+                }
+
+                return unitTestOutcome;
             }
         }
 
@@ -30,7 +62,7 @@ namespace Autodash.Core
 
         public override string ToString()
         {
-            return TestName + " - Passed: " + Passed;
+            return TestName + " - Outcome: " + Outcome;
         }
     }
 }

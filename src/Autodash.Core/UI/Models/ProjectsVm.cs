@@ -16,11 +16,31 @@ namespace Autodash.Core.UI.Models
     public class ProjectSuiteRunDetail
     {
         public double DurationMinutes { get; set; }
-        public bool Passed { get; set; }
+        public TestOutcome Outcome { get; set; }
+
+        public string BgColor()
+        {
+            return TestOutcomeColorHelper.BgColor(Outcome);
+        }
 
         public override string ToString()
         {
-            return (Passed ? "Passed" : "Failed") + ". Took " + DurationMinutes.ToString("0.00") + " mins";
+            return Outcome + ". Duration " + DurationMinutes.ToString("0.00") + " mins";
+        }
+    }
+
+    public static class TestOutcomeColorHelper
+    {
+        public static string BgColor(TestOutcome outcome)
+        {
+            switch (outcome)
+            {
+                case TestOutcome.Passed:
+                    return "bg-success";
+                case TestOutcome.Inconclusive:
+                    return "bg-warning";
+            }
+            return "bg-danger";
         }
     }
 }

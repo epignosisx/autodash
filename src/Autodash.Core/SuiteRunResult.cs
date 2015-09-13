@@ -5,9 +5,22 @@ namespace Autodash.Core
 {
     public class SuiteRunResult
     {
-        public bool Passed 
+        public TestOutcome Outcome 
         {
-            get { return CollectionResults != null && CollectionResults.All(n => n.Passed); }
+            get
+            {
+                if(CollectionResults == null || CollectionResults.Count == 0)
+                    return TestOutcome.Inconclusive;
+
+                foreach (var coll in CollectionResults)
+                {
+                    if (coll.Outcome == TestOutcome.Failed)
+                        return TestOutcome.Failed;
+                    if (coll.Outcome == TestOutcome.Inconclusive)
+                        return TestOutcome.Inconclusive;
+                }
+                return TestOutcome.Passed;
+            }
         }
 
         public int PassedTotal
@@ -16,7 +29,7 @@ namespace Autodash.Core
             {
                 if (CollectionResults == null)
                     return 0;
-                return CollectionResults.SelectMany(n => n.UnitTestResults).Count(n => n.Passed);
+                return CollectionResults.SelectMany(n => n.UnitTestResults).Count(n => n.Outcome == TestOutcome.Passed);
             }
         }
 
@@ -26,12 +39,21 @@ namespace Autodash.Core
             {
                 if (CollectionResults == null)
                     return 0;
-                return CollectionResults.SelectMany(n => n.UnitTestResults).Count(n => !n.Passed);
+                return CollectionResults.SelectMany(n => n.UnitTestResults).Count(n => n.Outcome == TestOutcome.Failed);
+            }
+        }
+
+        public int InconclusiveTotal
+        {
+            get
+            {
+                if (CollectionResults == null)
+                    return 0;
+                return CollectionResults.SelectMany(n => n.UnitTestResults).Count(n => n.Outcome == TestOutcome.Inconclusive);
             }
         }
 
         public string Details { get; set; }
-        public string Status { get; set; }
         public List<UnitTestCollectionResult> CollectionResults { get; set; }
 
         public SuiteRunResult()
@@ -39,7 +61,7 @@ namespace Autodash.Core
             CollectionResults = new List<UnitTestCollectionResult>();
         }
 
-        public SuiteRunResult(string details)
+        public SuiteRunResult(string details) : this()
         {
             Details = details;
         }

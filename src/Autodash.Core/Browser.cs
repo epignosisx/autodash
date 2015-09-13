@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Autodash.Core
 {
-    public class Browser : IEquatable<Browser>, IComparer<Browser>
+    public class Browser : IEquatable<Browser>, IComparer<Browser>, IComparable<Browser>
     {
         public string Name { get; set; }
         public string Version { get; set; }
@@ -36,6 +36,11 @@ namespace Autodash.Core
                 return comp;
 
             return string.Compare(x.Version, y.Version, StringComparison.Ordinal);
+        }
+
+        public int CompareTo(Browser other)
+        {
+            return Compare(this, other);
         }
 
         public override bool Equals(object obj)
