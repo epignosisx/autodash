@@ -268,3 +268,7 @@ a.thumbnail.active {
     text-decoration: none !important;
     color: #333;
 }
+
+.project-box:nth-child(3n+4){
+    clear:both;
+}
